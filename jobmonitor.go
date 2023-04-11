@@ -26,7 +26,7 @@ type Sumaconf struct {
 
 type SUMAConfig struct {
 	SUMA map[string]struct {
-		User     string `yaml:"user"`
+		User     string `yaml:"username"`
 		Password string `yaml:"password"`
 		Logfile  string `yaml:"logfile"`
 	} `yaml:"suma_api"`
