@@ -1,13 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -31,6 +31,10 @@ type SUMAConfig struct {
 		Password string `yaml:"password"`
 		Logfile  string `yaml:"logfile"`
 	} `yaml:"suma_api"`
+}
+
+func init() {
+
 }
 
 func GetConfig(file string) *SUMAConfig {
@@ -199,27 +203,20 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 }
 
 func main() {
-	if len(os.Args[1:]) == 0 {
-		log.Fatalln("No config file for SUMA provided.")
-	}
-	if len(os.Args) <= 3 {
-		log.Fatalf("Not enough arguments given. 3 args needed. %+v\n", os.Args)
-	}
-	configurations := os.Args[1:]
-	SUMAConfig := GetConfig(configurations[0])
+	sumafile_path := flag.String("config", "/etc/salt/master.d/spacewalk.conf", "provide config file with SUMA login")
+	api_interval := flag.Int("interval", 10, "SUMA API polling interval, default 10seconds, no need to write s.")
+	templates_dir := flag.String("templates", "/srv/jobmonitor", "provide directory name where the template files are stored.")
+	flag.Parse()
 
-	interval, err := strconv.Atoi(configurations[1])
-	if err != nil {
-		log.Printf("Failed to parse interval into integer: %v\n", err.Error())
-	}
-	log.Printf("interval is: %d\n", interval)
+	SUMAConfig := GetConfig(*sumafile_path)
+	log.Printf("interval is: %d\n", api_interval)
 
-	if _, err := os.Stat(configurations[2]); os.IsNotExist(err) {
+	if _, err := os.Stat(*templates_dir); os.IsNotExist(err) {
 		// path/to/whatever does not exist
-		log.Fatalf("templates directory missing: %s\n", configurations[2])
+		log.Fatalf("templates directory missing: %s\n", *templates_dir)
 	}
-	templates_dir := &email.Templates_Dir{Dir: configurations[2]}
-	log.Printf("templates_dir is: %s\n", templates_dir.Dir)
+	templates := &email.Templates_Dir{Dir: *templates_dir}
+	log.Printf("templates_dir is: %s\n", templates.Dir)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -255,7 +252,7 @@ func main() {
 			}
 		}
 
-		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching, templates_dir)
+		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching, templates)
 		c.String(200, "Jobchecker task started.")
 	})
 	log.Default().Println("/jobckecker API is listening and serving HTTP on :12345")
