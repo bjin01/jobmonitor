@@ -32,5 +32,7 @@ func TestSendit(t *testing.T) {
 
 	obj.JobcheckerEmails = emails
 	obj.T7user = "t7udp"
-	Sendit(obj)
+
+	templates_dir := &Templates_Dir{Dir: "/srv/jobmonitor"}
+	Sendit(obj, templates_dir)
 }

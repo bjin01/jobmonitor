@@ -9,8 +9,9 @@ import (
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-func Write_SLS(result *schedules.Jobstatus) (string, error) {
-	template, err := template.ParseFiles("./templates/reboot.sls")
+func Write_SLS(result *schedules.Jobstatus, templates_dir *Templates_Dir) (string, error) {
+	template_file := fmt.Sprintf("%s/reboot.sls.template", templates_dir.Dir)
+	template, err := template.ParseFiles(template_file)
 	// Capture any error
 	if err != nil {
 		return "", err

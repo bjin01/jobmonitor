@@ -2,6 +2,7 @@ package email
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"net/mail"
 	"net/smtp"
@@ -10,19 +11,13 @@ import (
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-type Request struct {
-	from    string
-	to      []string
-	subject string
-	body    string
-}
-
-func Sendit(result *schedules.Jobstatus) {
+func Sendit(result *schedules.Jobstatus, templates_dir *Templates_Dir) {
 	auth = smtp.PlainAuth("", "", "", "127.0.0.1")
 
 	r := NewRequest(result.JobcheckerEmails, "Jobchecker Notification", "")
 	//err := r.ParseTemplate("template.html", result)
-	if err := r.ParseTemplate("./templates/template.html", result); err == nil {
+	template_file := fmt.Sprintf("%s/template.html", templates_dir.Dir)
+	if err := r.ParseTemplate(template_file, result); err == nil {
 		ok, err1 := r.SendEmail()
 		if err1 != nil {
 			log.Default().Println(err1.Error())

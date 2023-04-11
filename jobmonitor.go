@@ -70,7 +70,8 @@ func Decrypt(key string, cryptoText string) string {
 	return fmt.Sprintf("%s", msg)
 }
 
-func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs, instance_jobs_patching schedules.Jobs_Patching) {
+func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
+	instance_jobs_patching schedules.Jobs_Patching, templates_dir *email.Templates_Dir) {
 	//key := "R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM="
 	key := os.Getenv("SUMAKEY")
 	if len(key) == 0 {
@@ -165,11 +166,11 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs, instanc
 					if err != nil {
 						log.Default().Printf("ERROR: reboot list: %s\n", err)
 					}
-					jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result)
+					jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
 					if err != nil {
 						log.Default().Printf("ERROR: reboot list: %s\n", err)
 					}
-					email.Sendit(jobstatus_result)
+					email.Sendit(jobstatus_result, templates_dir)
 					break begin
 				}
 			}
@@ -180,11 +181,11 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs, instanc
 			if err != nil {
 				log.Default().Printf("reboot list: %s\n", err)
 			}
-			jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result)
+			jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
 			if err != nil {
 				log.Default().Printf("ERROR: reboot list: %s\n", err)
 			}
-			email.Sendit(jobstatus_result)
+			email.Sendit(jobstatus_result, templates_dir)
 		}
 	} else {
 		log.Println("No Patch Jobs found.")
@@ -201,17 +202,24 @@ func main() {
 	if len(os.Args[1:]) == 0 {
 		log.Fatalln("No config file for SUMA provided.")
 	}
-	if len(os.Args) <= 2 {
-		log.Fatalf("Not enough arguments given. Two args needed. %+v\n", os.Args)
+	if len(os.Args) <= 3 {
+		log.Fatalf("Not enough arguments given. 3 args needed. %+v\n", os.Args)
 	}
-	config_file := os.Args[1:]
-	SUMAConfig := GetConfig(config_file[0])
+	configurations := os.Args[1:]
+	SUMAConfig := GetConfig(configurations[0])
 
-	interval, err := strconv.Atoi(config_file[1])
+	interval, err := strconv.Atoi(configurations[1])
 	if err != nil {
 		log.Printf("Failed to parse interval into integer: %v\n", err.Error())
 	}
 	log.Printf("interval is: %d\n", interval)
+
+	if _, err := os.Stat(configurations[2]); os.IsNotExist(err) {
+		// path/to/whatever does not exist
+		log.Fatalf("templates directory missing: %s\n", configurations[2])
+	}
+	templates_dir := &email.Templates_Dir{Dir: configurations[2]}
+	log.Printf("templates_dir is: %s\n", templates_dir)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -247,7 +255,7 @@ func main() {
 			}
 		}
 
-		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching)
+		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching, templates_dir)
 		c.String(200, "Jobchecker task started.")
 	})
 	log.Default().Println("/jobckecker API is listening and serving HTTP on :12345")
