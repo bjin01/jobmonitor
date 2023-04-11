@@ -22,7 +22,7 @@ func Sendit(result *schedules.Jobstatus) {
 
 	r := NewRequest(result.JobcheckerEmails, "Jobchecker Notification", "")
 	//err := r.ParseTemplate("template.html", result)
-	if err := r.ParseTemplate("email/template.html", result); err == nil {
+	if err := r.ParseTemplate("./templates/template.html", result); err == nil {
 		ok, err1 := r.SendEmail()
 		if err1 != nil {
 			log.Default().Println(err1.Error())

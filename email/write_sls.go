@@ -10,7 +10,7 @@ import (
 )
 
 func Write_SLS(result *schedules.Jobstatus) (string, error) {
-	template, err := template.ParseFiles("email/reboot.sls")
+	template, err := template.ParseFiles("./templates/reboot.sls")
 	// Capture any error
 	if err != nil {
 		return "", err
@@ -34,7 +34,7 @@ func Write_SLS(result *schedules.Jobstatus) (string, error) {
 		defer f.Close()
 		template.Execute(f, result)
 		log.Default().Printf("sls file written to %s\n", fileName)
-		
+
 		return fileName, nil
 	}
 
