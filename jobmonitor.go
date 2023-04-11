@@ -48,8 +48,6 @@ func GetConfig(file string) *SUMAConfig {
 		fmt.Println(err)
 
 	}
-
-	fmt.Println(config)
 	return &config
 }
 
@@ -202,6 +200,8 @@ func main() {
 		log.Printf("Failed to parse interval into integer: %v\n", err.Error())
 	}
 	log.Printf("interval is: %d\n", interval)
+
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
 	r.POST("/jobchecker", func(c *gin.Context) {
@@ -238,7 +238,8 @@ func main() {
 		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching)
 		c.String(200, "Jobchecker task started.")
 	})
-
+	log.Default().Println("/jobckecker API is listening and serving HTTP on :12345")
 	// Listen and serve on 0.0.0.0:12345
 	r.Run(":12345")
+
 }
