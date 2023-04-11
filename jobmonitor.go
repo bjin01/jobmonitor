@@ -219,7 +219,7 @@ func main() {
 		log.Fatalf("templates directory missing: %s\n", configurations[2])
 	}
 	templates_dir := &email.Templates_Dir{Dir: configurations[2]}
-	log.Printf("templates_dir is: %s\n", templates_dir)
+	log.Printf("templates_dir is: %s\n", templates_dir.Dir)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
