@@ -48,6 +48,12 @@ func GetConfig(file string) *SUMAConfig {
 		fmt.Println(err)
 
 	}
+
+	key := os.Getenv("SUMAKEY")
+	if len(key) == 0 {
+		log.Default().Printf("SUMAKEY is not set. This might cause error for password decryption.")
+	}
+
 	return &config
 }
 
@@ -64,7 +70,12 @@ func Decrypt(key string, cryptoText string) string {
 }
 
 func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs, instance_jobs_patching schedules.Jobs_Patching) {
-	key := "R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM="
+	//key := "R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM="
+	key := os.Getenv("SUMAKEY")
+	if len(key) == 0 {
+		log.Default().Printf("SUMAKEY is not set. This might cause error for password decryption.")
+	}
+
 	var sumaconf Sumaconf
 	for a, b := range SUMAConfig.SUMA {
 		sumaconf.Server = a
