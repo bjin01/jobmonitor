@@ -27,7 +27,7 @@ func Write_SLS(result *schedules.Jobstatus, templates_dir *Templates_Dir) (strin
 		log.Default().Printf("Directory for yaml output file is missing: %s\n", "/srv/salt/sumapatch")
 		return "", err
 	} else {
-		fileName := fmt.Sprintf("/srv/salt/sumapatch/reboot_%s", result.T7user)
+		fileName := fmt.Sprintf("/srv/salt/sumapatch/reboot_%s.sls", result.T7user)
 		f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			return "", err
