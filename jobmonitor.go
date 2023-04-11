@@ -209,7 +209,7 @@ func main() {
 	flag.Parse()
 
 	SUMAConfig := GetConfig(*sumafile_path)
-	log.Printf("interval is: %d\n", api_interval)
+	log.Printf("interval is: %v\n", *api_interval)
 
 	if _, err := os.Stat(*templates_dir); os.IsNotExist(err) {
 		// path/to/whatever does not exist
