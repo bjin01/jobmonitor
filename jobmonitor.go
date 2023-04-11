@@ -168,7 +168,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					}
 					jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
 					if err != nil {
-						log.Default().Printf("ERROR: reboot list: %s\n", err)
+						log.Default().Printf("ERROR: reboot sls: %s\n", err)
 					}
 					email.Sendit(jobstatus_result, templates_dir)
 					break begin
@@ -183,7 +183,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 			}
 			jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
 			if err != nil {
-				log.Default().Printf("ERROR: reboot list: %s\n", err)
+				log.Default().Printf("ERROR: reboot sls: %s\n", err)
 			}
 			email.Sendit(jobstatus_result, templates_dir)
 		}
