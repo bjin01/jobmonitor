@@ -65,6 +65,17 @@
     {{end}}
     {{end}}
 {{end}}
+
+<p style='color:blueviolet;'><strong><font size='+2'>btrfs disqualified (because / < 2GiB):</font></strong></p>
+{{with .Disqualified_minions}}
+    {{range .}}
+    {{ if ne . "" }}
+    <p><span style="margin-left: 20px;">- {{ . }}</span></p>
+    {{else}}
+    <p><span style="margin-left: 20px;"></span></p>
+    {{end}}
+    {{end}}
+{{end}}
 <br>
 {{ if ne .Reboot_SLS "" }}
 <p style='color:brown;'><strong>salstack sls for reboot action have been written to: {{ .Reboot_SLS }}</strong></p>

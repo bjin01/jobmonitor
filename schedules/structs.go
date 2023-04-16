@@ -58,27 +58,29 @@ type ScheduledJobs struct {
 }
 
 type Jobs_Patching struct {
-	Patching          []interface{} `json:"Patching"`
-	JobcheckerEmails  []string      `json:"jobchecker_emails,omitempty"`
-	JobcheckerTimeout int           `json:"jobchecker_timeout,omitempty"`
-	JobstartDelay     int           `json:"jobstart_delay,omitempty"`
-	Offline_minions   []string      `json:"offline_minions,omitempty"`
-	T7user            string        `json:"t7user,omitempty"`
+	Patching             []interface{} `json:"Patching"`
+	JobcheckerEmails     []string      `json:"jobchecker_emails,omitempty"`
+	JobcheckerTimeout    int           `json:"jobchecker_timeout,omitempty"`
+	JobstartDelay        int           `json:"jobstart_delay,omitempty"`
+	Offline_minions      []string      `json:"offline_minions,omitempty"`
+	Disqualified_minions []string      `json:"btrfs_disqualified,omitempty"`
+	T7user               string        `json:"t7user,omitempty"`
 }
 
 type Jobstatus struct {
-	Pending           []Job
-	Completed         []Job
-	Failed            []Job
-	Cancelled         []Job
-	JobcheckerEmails  []string
-	JobcheckerTimeout int
-	JobstartDelay     int
-	Offline_minions   []string
-	T7user            string
-	JobStartTime      string
-	YamlFileName      string
-	Reboot_List       string
-	Reboot_SLS        string
-	Reboot_Command    string
+	Pending              []Job
+	Completed            []Job
+	Failed               []Job
+	Cancelled            []Job
+	JobcheckerEmails     []string
+	JobcheckerTimeout    int
+	JobstartDelay        int
+	Offline_minions      []string
+	Disqualified_minions []string
+	T7user               string
+	JobStartTime         string
+	YamlFileName         string
+	Reboot_List          string
+	Reboot_SLS           string
+	Reboot_Command       string
 }

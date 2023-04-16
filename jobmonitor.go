@@ -124,6 +124,14 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		log.Printf("Offline_minions : %v\n", jobstatus_result.Offline_minions)
 	}
 
+	if len(instance_jobs_patching.Disqualified_minions) != 0 {
+		jobstatus_result.Disqualified_minions = instance_jobs_patching.Disqualified_minions
+		log.Printf("Disqualified_minions : %v\n", jobstatus_result.Disqualified_minions)
+	} else {
+		jobstatus_result.Disqualified_minions = []string{}
+		log.Printf("Disqualified_minions : %v\n", jobstatus_result.Disqualified_minions)
+	}
+
 	if instance_jobs_patching.JobstartDelay != 0 {
 		jobstatus_result.JobstartDelay = instance_jobs_patching.JobstartDelay
 		log.Printf("JobstartDelay : %v\n", jobstatus_result.JobstartDelay)
