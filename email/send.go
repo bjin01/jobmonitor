@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/mail"
 	"net/smtp"
+	"os/exec"
 	"text/template"
 
 	"github.com/bjin01/jobmonitor/schedules"
@@ -37,9 +38,28 @@ func NewRequest(to []string, subject, body string) *Request {
 	}
 }
 
+func get_hostname_fqdn() (string, error) {
+	cmd := exec.Command("/usr/bin/hostname", "-f")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("Error when get_hostname_fqdn: %v", err)
+	}
+	fqdn := out.String()
+	fqdn = fqdn[:len(fqdn)-1] // removing EOL
+
+	return fqdn, nil
+}
+
 func (r *Request) SendEmail() (bool, error) {
+	hostname, err := get_hostname_fqdn()
+	if err != nil {
+		log.Default().Printf("Failed to get FQDN: %s\n", err)
+	}
+
 	fromName := "SUSE Manager"
-	fromEmail := "suma1@bo2go.home"
+	fromEmail := "suma@" + hostname
 	from := mail.Address{Name: fromName, Address: fromEmail}
 	r.from = from.String()
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
