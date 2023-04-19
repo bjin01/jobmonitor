@@ -148,6 +148,14 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		log.Printf("T7user : %v\n", jobstatus_result.T7user)
 	}
 
+	if instance_jobs_patching.Post_patching_file != "" {
+		jobstatus_result.Post_patching_file = instance_jobs_patching.Post_patching_file
+		log.Printf("Post_patching_file : %v\n", jobstatus_result.Post_patching_file)
+	} else {
+		jobstatus_result.Post_patching_file = ""
+		log.Printf("Post_patching_file : %v\n", jobstatus_result.Post_patching_file)
+	}
+
 	for _, job := range alljobs.AllJobs {
 		log.Printf("Host: %s \tJob-ID: %d\n", job.Hostname, job.JobID)
 	}

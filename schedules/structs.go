@@ -65,6 +65,7 @@ type Jobs_Patching struct {
 	Offline_minions      []string      `json:"offline_minions,omitempty"`
 	Disqualified_minions []string      `json:"btrfs_disqualified,omitempty"`
 	T7user               string        `json:"t7user,omitempty"`
+	Post_patching_file   string        `json:"post_patching_file,omitempty"`
 }
 
 type Jobstatus struct {
@@ -83,4 +84,5 @@ type Jobstatus struct {
 	Reboot_List          string
 	Reboot_SLS           string
 	Reboot_Command       string
+	Post_patching_file   string
 }
