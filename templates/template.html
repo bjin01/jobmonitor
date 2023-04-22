@@ -76,6 +76,17 @@
     {{end}}
     {{end}}
 {{end}}
+
+<p style='color:blueviolet;'><strong><font size='+2'>No_patch Exceptions (Systems for patching excluded):</font></strong></p>
+{{with .No_patch_execptions}}
+    {{range .}}
+    {{ if ne . "" }}
+    <p><span style="margin-left: 20px;">- {{ . }}</span></p>
+    {{else}}
+    <p><span style="margin-left: 20px;"></span></p>
+    {{end}}
+    {{end}}
+{{end}}
 <br>
 {{ if ne .Reboot_SLS "" }}
 <p style='color:brown;'><strong>Post Patching: saltstack sls for reboot action have been written to: {{ .Reboot_SLS }}</strong></p>
@@ -95,13 +106,13 @@
 <br>
 <p style='color:blueviolet;'><strong>Post Patching: Set Patch Level</strong></p>
 <p>A saltstack runner module post_patching.set_pl can be used to set new patch level for a given list of minions.</p>
-<p><strong><font size='+2'></font>salt-run post_patching.set_pl /srv/pillar/sumapatch/completd_t7udp_20230411160037 2023-Q12</font></strong></p>
+<p><strong><font size='+2'></font>salt-run post_patching.set_pl {{ .YamlFileName }} 2023-Q12</font></strong></p>
 <p>The first parameter is a minions list. The list must have a key name. The list must not be limited to reboot list or post_patching list.</p>
 <p>The second parameter is the new patch level</p>
 <br>
 <p style='color:blueviolet;'><strong>Post Patching: Reporting to csv file</strong></p>
 <p>A saltstack runner module post_patching.report can be used to collect data and generate a csv file for a given list of minions.</p>
-<p><strong><font size='+2'></font>salt-run post_patching.report /srv/pillar/sumapatch/completd_t7udp_20230411160037 csv_file=/tmp/myreport.csv</font></strong></p>
+<p><strong><font size='+2'></font>salt-run post_patching.report {{ .YamlFileName }} csv_file=/tmp/myreport.csv</font></strong></p>
 <p>The first parameter is a minions list. The list must have a key name. The list must not be limited to reboot list or post_patching list.</p>
 <p>The second parameter is where the csv should be written to.</p>
 </body>

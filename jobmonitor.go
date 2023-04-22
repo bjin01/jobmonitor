@@ -132,6 +132,14 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		log.Printf("Disqualified_minions : %v\n", jobstatus_result.Disqualified_minions)
 	}
 
+	if len(instance_jobs_patching.No_patch_execptions) != 0 {
+		jobstatus_result.No_patch_execptions = instance_jobs_patching.No_patch_execptions
+		log.Printf("No_patch_execptions : %v\n", jobstatus_result.No_patch_execptions)
+	} else {
+		jobstatus_result.No_patch_execptions = []string{}
+		log.Printf("No_patch_execptions : %v\n", jobstatus_result.No_patch_execptions)
+	}
+
 	if instance_jobs_patching.JobstartDelay != 0 {
 		jobstatus_result.JobstartDelay = instance_jobs_patching.JobstartDelay
 		log.Printf("JobstartDelay : %v\n", jobstatus_result.JobstartDelay)
@@ -165,7 +173,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		deadline := time.Now().Add(time.Duration(jobstatus_result.JobcheckerTimeout) * time.Minute)
 		Jobstart_starttime := time.Now().Add(time.Duration(jobstatus_result.JobstartDelay) * time.Minute)
 		jobstatus_result.JobStartTime = Jobstart_starttime.Format(time.RFC822Z)
-		jobstatus_result.YamlFileName = fmt.Sprintf("completd_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
+		jobstatus_result.YamlFileName = fmt.Sprintf("completed_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
 	begin:
 		for time.Now().Before(deadline) {
 

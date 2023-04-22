@@ -66,6 +66,7 @@ type Jobs_Patching struct {
 	Disqualified_minions []string      `json:"btrfs_disqualified,omitempty"`
 	T7user               string        `json:"t7user,omitempty"`
 	Post_patching_file   string        `json:"post_patching_file,omitempty"`
+	No_patch_execptions  []string      `json:"no_patch_execptions,omitempty"`
 }
 
 type Jobstatus struct {
@@ -78,6 +79,7 @@ type Jobstatus struct {
 	JobstartDelay        int
 	Offline_minions      []string
 	Disqualified_minions []string
+	No_patch_execptions  []string
 	T7user               string
 	JobStartTime         string
 	YamlFileName         string
