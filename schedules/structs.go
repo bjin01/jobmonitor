@@ -67,6 +67,9 @@ type Jobs_Patching struct {
 	T7user               string        `json:"t7user,omitempty"`
 	Post_patching_file   string        `json:"post_patching_file,omitempty"`
 	No_patch_execptions  []string      `json:"no_patch_execptions,omitempty"`
+	Patch_level          string        `json:"patch_level,omitempty"`
+	Post_patching        string        `json:"post_patching,omitempty"`
+	Prep_patching        string        `json:"prep_patching,omitempty"`
 }
 
 type Jobstatus struct {
@@ -87,4 +90,7 @@ type Jobstatus struct {
 	Reboot_SLS           string
 	Reboot_Command       string
 	Post_patching_file   string
+	Patch_level          string
+	Post_patching        string
+	Prep_patching        string
 }

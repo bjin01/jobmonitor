@@ -14,12 +14,19 @@
         p {
             padding-left: 7%;
             font-family: Arial, Helvetica, sans-serif;
-            line-height: 0.7;
+            line-height: 0.5;
         }
         div {
             border: 2px solid black;
             outline: #4CAF50 solid 10px;
             margin: auto; 
+        }
+        p.para1 {
+            text-align: center;
+            color: green;
+        }
+        p.para2 {
+            color: green;
         }
     </style>
 </head>
@@ -28,8 +35,9 @@
 <body>
 
 <h1 style="text-align: center;">SUSE Manager - Job Monitoring Status</h1>
-<p>Reported by Jobchecker.</p><br><br>
-<p>Job execution time: {{ .JobStartTime }}</p>
+<p class="para1">Reported by Jobchecker.</p><br><br>
+
+<p class="para2" >Job execution time: {{ .JobStartTime }}</p>
 <h3>t7user: {{ .T7user }}</h3></p>
 <br>
 <h3 style='color:red;'>Pending:</h3>
@@ -80,7 +88,7 @@
 {{with .Offline_minions}}
     {{range .}}
     {{ if ne . "" }}
-    <p>- {{ . }}</p>
+    <p>{{ . }}</p>
     {{else}}
     <p></p>
     {{end}}
@@ -91,7 +99,7 @@
 {{with .Disqualified_minions}}
     {{range .}}
     {{ if ne . "" }}
-    <p>- {{ . }}</p>
+    <p>{{ . }}</p>
     {{else}}
     <p></p>
     {{end}}
@@ -102,7 +110,7 @@
 {{with .No_patch_execptions}}
     {{range .}}
     {{ if ne . "" }}
-    <p>- {{ . }}</p>
+    <p>{{ . }}</p>
     {{else}}
     <p></p>
     {{end}}
@@ -120,7 +128,8 @@
 
 {{ if ne .Post_patching_file "" }}
 <h3 style='color:brown;'>Post Patching: saltstack sls for post patching have been written to: {{ .Post_patching_file }}</h3>
-<p>Then run command on SUSE Manager host: <strong><font size='+2'></font>salt-run post_patching.start {{ .Post_patching_file }} sumapatch.post_patch_state</font></strong></p>
+<p>Then run command on SUSE Manager host:</p>
+<p><strong><font size='+2'></font>salt-run post_patching.start {{ .Post_patching_file }} state_name={{ .Post_patching }} presence_check=True</font></strong></p>
 <p>The salt runner module post_patching.start will start service ds_agent on the given minions.</p>
 {{ else }}
 <p>There is no post patching sls written. One possible reason is there is no system where we executed pre patching tasks.</p>
@@ -128,13 +137,13 @@
 <br>
 <h3 style='color:blueviolet;'>Post Patching: Set Patch Level:</h3>
 <p>A saltstack runner module post_patching.set_pl can be used to set new patch level for a given list of minions.</p>
-<p><strong><font size='+2'></font>salt-run post_patching.set_pl {{ .YamlFileName }} 2023-Q12</font></strong></p>
+<p><strong><font size='+2'></font>salt-run post_patching.set_pl {{ .YamlFileName }} {{ .Patch_level  }} presence_check=True</font></strong></p>
 <p>The first parameter is a minions list. The list must have a key name. The list must not be limited to reboot list or post_patching list.</p>
 <p>The second parameter is the new patch level</p>
 <br>
 <h3 style='color:blueviolet;'>Post Patching: Reporting to csv file</h3>
 <p>A saltstack runner module post_patching.report can be used to collect data and generate a csv file for a given list of minions.</p>
-<p><strong><font size='+2'></font>salt-run post_patching.report {{ .YamlFileName }} csv_file=/tmp/myreport.csv</font></strong></p>
+<p><strong><font size='+2'></font>salt-run post_patching.report {{ .YamlFileName }} csv_file=/tmp/myreport.csv presence_check=True</font></strong></p>
 <p>The first parameter is a minions list. The list must have a key name. The list must not be limited to reboot list or post_patching list.</p>
 <p>The second parameter is where the csv should be written to.</p>
 </div>

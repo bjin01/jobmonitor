@@ -164,6 +164,30 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		log.Printf("Post_patching_file : %v\n", jobstatus_result.Post_patching_file)
 	}
 
+	if instance_jobs_patching.Post_patching != "" {
+		jobstatus_result.Post_patching = instance_jobs_patching.Post_patching
+		log.Printf("Post_patching state : %v\n", jobstatus_result.Post_patching)
+	} else {
+		jobstatus_result.Post_patching = ""
+		log.Printf("Post_patching state : %v\n", jobstatus_result.Post_patching)
+	}
+
+	if instance_jobs_patching.Prep_patching != "" {
+		jobstatus_result.Prep_patching = instance_jobs_patching.Prep_patching
+		log.Printf("Prep_patching state : %v\n", jobstatus_result.Prep_patching)
+	} else {
+		jobstatus_result.Prep_patching = ""
+		log.Printf("Prep_patching state : %v\n", jobstatus_result.Prep_patching)
+	}
+
+	if instance_jobs_patching.Patch_level != "" {
+		jobstatus_result.Patch_level = instance_jobs_patching.Patch_level
+		log.Printf("Patch_level : %v\n", jobstatus_result.Patch_level)
+	} else {
+		jobstatus_result.Patch_level = ""
+		log.Printf("Patch_level : %v\n", jobstatus_result.Patch_level)
+	}
+
 	for _, job := range alljobs.AllJobs {
 		log.Printf("Host: %s \tJob-ID: %d\n", job.Hostname, job.JobID)
 	}
