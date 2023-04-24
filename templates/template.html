@@ -14,7 +14,7 @@
         p {
             padding-left: 7%;
             font-family: Arial, Helvetica, sans-serif;
-            line-height: 0.5;
+            line-height: 0.7;
         }
         div {
             border: 2px solid black;
@@ -37,7 +37,7 @@
 <h1 style="text-align: center;">SUSE Manager - Job Monitoring Status</h1>
 <p class="para1">Reported by Jobchecker.</p><br><br>
 
-<p class="para2" >Job execution time: {{ .JobStartTime }}</p>
+<h3>Job execution time: {{ .JobStartTime }}</h3>
 <h3>t7user: {{ .T7user }}</h3></p>
 <br>
 <h3 style='color:red;'>Pending:</h3>
