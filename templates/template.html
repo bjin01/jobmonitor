@@ -120,7 +120,7 @@
 
 {{ if ne .Post_patching_file "" }}
 <h3 style='color:brown;'>Post Patching: saltstack sls for post patching have been written to: {{ .Post_patching_file }}</h3>
-<p>Then run command on SUSE Manager host: <strong><font size='+2'></font>salt-run post_patching.start {{ .Post_patching_file }}</font></strong></p>
+<p>Then run command on SUSE Manager host: <strong><font size='+2'></font>salt-run post_patching.start {{ .Post_patching_file }} sumapatch.post_patch_state</font></strong></p>
 <p>The salt runner module post_patching.start will start service ds_agent on the given minions.</p>
 {{ else }}
 <p>There is no post patching sls written. One possible reason is there is no system where we executed pre patching tasks.</p>
