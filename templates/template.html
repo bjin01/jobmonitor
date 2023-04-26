@@ -119,8 +119,8 @@
 <br>
 <div>
 {{ if ne .Reboot_SLS "" }}
-<h3 style='color:brown;'>Post Patching: saltstack sls for reboot action have been written to: {{ .Reboot_SLS }}</h3>
-<p>Then run command on SUSE Manager host: <strong><font size='+2'></font>salt-run state.orch sumapatch.reboot_{{ .T7user }}</font></strong></p>
+<h3 style='color:brown;'>Post Patching: saltstack sls for reboot action have been written to: /srv/salt/sumapatch/{{ .Reboot_SLS }}</h3>
+<p>Then run command on SUSE Manager host: <strong><font size='+2'></font>salt-run state.orch sumapatch.{{ .Reboot_SLS }}</font></strong></p>
 <p>The sumapatch.reboot execution module will trigger reboot jobs through SUSE Manager.</p>
 {{ else }}
 <p>There is no reboot sls written. One possible reason is there is no system with completed jobs.</p>
@@ -137,7 +137,7 @@
 <br>
 <h3 style='color:blueviolet;'>Post Patching: Set Patch Level:</h3>
 <p>A saltstack runner module post_patching.set_pl can be used to set new patch level for a given list of minions.</p>
-<p><strong><font size='+2'></font>salt-run post_patching.set_pl {{ .YamlFileName }} {{ .Patch_level  }} presence_check=True</font></strong></p>
+<p><strong><font size='+2'></font>salt-run post_patching.set_pl /srv/pillar/sumapatch/{{ .YamlFileName }} {{ .Patch_level  }} presence_check=True</font></strong></p>
 <p>The first parameter is a minions list. The list must have a key name. The list must not be limited to reboot list or post_patching list.</p>
 <p>The second parameter is the new patch level</p>
 <br>
