@@ -38,7 +38,7 @@ func Write_SLS(result *schedules.Jobstatus, templates_dir *Templates_Dir) (strin
 		defer f.Close()
 		template.Execute(f, result)
 		log.Default().Printf("sls file written to %s\n", fileName_path)
-		fileName := current_time.Format("20060102150405")
+		fileName := fmt.Sprintf("reboot_%s_%s", result.T7user, current_time.Format("20060102150405"))
 		return fileName, nil
 	}
 }
