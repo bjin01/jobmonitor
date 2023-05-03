@@ -38,12 +38,18 @@
 
 <h3>Job execution time: {{ .JobStartTime }}</h3>
 <h3>t7user: {{ .T7user }}</h3></p>
+<h3>Job Type: {{ .JobType }}</h3></p>
+
 <br>
 <h3 style='color:red;'>Pending:</h3>
 {{with .Pending}}
     {{ range . }}
     {{ if ne .Hostname "" }}
-    <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{ if eq .JobType "patching" }}
+            <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{else}}
+            <p>{{.Hostname}}: {{.JobID}}</p>
+        {{end}}
     {{else}}
     <p></p>
     {{end}}
@@ -54,7 +60,11 @@
 {{with .Failed}}
     {{range .}}
     {{ if ne .Hostname "" }}
-    <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{ if eq .JobType "patching" }}
+        <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{else}}
+            <p>{{.Hostname}}: {{.JobID}}</p>
+        {{end}}
     {{else}}
     <p></p>
     {{end}}
@@ -65,7 +75,11 @@
 {{with .Completed}}
     {{range .}}
     {{ if ne .Hostname "" }}
-    <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{ if eq .JobType "patching" }}
+            <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{else}}
+            <p>{{.Hostname}}: {{.JobID}}</p>
+        {{end}}
     {{else}}
     <p><span style="margin-left: 20px;"></span></p>
     {{end}}
@@ -76,7 +90,11 @@
 {{with .Cancelled}}
     {{range .}}
     {{ if ne .Hostname "" }}
-    <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>    
+        {{ if eq .JobType "patching" }}
+            <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
+        {{else}}
+            <p>{{.Hostname}}: {{.JobID}}</p>
+        {{end}}    
     {{else}}
     <p></p>
     {{end}}
@@ -94,6 +112,7 @@
     {{end}}
 {{end}}
 
+{{ if ne .JobType "reboot" }}
 <h3 style='color:blueviolet;'>Btrfs disqualified (because / < 2GiB):</h3>
 {{with .Disqualified_minions}}
     {{range .}}
@@ -145,5 +164,6 @@
 <p><strong><font size='+2'></font>salt-run post_patching.report /srv/pillar/sumapatch/{{ .YamlFileName }} csv_file=/tmp/myreport.csv presence_check=True</font></strong></p>
 <p>The first parameter is a minions list. The list must have a key name. The list must not be limited to reboot list or post_patching list.</p>
 <p>The second parameter is where the csv should be written to.</p>
+{{end}}
 </body>
 </html>

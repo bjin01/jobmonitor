@@ -100,6 +100,15 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 
 	jobstatus_result := new(schedules.Jobstatus)
 
+	switch alljobs.JobType {
+	case "patching":
+		jobstatus_result.JobType = "patching"
+	case "reboot":
+		jobstatus_result.JobType = "reboot"
+	default:
+		jobstatus_result.JobType = "patching"
+	}
+
 	if len(instance_jobs_patching.JobcheckerEmails) != 0 {
 		jobstatus_result.JobcheckerEmails = instance_jobs_patching.JobcheckerEmails
 		log.Printf("JobcheckerEmails : %v\n", jobstatus_result.JobcheckerEmails)
@@ -213,15 +222,17 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 				time.Sleep(10 * time.Second)
 				if len(jobstatus_result.Pending) == 0 {
 					log.Printf("No more pending Jobs. Exit loop. Email sent.")
+					if jobstatus_result.JobType == "patching" {
+						jobstatus_result.Reboot_List, err = email.WriteYaml(jobstatus_result)
+						if err != nil {
+							log.Default().Printf("ERROR: reboot list: %s\n", err)
+						}
+						jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
+						if err != nil {
+							log.Default().Printf("ERROR: reboot sls: %s\n", err)
+						}
+					}
 
-					jobstatus_result.Reboot_List, err = email.WriteYaml(jobstatus_result)
-					if err != nil {
-						log.Default().Printf("ERROR: reboot list: %s\n", err)
-					}
-					jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
-					if err != nil {
-						log.Default().Printf("ERROR: reboot sls: %s\n", err)
-					}
 					email.Sendit(jobstatus_result, templates_dir)
 					break begin
 				}
@@ -229,13 +240,15 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 			time.Sleep(10 * time.Second)
 		}
 		if len(jobstatus_result.Pending) > 0 {
-			jobstatus_result.Reboot_List, err = email.WriteYaml(jobstatus_result)
-			if err != nil {
-				log.Default().Printf("reboot list: %s\n", err)
-			}
-			jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
-			if err != nil {
-				log.Default().Printf("ERROR: reboot sls: %s\n", err)
+			if jobstatus_result.JobType == "patching" {
+				jobstatus_result.Reboot_List, err = email.WriteYaml(jobstatus_result)
+				if err != nil {
+					log.Default().Printf("ERROR: reboot list: %s\n", err)
+				}
+				jobstatus_result.Reboot_SLS, err = email.Write_SLS(jobstatus_result, templates_dir)
+				if err != nil {
+					log.Default().Printf("ERROR: reboot sls: %s\n", err)
+				}
 			}
 			email.Sendit(jobstatus_result, templates_dir)
 		}
@@ -288,6 +301,10 @@ func main() {
 					switch k {
 					case "Patch Job ID is":
 						instance_jobs_patching.JobID = int(v.(float64))
+						alljobs.JobType = "patching"
+					case "Reboot Job ID is":
+						instance_jobs_patching.JobID = int(v.(float64))
+						alljobs.JobType = "reboot"
 					case "masterplan":
 						instance_jobs_patching.Masterplan = v.(string)
 					default:

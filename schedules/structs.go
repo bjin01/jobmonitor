@@ -55,10 +55,12 @@ type Job struct {
 
 type ScheduledJobs struct {
 	AllJobs []Job
+	JobType string
 }
 
 type Jobs_Patching struct {
 	Patching             []interface{} `json:"Patching"`
+	Reboot               []interface{} `json:"reboot_jobs"`
 	JobcheckerEmails     []string      `json:"jobchecker_emails,omitempty"`
 	JobcheckerTimeout    int           `json:"jobchecker_timeout,omitempty"`
 	JobstartDelay        int           `json:"jobstart_delay,omitempty"`
@@ -93,4 +95,5 @@ type Jobstatus struct {
 	Patch_level          string
 	Post_patching        string
 	Prep_patching        string
+	JobType              string
 }
