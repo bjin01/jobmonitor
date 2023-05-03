@@ -45,7 +45,7 @@
 {{with .Pending}}
     {{ range . }}
     {{ if ne .Hostname "" }}
-        {{ if eq .JobType "patching" }}
+        {{ if eq $.JobType "patching" }}
             <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
         {{else}}
             <p>{{.Hostname}}: {{.JobID}}</p>
@@ -60,7 +60,7 @@
 {{with .Failed}}
     {{range .}}
     {{ if ne .Hostname "" }}
-        {{ if eq .JobType "patching" }}
+        {{ if eq $.JobType "patching" }}
         <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
         {{else}}
             <p>{{.Hostname}}: {{.JobID}}</p>
@@ -75,7 +75,7 @@
 {{with .Completed}}
     {{range .}}
     {{ if ne .Hostname "" }}
-        {{ if eq .JobType "patching" }}
+        {{ if eq $.JobType "patching" }}
             <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
         {{else}}
             <p>{{.Hostname}}: {{.JobID}}</p>
@@ -90,7 +90,7 @@
 {{with .Cancelled}}
     {{range .}}
     {{ if ne .Hostname "" }}
-        {{ if eq .JobType "patching" }}
+        {{ if eq $.JobType "patching" }}
             <p>{{.Hostname}}: {{.JobID}} - masterplan: {{.Masterplan}}</p>
         {{else}}
             <p>{{.Hostname}}: {{.JobID}}</p>
