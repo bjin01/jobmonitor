@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/delete_systems"
 	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/request"
 	"github.com/bjin01/jobmonitor/schedules"
@@ -72,6 +73,36 @@ func Decrypt(key string, cryptoText string) string {
 	//fmt.Println(string(msg))
 
 	return fmt.Sprintf("%s", msg)
+}
+
+func Delete_System(SUMAConfig *SUMAConfig, deleteSystemdata *delete_systems.DeleteSystemRequest) {
+	fmt.Printf("deleteSystemdata %s\n", deleteSystemdata.MinionName)
+	var sumaconf Sumaconf
+	key := os.Getenv("SUMAKEY")
+	if len(key) == 0 {
+		log.Default().Printf("SUMAKEY is not set. This might cause error for password decryption.")
+	}
+	for a, b := range SUMAConfig.SUMA {
+		sumaconf.Server = a
+		b.Password = Decrypt(key, b.Password)
+		sumaconf.Password = b.Password
+		sumaconf.User = b.User
+	}
+	SessionKey := new(auth.SumaSessionKey)
+	var err error
+	MysumaLogin := auth.Sumalogin{Login: sumaconf.User, Passwd: sumaconf.Password}
+	request.Sumahost = &sumaconf.Server
+	*SessionKey, err = auth.Login("auth.login", MysumaLogin)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
+	fmt.Printf("Deleting System in SUMA: %s\n", deleteSystemdata.MinionName)
+	err = delete_systems.Delete_System(SessionKey, deleteSystemdata)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
@@ -263,6 +294,12 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 	}
 }
 
+func isValidAuthToken(token string) bool {
+	// Your authentication token validation logic here
+	// Return true if the token is valid, false otherwise
+	return true
+}
+
 func main() {
 	sumafile_path := flag.String("config", "/etc/salt/master.d/spacewalk.conf", "provide config file with SUMA login")
 	api_interval := flag.Int("interval", 10, "SUMA API polling interval, default 10seconds, no need to write s.")
@@ -281,6 +318,30 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+
+	r.POST("/delete_system", func(c *gin.Context) {
+		/* minionName := c.PostForm("minion_name")
+		authToken := c.GetHeader("Authentication-Token") */
+		var deleteSystemRequestObj delete_systems.DeleteSystemRequest
+		if err := c.ShouldBindJSON(&deleteSystemRequestObj); err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+		}
+
+		// Perform authentication/token validation
+		if !isValidAuthToken(deleteSystemRequestObj.Token) {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Perform deletion of the system with the provided minion_name
+		/* if err := deleteSystem(minionName); err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		} */
+
+		go Delete_System(SUMAConfig, &deleteSystemRequestObj)
+		c.String(http.StatusOK, fmt.Sprintf("System (%s) delete request is sent to SUSE Manager.", deleteSystemRequestObj.MinionName))
+	})
 
 	r.POST("/jobchecker", func(c *gin.Context) {
 		// create copy to be used inside the goroutine

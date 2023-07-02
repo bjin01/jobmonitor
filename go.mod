@@ -6,6 +6,7 @@ require gopkg.in/yaml.v2 v2.4.0
 
 require (
 	github.com/gorilla/rpc v1.2.0 // indirect
+	
 	github.com/rogpeppe/go-charset v0.0.0-20190617161244-0dc95cdf6f31 // indirect
 )
 
