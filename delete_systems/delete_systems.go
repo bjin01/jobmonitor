@@ -120,6 +120,7 @@ func Handle_Xmlrpc_Error(message []byte) {
 func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSystemRequest) error {
 
 	//var systeminfo ListSystemInfo
+	var systemid int
 	get_system_obj := Get_System_Request{
 		Sessionkey:  Sessionkey.Sessionkey,
 		System_Name: deletesystemdata.MinionName,
@@ -133,7 +134,7 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 		log.Fatalf("Encoding error: %s\n", err)
 	}
 
-	fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
 		log.Fatalf("Get SystemID API error: %s\n", err)
@@ -152,7 +153,7 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 	// Access the first struct value
 	if len(response.Params.Param.Value.Array.Data.Values) == 0 {
 		log.Printf("%s not found in SUMA.", get_system_obj.System_Name)
-		//return nil
+		return nil
 	}
 
 	if len(response.Params.Param.Value.Array.Data.Values) > 1 {
@@ -177,10 +178,11 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 		log.Println("ID:", id)
 		log.Println("Last Checkin:", lastCheckin.(*CustomTime).Format("02/01/2006 15:4:5"))
 		log.Println("Outdated Package Count:", outdatedPkgCount)
+		systemid = id.(int)
+
 	}
 
-	//systemid := id.(int)
-	systemid := 123
+	//systemid := 123
 	if systemid > 0 {
 		del_system_obj := Delete_System_Request{
 			Sessionkey: Sessionkey.Sessionkey,
@@ -207,7 +209,7 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 		}
 
 		// Print the response as a string
-		fmt.Println(string(responseBody))
+		//fmt.Println(string(responseBody))
 
 		if strings.Contains(string(responseBody), "XmlRpcFault") {
 			//fmt.Println("do we get here")
