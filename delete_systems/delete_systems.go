@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/request"
 	gorillaxml "github.com/divan/gorilla-xmlrpc/xml"
 )
@@ -114,10 +115,11 @@ func Handle_Xmlrpc_Error(message []byte) {
 	}
 	log.Printf("Error ID: %d\n", Error.Fault.Error_Data.Error_Struct.GetMemberValue("faultCode").(int))
 	log.Printf("Error Message: %s\n", Error.Fault.Error_Data.Error_Struct.GetMemberValue("faultString").(string))
+
 	return
 }
 
-func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSystemRequest) error {
+func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSystemRequest, emails_to []string) error {
 
 	//var systeminfo ListSystemInfo
 	var systemid int
@@ -153,6 +155,9 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 	// Access the first struct value
 	if len(response.Params.Param.Value.Array.Data.Values) == 0 {
 		log.Printf("%s not found in SUMA.", get_system_obj.System_Name)
+		subject := "System deleted from SUSE Manager - system not found"
+		message := fmt.Sprintf("System %s does not exist in SUSE Manager.\n", deletesystemdata.MinionName)
+		email.Send_system_emails(emails_to, subject, message)
 		return nil
 	}
 
@@ -208,12 +213,12 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 			log.Fatalf("ReadAll error: %s\n", err)
 		}
 
-		// Print the response as a string
-		//fmt.Println(string(responseBody))
-
 		if strings.Contains(string(responseBody), "XmlRpcFault") {
 			//fmt.Println("do we get here")
 			Handle_Xmlrpc_Error(responseBody)
+			subject := "System delete from SUSE Manager - failed"
+			message := fmt.Sprintf("System %s delete in SUSE Manager. failed: %s\n", deletesystemdata.MinionName, string(responseBody))
+			email.Send_system_emails(emails_to, subject, message)
 			return nil
 		}
 	}
@@ -223,11 +228,9 @@ func Delete_System(Sessionkey *auth.SumaSessionKey, deletesystemdata *DeleteSyst
 		return nil
 	}
 
-	/* err = gorillaxml.DecodeClientResponse(resp.Body, &result)
-	if err != nil {
-		log.Printf("Decode system delete response body failed: %s\n", err)
-	} */
-	//fmt.Printf("Delete system result %d.\n", *result.Params.Param.Value.Id)
 	fmt.Printf("Delete system result %d.\n", *result.Result_ID)
+	subject := "System deleted from SUSE Manager"
+	message := fmt.Sprintf("System %s has been successfully deleted from SUSE Manager.", deletesystemdata.MinionName)
+	email.Send_system_emails(emails_to, subject, message)
 	return nil
 }

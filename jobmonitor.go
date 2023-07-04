@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"reflect"
 
 	"io/ioutil"
 	"log"
@@ -24,13 +26,17 @@ type Sumaconf struct {
 	Server   string
 	User     string
 	Password string
+	Email_to []string
 }
 
 type SUMAConfig struct {
 	SUMA map[string]struct {
-		User     string `yaml:"username"`
-		Password string `yaml:"password"`
-		Logfile  string `yaml:"logfile"`
+		User                 string   `yaml:"username"`
+		Password             string   `yaml:"password"`
+		Logfile              string   `yaml:"logfile"`
+		Email_to             []string `yaml:"email_to"`
+		Healthcheck_interval int      `yaml:"healthcheck_interval"`
+		Healthcheck_email_to []string `yaml:"healthcheck_email"`
 	} `yaml:"suma_api"`
 }
 
@@ -87,6 +93,9 @@ func Delete_System(SUMAConfig *SUMAConfig, deleteSystemdata *delete_systems.Dele
 		b.Password = Decrypt(key, b.Password)
 		sumaconf.Password = b.Password
 		sumaconf.User = b.User
+		if len(b.Email_to) > 0 {
+			sumaconf.Email_to = b.Email_to
+		}
 	}
 	SessionKey := new(auth.SumaSessionKey)
 	var err error
@@ -98,7 +107,7 @@ func Delete_System(SUMAConfig *SUMAConfig, deleteSystemdata *delete_systems.Dele
 	}
 	fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
 	fmt.Printf("Deleting System in SUMA: %s\n", deleteSystemdata.MinionName)
-	err = delete_systems.Delete_System(SessionKey, deleteSystemdata)
+	err = delete_systems.Delete_System(SessionKey, deleteSystemdata, sumaconf.Email_to)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -295,9 +304,49 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 }
 
 func isValidAuthToken(token string) bool {
-	// Your authentication token validation logic here
-	// Return true if the token is valid, false otherwise
-	return true
+	if token == os.Getenv("SUMAKEY") {
+		return true
+	} else {
+		return false
+	}
+
+}
+
+func performHealthCheck(sumaconfig *SUMAConfig) error {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   10 * time.Second,
+	}
+
+	sumaserver := new(string)
+	for a := range sumaconfig.SUMA {
+		*sumaserver = a
+	}
+
+	sumaurl := fmt.Sprintf("https://%s/rhn/manager/api/api/systemVersion", *sumaserver)
+	//log.Printf("suma url health check: %s\n", sumaurl)
+
+	resp, err := client.Get(sumaurl)
+	if err != nil {
+		log.Println("SUMA Health check - API call failed:", err)
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Response code not OK, %d\n", resp.StatusCode)
+	} else {
+		log.Printf("Health check status: OK, %d\n", resp.StatusCode)
+	}
+	/* responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("ReadAll error: %s\n", err)
+	}
+	fmt.Printf("Response: %s\n", string(responseBody)) */
+	return nil
 }
 
 func main() {
@@ -315,6 +364,53 @@ func main() {
 	}
 	templates := &email.Templates_Dir{Dir: *templates_dir}
 	log.Printf("templates_dir is: %s\n", templates.Dir)
+
+	go func() {
+		// Create a ticker with the desired interval
+		healthcheck_interval := new(int)
+		emails_to := new([]string)
+		for _, b := range SUMAConfig.SUMA {
+			value := reflect.ValueOf(b)
+			healthcheck_email_to_field := value.FieldByName("Healthcheck_email_to")
+			healthcheck_interval_field := value.FieldByName("Healthcheck_interval")
+			if healthcheck_email_to_field.IsValid() && len(b.Healthcheck_email_to) > 0 {
+				*emails_to = b.Healthcheck_email_to
+				log.Printf("Health check email recipients: %v\n", *emails_to)
+			}
+
+			if healthcheck_interval_field.IsValid() && b.Healthcheck_interval > 60 {
+				*healthcheck_interval = b.Healthcheck_interval
+			} else {
+				*healthcheck_interval = 60
+			}
+			log.Printf("Health check interval: %ds\n", *healthcheck_interval)
+		}
+		error_counter := 0
+		interval := time.Duration(*healthcheck_interval) * time.Second
+		ticker := time.NewTicker(interval)
+		// Call the API immediately
+		err := performHealthCheck(SUMAConfig)
+		if err != nil {
+			log.Fatalf("SUSE Manager initial health check failed. %s\n", err)
+		}
+
+		// Start the loop to perform the API call periodically
+		for range ticker.C {
+			err = performHealthCheck(SUMAConfig)
+			if err != nil {
+				error_counter += 1
+			}
+			if error_counter == 5 {
+				subject := "SUSE Manager health check failed"
+				message := fmt.Sprintf("SUSE Manager health check failed 5 times in serie.\n")
+				if len(*emails_to) > 0 {
+					email.Send_system_emails(*emails_to, subject, message)
+				} else {
+					log.Println("Alarm: SUSE Manager health check failed 5 times in row.")
+				}
+			}
+		}
+	}()
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()

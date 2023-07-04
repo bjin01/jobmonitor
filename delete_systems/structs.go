@@ -29,29 +29,6 @@ type ListSystemInfo struct {
 	}
 }
 
-/* type SystemInfo struct {
-	Name             string    `xml:"name"`
-	ID               int       `xml:"id"`
-	LastCheckin      time.Time `xml:"last_checkin"`
-	OutdatedPkgCount int       `xml:"outdated_pkg_count"`
-} */
-
-type Ds_Result struct {
-	Params Ds_Params `xml:"params"`
-}
-
-type Ds_Params struct {
-	Param Ds_Param `xml:"param"`
-}
-
-type Ds_Param struct {
-	Value Ds_Value `xml:"value"`
-}
-
-type Ds_Value struct {
-	Id *int `xml:"i4,omitempty"`
-}
-
 type Delete_System_Return struct {
 	Result_ID *int `xml:"params>param>value>i4,omitempty"`
 }
