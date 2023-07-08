@@ -44,3 +44,48 @@ type Error_Fault struct {
 type ErrorData struct {
 	Error_Struct Struct `xml:"struct"`
 }
+
+type MethodResponse struct {
+	Params Params `xml:"params"`
+}
+
+type Params struct {
+	Param Param `xml:"param"`
+}
+
+type Param struct {
+	Value Value `xml:"value"`
+}
+
+type Value struct {
+	Array Array `xml:"array"`
+}
+
+type Array struct {
+	Data Data `xml:"data"`
+}
+
+type Data struct {
+	Values []Struct `xml:"value>struct"`
+}
+
+type Struct struct {
+	Members []Member `xml:"member"`
+}
+
+type Member struct {
+	Name  string     `xml:"name"`
+	Value InnerValue `xml:"value"`
+}
+
+type CustomTime struct {
+	time.Time
+}
+
+type InnerValue struct {
+	StringValue   *string     `xml:"string,omitempty"`
+	IntegerValue  *int        `xml:"i4,omitempty"`
+	Int           *int        `xml:"int,omitempty"`
+	DateTimeValue *CustomTime `xml:"dateTime.iso8601,omitempty"`
+	BooleanValue  *bool       `xml:"bool,omitempty"`
+}

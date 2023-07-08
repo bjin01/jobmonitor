@@ -1,5 +1,7 @@
 
 dist/
 .goreleaser.yaml
+.gitignore
+.postman
 
 
