@@ -49,7 +49,9 @@ func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 }
 
 func Convert_to_ISO8601_DateTime(date time.Time) string {
-	return date.Format("2006-01-02T15:04:05")
+	//convert to ISO8651 date time format
+
+	return date.Format("2006-01-02T15:04:05-07:00")
 }
 
 func (s Struct) GetMemberValue(name string) interface{} {
@@ -83,6 +85,7 @@ func (v InnerValue) GetFieldValue() interface{} {
 func Get_Active_Minions_in_Group(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) []int {
 	var minion_list []int
 	method := "systemgroup.listActiveSystemsInGroup"
+	//method := "systemgroup.listInactiveSystemsInGroup"
 	for _, group := range groupsdata.Groups {
 		get_system_by_group_request := Get_System_by_Group_Request{
 			Sessionkey: sessionkey.Sessionkey,
@@ -102,19 +105,20 @@ func Get_Active_Minions_in_Group(sessionkey *auth.SumaSessionKey, groupsdata *Mi
 		if err != nil {
 			log.Fatalf("ReadAll error: %s\n", err)
 		}
-
+		//fmt.Printf("responseBody: %s\n", string(responseBody))
 		var response MethodResponse_ActiveSystems_in_Group
 		if err := xml.Unmarshal(responseBody, &response); err != nil {
 			log.Fatalf("Unmarshal error: %s\n", err)
 		}
-		fmt.Printf("response of active systems in group: %v\n", response.Params.Param.Value.Array.Data.Values)
-		minion_list = append(minion_list)
+		//fmt.Printf("response of active systems in group: %v\n", response.Params.Param.Value.Array.Data.Values)
+		minion_list = append(minion_list, response.Params.Param.Value.Array.Data.Values...)
 	}
 	return minion_list
 }
 
 func Contains(s []int, e int) bool {
 	for _, a := range s {
+		//fmt.Printf("acive id: %d - minion_id e: %d\n", a, e)
 		if a == e {
 			return true
 		}
@@ -122,10 +126,10 @@ func Contains(s []int, e int) bool {
 	return false
 }
 
-func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) {
+func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) error {
 	method := "systemgroup.listSystemsMinimal"
 	active_minion_ids := Get_Active_Minions_in_Group(sessionkey, groupsdata)
-	fmt.Printf("active_minion_ids: %v\n", active_minion_ids)
+	//fmt.Printf("active_minion_ids: %v\n", active_minion_ids)
 
 	for _, group := range groupsdata.Groups {
 		get_system_by_group_request := Get_System_by_Group_Request{
@@ -139,7 +143,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 			log.Fatalf("Encoding error: %s\n", err)
 		}
 
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
 			log.Fatalf("Get Minions from Group API error: %s\n", err)
@@ -154,7 +158,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 		var response MethodResponse
 		if err := xml.Unmarshal(responseBody, &response); err != nil {
 			log.Printf("Failed to parse XML-RPC response: %v", err)
-			return
+			return err
 		}
 
 		//fmt.Printf("response: %v\n", response)if len(response.Params.Param.Value.Array.Data.Values) == 1 {
@@ -166,7 +170,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				// Access specific member values by name
 				minion_data.Minion_Name = valueStruct.GetMemberValue("name").(string)
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
-				fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
+				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				if Contains(active_minion_ids, minion_data.Minion_ID) {
 
 					m.Minion_List = append(m.Minion_List, minion_data)
@@ -177,7 +181,8 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 		}
 
 	}
-	m.Show_Minions()
+	//m.Show_Minions()
+	return nil
 }
 
 func (s *Target_Minions) Show_Minions() {
@@ -199,6 +204,7 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 		if err != nil {
 			log.Fatalf("Encoding error: %s\n", err)
 		}
+		fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
 
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
@@ -209,7 +215,7 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 		if err != nil {
 			log.Fatalf("ReadAll error: %s\n", err)
 		}
-
+		fmt.Printf("responseBody: %s\n", responseBody)
 		var response MethodResponse
 		if err := xml.Unmarshal(responseBody, &response); err != nil {
 			log.Printf("Failed to parse XML-RPC response: %v", err)
@@ -217,4 +223,11 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 		}
 		fmt.Printf("Schedule Pkg Refresh response: %v\n", response)
 	}
+}
+
+func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) {
+	var target_minions Target_Minions
+	target_minions.Get_Minions(sessionkey, groupsdata)
+	target_minions.Show_Minions()
+	target_minions.Schedule_Pkg_refresh(sessionkey)
 }
