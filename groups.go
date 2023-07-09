@@ -34,7 +34,7 @@ func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *groups.Migration_Groups) 
 	if err != nil {
 		log.Fatal(err)
 	}
-	groups.Orchestrate(SessionKey, groupsdata)
+	groups.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost))
 	//fmt.Printf("target_minions: %v\n", target_minions)
 	//fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
 }

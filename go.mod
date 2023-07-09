@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	//alexejk.io/go-xmlrpc v0.4.0
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/divan/gorilla-xmlrpc v0.0.0-20190926132722-f0686da74fda

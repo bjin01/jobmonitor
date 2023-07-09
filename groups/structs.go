@@ -19,12 +19,6 @@ type Get_System_by_Group_Request struct {
 	GroupName  string `xmlrpc:"systemGroupName"`
 }
 
-type Schedule_Pkg_Refresh_Request struct {
-	Sessionkey         string `xmlrpc:"sessionKey"`
-	Minion_ID          int    `xmlrpc:"sid"`
-	EarliestOccourance string `xmlrpc:"earliestOccourance"`
-}
-
 type MethodResponse_ActiveSystems_in_Group struct {
 	Params Params_ActiveSystems_in_Group `xml:"params"`
 }
