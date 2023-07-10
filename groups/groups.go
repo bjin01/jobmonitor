@@ -18,21 +18,21 @@ type Target_Minions struct {
 }
 
 type Minion_Data struct {
-	Minion_ID                    int
-	Minion_Name                  string
-	Assign_Vendor_Channel_Job_ID int
-	Pkg_Refresh_Job_ID           int
-	Outdated_Pkg_Count           int
-	Reboot_Job_ID                int
-	SP_Migration_Dry_Run_Job_ID  int
-	SP_Migration_Job_ID          int
-	PostMigration_Reboot_Job_ID  int
+	Minion_ID              int
+	Minion_Name            string
+	Host_Job_Info          Host_Job_Info
+	Migration_Stage        string
+	Migration_Stage_Status string
 }
 
 type Schedule_Pkg_Refresh_Request struct {
 	Sessionkey         string    `xmlrpc:"sessionKey"`
 	Sid                int       `xmlrpc:"sid"`
 	EarliestOccurrence time.Time `xmlrpc:"earliestOccurrence"`
+}
+
+type Schedule_Pkg_Refresh_Response struct {
+	JobID int `xmlrpc:"id"`
 }
 
 func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -197,45 +197,14 @@ func (s *Target_Minions) Show_Minions() {
 	}
 }
 
-func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
-	method := "system.schedulePackageRefresh"
-
-	for _, minion := range t.Minion_List {
-		schedule_pkg_refresh_request := Schedule_Pkg_Refresh_Request{
-			Sessionkey:         sessionkey.Sessionkey,
-			Sid:                minion.Minion_ID,
-			EarliestOccurrence: time.Now(),
-		}
-
-		buf, err := gorillaxml.EncodeClientRequest(method, &schedule_pkg_refresh_request)
-		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
-		}
-		fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
-		resp, err := request.MakeRequest(buf)
-		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
-		}
-		fmt.Printf("buffer: %s\n", string(buf))
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
-
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("ReadAll error: %s\n", err)
-		}
-		fmt.Printf("responseBody: %s\n", responseBody)
-		/* var response MethodResponse
-		if err := xml.Unmarshal(responseBody, &response); err != nil {
-			log.Printf("Failed to parse XML-RPC response: %v", err)
-			return
-		}
-		fmt.Printf("Schedule Pkg Refresh response: %v\n", response) */
-	}
-}
-
 func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, sumahost string) {
 	var target_minions Target_Minions
 	target_minions.Get_Minions(sessionkey, groupsdata)
-	target_minions.Show_Minions()
+	//target_minions.Show_Minions()
+	//target_minions.Schedule_Pkg_refresh(sessionkey)
+	target_minions.Assign_Channels(sessionkey, groupsdata.Update_Channel_Prefix)
+	//fmt.Printf("Host info %v\n", target_minions.Minion_List)
+	target_minions.Check_Assigne_Channels_Jobs(sessionkey)
 	target_minions.Schedule_Pkg_refresh(sessionkey)
+	target_minions.Check_Pkg_Refresh_Jobs(sessionkey)
 }
