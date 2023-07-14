@@ -70,9 +70,10 @@ func (t *Target_Minions) Schedule_Package_Updates(sessionkey *auth.SumaSessionKe
 func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey, minion_id_list []int) int {
 	method := "system.schedulePackageUpdate"
 	params := SchedulePackageUpdates_Request{
-		Sessionkey:         sessionkey.Sessionkey,
-		Sids:               minion_id_list,
-		EarliestOccurrence: time.Now().Add(time.Duration(5) * time.Minute),
+		Sessionkey: sessionkey.Sessionkey,
+		Sids:       minion_id_list,
+		//EarliestOccurrence: time.Now().Add(time.Duration(0) * time.Minute),
+		EarliestOccurrence: time.Now(),
 	}
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
