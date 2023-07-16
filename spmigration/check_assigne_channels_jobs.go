@@ -1,4 +1,4 @@
-package groups
+package spmigration
 
 import (
 	"log"
@@ -19,6 +19,12 @@ func (t *Target_Minions) Check_Assigne_Channels_Jobs(sessionkey *auth.SumaSessio
 		l.GetPendingjobs(sessionkey)
 		time.Sleep(10 * time.Second)
 		t.Find_Assigne_Channels_Jobs(&l)
+
+		if len(l.Pending.Result) == 0 {
+			log.Printf("No more pending assign channels job. Exit job check.\n")
+			deadline = time.Now()
+			break
+		}
 		log.Printf("Assign Channels Job check 20 seconds. Deadline is %+v\n", deadline)
 		for _, Minion := range t.Minion_List {
 			log.Printf("Assign Channels Job Status: %s %s\n", Minion.Host_Job_Info.Assigne_Channels_Job.JobStatus,
@@ -33,6 +39,7 @@ func (t *Target_Minions) Check_Assigne_Channels_Jobs(sessionkey *auth.SumaSessio
 
 func (t *Target_Minions) Find_Assigne_Channels_Jobs(alljobs *schedules.ListJobs) {
 	for m, Minion := range t.Minion_List {
+
 		for _, p := range alljobs.Pending.Result {
 			if p.Id == Minion.Host_Job_Info.Assigne_Channels_Job.JobID {
 				//fmt.Printf("Pending Job ID: %d\n", p.Id)

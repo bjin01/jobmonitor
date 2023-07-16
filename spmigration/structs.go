@@ -1,4 +1,4 @@
-package groups
+package spmigration
 
 import "time"
 
@@ -13,6 +13,7 @@ type Migration_Groups struct {
 	T7User                string   `json:"t7user"`
 	Token                 string   `json:"authentication_token"`
 	Update_Channel_Prefix string   `json:"update_channel_prefix"`
+	Target_base_channel   string   `json:"target_base_channel"`
 }
 
 type Generic_Job_Response struct {

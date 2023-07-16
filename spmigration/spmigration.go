@@ -1,7 +1,8 @@
-package groups
+package spmigration
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -23,16 +24,8 @@ type Minion_Data struct {
 	Host_Job_Info          Host_Job_Info
 	Migration_Stage        string
 	Migration_Stage_Status string
-}
-
-type Schedule_Pkg_Refresh_Request struct {
-	Sessionkey         string    `xmlrpc:"sessionKey"`
-	Sid                int       `xmlrpc:"sid"`
-	EarliestOccurrence time.Time `xmlrpc:"earliestOccurrence"`
-}
-
-type Schedule_Pkg_Refresh_Response struct {
-	JobID int `xmlrpc:"id"`
+	Target_base_channel    string
+	Target_Ident           string
 }
 
 func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -133,6 +126,11 @@ func Contains(s []int, e int) bool {
 }
 
 func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) error {
+	if groupsdata.Target_base_channel == "" {
+		log.Printf("Error: Target base channel is not defined")
+		return errors.New("Target base channel is not defined")
+	}
+
 	method := "systemgroup.listSystemsMinimal"
 	active_minion_ids := Get_Active_Minions_in_Group(sessionkey, groupsdata)
 	//fmt.Printf("active_minion_ids: %v\n", active_minion_ids)
@@ -176,6 +174,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				// Access specific member values by name
 				minion_data.Minion_Name = valueStruct.GetMemberValue("name").(string)
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
+
 				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				if Contains(active_minion_ids, minion_data.Minion_ID) {
 
@@ -202,16 +201,17 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Get_Minions(sessionkey, groupsdata)
 	//target_minions.Show_Minions()
 
-	target_minions.Assign_Channels(sessionkey, groupsdata.Update_Channel_Prefix)
-	target_minions.Check_Assigne_Channels_Jobs(sessionkey) // deadline 15min
+	//target_minions.Assign_Channels(sessionkey, groupsdata.Update_Channel_Prefix)
+	//target_minions.Check_Assigne_Channels_Jobs(sessionkey) // deadline 15min
 	//target_minions.Schedule_Pkg_refresh(sessionkey)        // pkg refresh
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
-	JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
+	/* JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
 	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update)
-	/* target_minions.Pre_Migration_Reboot()
-	target_minions.Check_Pre_Migration_reboot(sessionkey)
-	target_minions.SP_Migration_DryRun()
-	target_minions.Check_SP_Migration_DryRun()
+	target_minions.Pre_Migration_Reboot(sessionkey)
+	target_minions.Check_Reboot_Jobs(sessionkey) */
+	target_minions.ListMigrationTarget(sessionkey, groupsdata)
+	//target_minions.SP_Migration_DryRun()
+	/*target_minions.Check_SP_Migration_DryRun()
 	target_minions.SP_Migration()
 	target_minions.Check_SP_Migration()
 	target_minions.Post_Migration_Reboot()

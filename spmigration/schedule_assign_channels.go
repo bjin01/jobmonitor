@@ -1,4 +1,4 @@
-package groups
+package spmigration
 
 import (
 	"fmt"

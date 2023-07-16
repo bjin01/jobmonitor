@@ -1,4 +1,4 @@
-package groups
+package spmigration
 
 import (
 	"log"
@@ -19,6 +19,13 @@ func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey)
 		l.GetPendingjobs(sessionkey)
 		time.Sleep(10 * time.Second)
 		t.Find_Pkg_Refresh_Jobs(&l)
+
+		if len(l.Pending.Result) == 0 {
+			log.Printf("No more pending pkg refresh job. Exit job check.\n")
+			deadline = time.Now()
+			break
+		}
+
 		log.Printf("Package refresh Job check 20 seconds. Deadline is %+v\n", deadline)
 		for _, Minion := range t.Minion_List {
 			log.Printf("Package refresh Job Status: %s %s\n", Minion.Host_Job_Info.Pkg_Refresh_Job.JobStatus,

@@ -1,4 +1,4 @@
-package groups
+package spmigration
 
 import (
 	"fmt"
@@ -72,7 +72,7 @@ func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey,
 	params := SchedulePackageUpdates_Request{
 		Sessionkey: sessionkey.Sessionkey,
 		Sids:       minion_id_list,
-		//EarliestOccurrence: time.Now().Add(time.Duration(0) * time.Minute),
+		//EarliestOccurrence: time.Now().Add(time.Duration(5) * time.Minute),
 		EarliestOccurrence: time.Now(),
 	}
 

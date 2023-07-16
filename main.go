@@ -12,8 +12,8 @@ import (
 
 	"github.com/bjin01/jobmonitor/delete_systems"
 	"github.com/bjin01/jobmonitor/email"
-	"github.com/bjin01/jobmonitor/groups"
 	"github.com/bjin01/jobmonitor/schedules"
+	"github.com/bjin01/jobmonitor/spmigration"
 	"github.com/gin-gonic/gin"
 )
 
@@ -106,7 +106,7 @@ func main() {
 	})
 
 	r.POST("/spmigration", func(c *gin.Context) {
-		var spmigrationRequestObj groups.Migration_Groups
+		var spmigrationRequestObj spmigration.Migration_Groups
 		if err := c.ShouldBindJSON(&spmigrationRequestObj); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
