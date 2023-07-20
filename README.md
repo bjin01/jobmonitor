@@ -30,3 +30,4 @@ curl --location 'http://suma1.bo2go.home:12345/delete_system' \
   "authentication_token": "e2J8anZ4G4n4IM="
 }'
 ```
+
