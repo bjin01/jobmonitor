@@ -31,3 +31,6 @@ curl --location 'http://suma1.bo2go.home:12345/delete_system' \
 }'
 ```
 
+
+
+
