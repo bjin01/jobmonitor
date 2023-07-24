@@ -3,5 +3,9 @@ dist/
 .goreleaser.yaml
 .gitignore
 .postman
+.vscode/
+sumakey.sh
+temp/
+
 
 

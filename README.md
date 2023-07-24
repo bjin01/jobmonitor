@@ -12,10 +12,16 @@ suma_api:
     password: tAOdyzcvQ==
     email_to:
       - my-addr@domain.com
-    healthcheck_interval: 60
+    healthcheck_interval: 120
     healthcheck_email:
       - my-addr@domain.com
 ```
+email_to: is used for /delete_system API to send notifications to.
+
+healthcheck_email: is used to notify admins if SUMA is health check failed.
+
+healthcheck_interval: 120 - is provided in seconds. 2 Minutes is a good interval for health check without overwhelming SUMA API.
+
 
 ## Features:
 * api endpoint - monitor SUSE Manager scheduled jobs, upon completion email notification will be sent.
