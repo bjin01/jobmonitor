@@ -13,7 +13,7 @@ import (
 )
 
 func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
-	instance_jobs_patching schedules.Jobs_Patching, templates_dir *email.Templates_Dir) {
+	instance_jobs_patching schedules.Jobs_Patching, templates_dir *email.Templates_Dir, health *bool) {
 	//key := "R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM="
 	key := os.Getenv("SUMAKEY")
 	if len(key) == 0 {
@@ -147,6 +147,11 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		jobstatus_result.YamlFileName = fmt.Sprintf("completed_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
 	begin:
 		for time.Now().Before(deadline) {
+			if *health == false {
+				log.Printf("SUMA Health check failed. Skip jobcheck loop.")
+				time.Sleep(20 * time.Second)
+				continue
+			}
 
 			log.Printf("Looping every minute. Deadline is %+v\n", deadline)
 			log.Printf("Jobcheck will start at %+v\n", Jobstart_starttime)
@@ -155,7 +160,18 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 				jobstatus_result.Failed = []schedules.Job{}
 				jobstatus_result.Completed = []schedules.Job{}
 				jobstatus_result.Cancelled = []schedules.Job{}
-				jobstatus_result.Compare(SessionKey, alljobs.AllJobs)
+
+				if alljobs.Full_Update_Jobs.Full_Update_Job_ID != nil {
+					log.Printf("Monitor Full Update Job ID: %v\n", alljobs.Full_Update_Jobs.Full_Update_Job_ID)
+					if len(alljobs.Full_Update_Jobs.Full_Update_Job_ID) > 0 {
+						for _, j := range alljobs.Full_Update_Jobs.Full_Update_Job_ID {
+							jobstatus_result.Check_Package_Updates_Jobs(SessionKey, alljobs.AllJobs, j)
+						}
+					}
+				} else {
+					jobstatus_result.Compare(SessionKey, alljobs.AllJobs)
+				}
+
 				log.Printf("Jobstatus result: %+v\n", jobstatus_result)
 				time.Sleep(10 * time.Second)
 				if len(jobstatus_result.Pending) == 0 {
@@ -175,7 +191,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					break begin
 				}
 			}
-			time.Sleep(10 * time.Second)
+			time.Sleep(20 * time.Second)
 		}
 		if len(jobstatus_result.Pending) > 0 {
 			if jobstatus_result.JobType == "patching" {
