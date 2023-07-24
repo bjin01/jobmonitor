@@ -10,5 +10,5 @@ run_patching_{{ .YamlFileName }}:
       {{- range .JobcheckerEmails}}
         - {{.}}
       {{- end}}
-      t7user: {{- .T7user}}
+      t7user: {{ .T7user }}
 
