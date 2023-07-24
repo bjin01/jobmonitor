@@ -148,7 +148,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 	begin:
 		for time.Now().Before(deadline) {
 			if *health == false {
-				log.Printf("SUMA Health check failed. Skip jobcheck loop.")
+				log.Printf("SUMA Health check failed. Skip jobcheck loop. We will continue if SUMA is online again.")
 				time.Sleep(20 * time.Second)
 				continue
 			}
@@ -172,8 +172,17 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					jobstatus_result.Compare(SessionKey, alljobs.AllJobs)
 				}
 
-				log.Printf("Jobstatus result: %+v\n", jobstatus_result)
-				time.Sleep(10 * time.Second)
+				if len(jobstatus_result.Pending) > 0 {
+					log.Printf("Pending Jobs: %+v\n", jobstatus_result.Pending)
+				}
+				if len(jobstatus_result.Failed) > 0 {
+					log.Printf("Failed Jobs: %+v\n", jobstatus_result.Failed)
+				}
+				if len(jobstatus_result.Completed) > 0 {
+					log.Printf("Completed Jobs: %+v\n", jobstatus_result.Completed)
+				}
+				//log.Printf("Jobstatus result Pending: %+v\n", jobstatus_result.Pending)
+				time.Sleep(30 * time.Second)
 				if len(jobstatus_result.Pending) == 0 {
 					log.Printf("No more pending Jobs. Exit loop. Email sent.")
 					if jobstatus_result.JobType == "patching" {
@@ -191,7 +200,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					break begin
 				}
 			}
-			time.Sleep(20 * time.Second)
+			time.Sleep(60 * time.Second)
 		}
 		if len(jobstatus_result.Pending) > 0 {
 			if jobstatus_result.JobType == "patching" {
