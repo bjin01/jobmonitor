@@ -16,8 +16,8 @@ func (t *Jobstatus) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, 
 	current_ListSystemInJobs_status.List_Completed_Systems(sessionkey, jobid_pkg_update)
 
 	if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) > 0 {
-		log.Printf("Update Pkg bundle job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
-			current_ListSystemInJobs_status.ListInProgressSystems)
+		//log.Printf("Update Pkg bundle job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
+		//	current_ListSystemInJobs_status.ListInProgressSystems)
 		for _, minion := range scheduled_jobs_by_minions {
 			for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
 				if minion.Hostname == inprogress.Server_name {
@@ -31,8 +31,8 @@ func (t *Jobstatus) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, 
 	}
 
 	if len(current_ListSystemInJobs_status.ListCompletedSystems.Result) > 0 {
-		log.Printf("Update Pkg bundle job ID: %d: ListCompletedSystems: %v\n", jobid_pkg_update,
-			current_ListSystemInJobs_status.ListCompletedSystems)
+		//log.Printf("Update Pkg bundle job ID: %d: ListCompletedSystems: %v\n", jobid_pkg_update,
+		//	current_ListSystemInJobs_status.ListCompletedSystems)
 		for _, minion := range scheduled_jobs_by_minions {
 			for _, completed := range current_ListSystemInJobs_status.ListCompletedSystems.Result {
 				if minion.Hostname == completed.Server_name {
@@ -43,8 +43,8 @@ func (t *Jobstatus) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, 
 		}
 	}
 	if len(current_ListSystemInJobs_status.ListFailedSystems.Result) > 0 {
-		log.Printf("Update Pkg bundle job ID: %d: ListFailedSystems: %v\n", jobid_pkg_update,
-			current_ListSystemInJobs_status.ListFailedSystems)
+		//log.Printf("Update Pkg bundle job ID: %d: ListFailedSystems: %v\n", jobid_pkg_update,
+		//	current_ListSystemInJobs_status.ListFailedSystems)
 		for _, minion := range scheduled_jobs_by_minions {
 			for _, failed := range current_ListSystemInJobs_status.ListFailedSystems.Result {
 				if minion.Hostname == failed.Server_name {
