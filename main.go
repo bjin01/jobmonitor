@@ -24,7 +24,7 @@ func init() {
 
 func main() {
 	sumafile_path := flag.String("config", "/etc/salt/master.d/spacewalk.conf", "provide config file with SUMA login")
-	api_interval := flag.Int("interval", 10, "SUMA API polling interval, default 10seconds, no need to write s.")
+	api_interval := flag.Int("interval", 60, "SUMA API polling interval, default 60 seconds, no need to write s.")
 	templates_dir := flag.String("templates", "/srv/jobmonitor", "provide directory name where the template files are stored.")
 	flag.Parse()
 

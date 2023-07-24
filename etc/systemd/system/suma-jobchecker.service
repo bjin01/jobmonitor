@@ -1,0 +1,13 @@
+[Unit]
+Description=SUMA Jobchecker
+After=taskomatic.service
+Requires=taskomatic.service
+
+[Service]
+Environment="SUMAKEY=R2bfp223Qa="
+Type=simple
+Restart=always
+ExecStart=/usr/local/bin/jobmonitor -config /etc/salt/master.d/spacewalk.conf -interval 60 -templates /srv/jobmonitor
+
+[Install]
+WantedBy=multi-user.target
