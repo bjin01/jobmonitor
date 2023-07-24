@@ -1,7 +1,6 @@
 package schedules
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -66,21 +65,21 @@ func (j *Jobstatus) Compare(Sessionkey *auth.SumaSessionKey, scheduled_jobs []Jo
 func isExists(id int, list *Jobstatus) bool {
 	for _, l := range list.Pending {
 		if l.JobID == id {
-			fmt.Println(l, " gefunden in Pending")
+			log.Println(l, " Pending")
 			return true
 		}
 	}
 
 	for _, l := range list.Failed {
 		if l.JobID == id {
-			fmt.Println(l, " gefunden in Failed")
+			log.Println(l, " Failed")
 			return true
 		}
 	}
 
 	for _, l := range list.Completed {
 		if l.JobID == id {
-			fmt.Println(l, " gefunden in Completed")
+			log.Println(l, " Completed")
 			return true
 		}
 	}

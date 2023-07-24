@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 )
@@ -28,14 +27,12 @@ func performHealthCheck(sumaconfig *SUMAConfig) error {
 
 	resp, err := client.Get(sumaurl)
 	if err != nil {
-		log.Println("SUMA Health check - API call failed:", err)
+		//log.Println("SUMA Health check - API call failed:", err)
 		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Response code not OK, %d\n", resp.StatusCode)
-	} else {
-		log.Printf("Health check status: OK, %d\n", resp.StatusCode)
 	}
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

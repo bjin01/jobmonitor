@@ -53,9 +53,15 @@ type Job struct {
 	Masterplan string
 }
 
+type Full_Update_Jobs struct {
+	Full_Update_Job_ID []int
+	List_Systems       []string
+}
+
 type ScheduledJobs struct {
-	AllJobs []Job
-	JobType string
+	AllJobs          []Job
+	JobType          string
+	Full_Update_Jobs Full_Update_Jobs
 }
 
 type Jobs_Patching struct {
@@ -72,6 +78,7 @@ type Jobs_Patching struct {
 	Patch_level          string        `json:"patch_level,omitempty"`
 	Post_patching        string        `json:"post_patching,omitempty"`
 	Prep_patching        string        `json:"prep_patching,omitempty"`
+	Full_Update_Job_ID   []interface{} `json:"Full_Update_Job_ID,omitempty"`
 }
 
 type Jobstatus struct {
@@ -96,4 +103,33 @@ type Jobstatus struct {
 	Post_patching        string
 	Prep_patching        string
 	JobType              string
+}
+
+type ListSystemInJobs struct {
+	ListInProgressSystems ListSystemInJobs_Response
+	ListFailedSystems     ListSystemInJobs_Response
+	ListCompletedSystems  ListSystemInJobs_Response
+}
+
+/* type ListSystemInJobs_Response struct {
+	Result []struct {
+		Server_name  string    `xmlrpc:"server_name,omitempty"`
+		Base_channel string    `xmlrpc:"base_channel,omitempty"`
+		Server_id    int       `xmlrpc:"server_id,omitempty"`
+		Timestamp    time.Time `xmlrpc:"timestamp,omitempty"`
+	}
+} */
+
+type ListSystemInJobs_Response struct {
+	Result []struct {
+		Server_name  string
+		Base_channel string
+		Server_id    int
+		Timestamp    time.Time
+	}
+}
+
+type ListSystemInJobs_Request struct {
+	Sessionkey string `xmlrpc:"sessionKey"`
+	ActionId   int    `xmlrpc:"actionId"`
 }

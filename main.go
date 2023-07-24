@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"log"
 	"net/http"
@@ -37,6 +38,7 @@ func main() {
 	templates := &email.Templates_Dir{Dir: *templates_dir}
 	log.Printf("templates_dir is: %s\n", templates.Dir)
 
+	health := new(bool)
 	go func() {
 		// Create a ticker with the desired interval
 		healthcheck_interval := new(int)
@@ -57,30 +59,38 @@ func main() {
 			}
 			log.Printf("Health check interval: %ds\n", *healthcheck_interval)
 		}
-		error_counter := 0
+		//error_counter := 0
 		interval := time.Duration(*healthcheck_interval) * time.Second
 		ticker := time.NewTicker(interval)
 		// Call the API immediately
 		err := performHealthCheck(SUMAConfig)
 		if err != nil {
-			log.Fatalf("SUSE Manager initial health check failed. %s\n", err)
+			*health = false
+			log.Printf("SUSE Manager initial health check failed. %v %s\n", *health, err)
+		} else {
+			*health = true
+			log.Printf("SUSE Manager health check passed. %v\n", *health)
 		}
 
 		// Start the loop to perform the API call periodically
 		for range ticker.C {
 			err = performHealthCheck(SUMAConfig)
 			if err != nil {
-				error_counter += 1
+				*health = false
+				log.Printf("SUSE Manager health check failed. %s\n", err)
+			} else {
+				*health = true
+				log.Printf("SUSE Manager health check passed. %v\n", *health)
 			}
-			if error_counter == 5 {
-				subject := "SUSE Manager health check failed"
-				message := fmt.Sprintf("SUSE Manager health check failed 5 times in serie.\n")
-				if len(*emails_to) > 0 {
-					email.Send_system_emails(*emails_to, subject, message)
-				} else {
-					log.Println("Alarm: SUSE Manager health check failed 5 times in row.")
-				}
-			}
+
+			/* subject := "SUSE Manager health check failed"
+			message := fmt.Sprintf("SUSE Manager health check failed 5 times in serie.\n")
+			if len(*emails_to) > 0 {
+				email.Send_system_emails(*emails_to, subject, message)
+			} else {
+				log.Println("Alarm: SUSE Manager health check failed 5 times in row.")
+			} */
+
 		}
 	}()
 
@@ -125,14 +135,46 @@ func main() {
 	r.POST("/jobchecker", func(c *gin.Context) {
 		// create copy to be used inside the goroutine
 		cCp := c.Copy()
+		//fmt.Printf("cCp %+v\n", cCp.Request.Body)
 		var instance_jobs_patching schedules.Jobs_Patching
 		var alljobs schedules.ScheduledJobs
+		var full_update_jobs schedules.Full_Update_Jobs
+
+		if *health == false {
+			c.String(200, "Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
+			log.Printf("Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
+			return
+		}
 
 		if err := cCp.ShouldBindJSON(&instance_jobs_patching); err != nil {
 			cCp.AbortWithError(http.StatusBadRequest, err)
 		}
 
 		for _, elem := range instance_jobs_patching.Patching {
+			if instance_jobs_patching.Full_Update_Job_ID != nil {
+				for _, elem := range instance_jobs_patching.Full_Update_Job_ID {
+					for k, v := range elem.(map[string]interface{}) {
+						//fmt.Printf("k: %v, elem: %v\n", k, elem)
+						jobid, _ := strconv.Atoi(k)
+						if len(full_update_jobs.Full_Update_Job_ID) == 0 {
+							full_update_jobs.Full_Update_Job_ID = append(full_update_jobs.Full_Update_Job_ID, jobid)
+						} else {
+							for j := range full_update_jobs.Full_Update_Job_ID {
+								if full_update_jobs.Full_Update_Job_ID[j] != jobid {
+									full_update_jobs.Full_Update_Job_ID = append(full_update_jobs.Full_Update_Job_ID,
+										jobid)
+								}
+							}
+						}
+
+						for _, v := range v.([]interface{}) {
+							full_update_jobs.List_Systems = append(full_update_jobs.List_Systems, v.(string))
+						}
+					}
+				}
+				log.Printf("Bundle full_update_jobs %+v\n", full_update_jobs)
+				alljobs.Full_Update_Jobs = full_update_jobs
+			}
 			for x, y := range elem.(map[string]interface{}) {
 				var instance_jobs_patching schedules.Job
 				//log.Printf("%s:\n", x)
@@ -157,7 +199,7 @@ func main() {
 			}
 		}
 
-		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching, templates)
+		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching, templates, health)
 		c.String(200, "Jobchecker task started.")
 	})
 	log.Default().Println("/jobckecker API is listening and serving HTTP on :12345")
