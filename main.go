@@ -126,6 +126,8 @@ func main() {
 			return
 		}
 
+		fmt.Printf("spmigrationRequestObj %+v\n", spmigrationRequestObj)
+
 		go groups_lookup(SUMAConfig, &spmigrationRequestObj)
 		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for SP Migration through SUSE Manager.", spmigrationRequestObj.Groups))
 		//log.Printf("request data %v for SP Migration through SUSE Manager.\n", spmigrationRequestObj)

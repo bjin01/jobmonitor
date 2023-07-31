@@ -10,7 +10,7 @@ import (
 
 func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey) {
 
-	deadline := time.Now().Add(time.Duration(2) * time.Minute)
+	deadline := time.Now().Add(time.Duration(10) * time.Minute)
 
 	for time.Now().Before(deadline) {
 		var l schedules.ListJobs

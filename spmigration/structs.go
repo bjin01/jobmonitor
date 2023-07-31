@@ -13,7 +13,16 @@ type Migration_Groups struct {
 	T7User                string   `json:"t7user"`
 	Token                 string   `json:"authentication_token"`
 	Update_Channel_Prefix string   `json:"update_channel_prefix"`
-	Target_base_channel   string   `json:"target_base_channel"`
+	//Target_base_channel   string           `json:"target_base_channel"`
+	Target_Products []struct {
+		Product Target_Product `json:"product"`
+	} `json:"products"`
+}
+
+type Target_Product struct {
+	Name         string `json:"name"`
+	Ident        string `json:"ident"`
+	Base_Channel string `json:"base_channel_label"`
 }
 
 type Generic_Job_Response struct {
