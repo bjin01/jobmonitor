@@ -24,7 +24,7 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 	method := "system.schedulePackageRefresh"
 
 	for i, minion := range t.Minion_List {
-		if minion.Migration_Stage_Status == "Completed" && minion.Migration_Stage == "Assign_Channels" {
+		if minion.Migration_Stage_Status == "Completed" && minion.Migration_Stage == "Reboot" {
 
 			fmt.Printf("Minion %s is ready for package refresh\n", minion.Minion_Name)
 

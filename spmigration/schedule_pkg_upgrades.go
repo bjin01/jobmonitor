@@ -80,7 +80,7 @@ func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey,
 	if err != nil {
 		log.Fatalf("Encoding error: %s\n", err)
 	}
-	fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
 		log.Fatalf("Encoding error: %s\n", err)
@@ -98,8 +98,8 @@ func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey,
 		log.Fatalf("Decode Pkg Update Job response body failed: %s\n", err)
 	}
 	if reply.JobID > 0 {
-		fmt.Printf("Job %d has been scheduled to update packages on %d minions\n", reply.JobID, len(minion_id_list))
-		fmt.Printf("Package Update Job starts at %s\n", params.EarliestOccurrence.Format("2006-01-02 15:04:05"))
+		log.Printf("Job %d has been scheduled to update packages on %d minions\n", reply.JobID, len(minion_id_list))
+		log.Printf("Package Update Job starts at %s\n", params.EarliestOccurrence.Format("2006-01-02 15:04:05"))
 		for i, minion := range t.Minion_List {
 			for _, minion_id := range minion_id_list {
 				if minion.Minion_ID == minion_id {

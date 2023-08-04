@@ -83,7 +83,7 @@ type Change_Channels_Request struct {
 	EarliestOccurrence time.Time `xmlrpc:"earliestOccurrence"`
 }
 
-func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, update_channel_prefix string) {
+func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) {
 	method := "system.listSubscribedChildChannels"
 	for i, minion := range t.Minion_List {
 		params := Get_Channels_Request{
@@ -123,41 +123,52 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, update
 			//fmt.Printf("Channel: %v\n", channel)
 			var temp_base_channel_label string
 			var temp_Child_label string
-			old_base_channel_label = channel.Parent_channel_label
+			update_channel_prefix := new(string)
+
 			if strings.TrimSpace(channel.Clone_original) != "" {
+
 				if strings.TrimSpace(channel.Parent_channel_label) == "" {
 					log.Printf("Channel %s has no parent channel label\n", channel.Label)
 					break
 				}
 
-				if strings.TrimSpace(update_channel_prefix) != "" {
-					temp_base_channel_label = fmt.Sprintf("%s%s", update_channel_prefix,
-						Discart_lable(channel.Parent_channel_label))
-				} else {
-					temp_base_channel_label = Discart_lable(channel.Parent_channel_label)
+				for _, group := range groupsdata.Assigne_channels {
+					if strings.TrimSpace(group.Assigne_Channel.Current_base_channel) == strings.TrimSpace(channel.Parent_channel_label) {
+						old_base_channel_label = channel.Parent_channel_label
+						if strings.TrimSpace(group.Assigne_Channel.New_base_prefix) != "" {
+							update_channel_prefix = &group.Assigne_Channel.New_base_prefix
+							temp_base_channel_label = fmt.Sprintf("%s%s", *update_channel_prefix,
+								Discart_lable(channel.Parent_channel_label))
+							temp_Child_label = fmt.Sprintf("%s%s", *update_channel_prefix, Discart_lable(channel.Label))
+						} else {
+							*update_channel_prefix = ""
+							temp_base_channel_label = Discart_lable(channel.Parent_channel_label)
+							temp_Child_label = Discart_lable(channel.Label)
+						}
+					}
 				}
-				set_channels_request.BaseChannelLabel = temp_base_channel_label
 
-				if strings.TrimSpace(update_channel_prefix) != "" {
-					temp_Child_label = fmt.Sprintf("%s%s", update_channel_prefix, Discart_lable(channel.Label))
-				} else {
-					temp_Child_label = Discart_lable(channel.Label)
-				}
+				set_channels_request.BaseChannelLabel = temp_base_channel_label
 				set_channels_request.ChildLabels = append(set_channels_request.ChildLabels, temp_Child_label)
+
 			} else {
-				if strings.TrimSpace(update_channel_prefix) != "" {
-					temp_base_channel_label = fmt.Sprintf("%s%s", update_channel_prefix, channel.Parent_channel_label)
-				} else {
-					temp_base_channel_label = channel.Parent_channel_label
-				}
-				set_channels_request.BaseChannelLabel = temp_base_channel_label
+				for _, group := range groupsdata.Assigne_channels {
 
-				if strings.TrimSpace(update_channel_prefix) != "" {
-					temp_Child_label = fmt.Sprintf("%s%s", update_channel_prefix, channel.Label)
-				} else {
-					temp_Child_label = channel.Label
+					if strings.Contains(strings.TrimSpace(group.Assigne_Channel.Current_base_channel),
+						strings.TrimSpace(channel.Parent_channel_label)) {
+						old_base_channel_label = channel.Parent_channel_label
+						if strings.TrimSpace(group.Assigne_Channel.New_base_prefix) != "" {
+							update_channel_prefix = &group.Assigne_Channel.New_base_prefix
+							temp_base_channel_label = fmt.Sprintf("%s%s", *update_channel_prefix, channel.Parent_channel_label)
+							temp_Child_label = fmt.Sprintf("%s%s", *update_channel_prefix, channel.Label)
+						} else {
+							temp_base_channel_label = channel.Parent_channel_label
+							temp_Child_label = channel.Label
+						}
+						set_channels_request.BaseChannelLabel = temp_base_channel_label
+						set_channels_request.ChildLabels = append(set_channels_request.ChildLabels, temp_Child_label)
+					}
 				}
-				set_channels_request.ChildLabels = append(set_channels_request.ChildLabels, temp_Child_label)
 			}
 
 			/* fmt.Printf("Channel ID: %v\n", channel.Id)
@@ -175,7 +186,7 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, update
 				continue
 			}
 
-			fmt.Printf("Assigne %s including child channels for: %s\n",
+			log.Printf("Assigne %s including child channels for: %s\n",
 				set_channels_request.BaseChannelLabel, minion.Minion_Name)
 			buf, err := gorillaxml.EncodeClientRequest("system.scheduleChangeChannels", &set_channels_request)
 			if err != nil {
@@ -198,7 +209,7 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, update
 			if err != nil {
 				log.Fatalf("Decode scheduleChangeChannels Job response body failed: %s\n", err)
 			}
-			fmt.Printf("scheduleChangeChannels JobID: %d\n", reply.JobID)
+			log.Printf("scheduleChangeChannels JobID: %d\n", reply.JobID)
 			var host_info Host_Job_Info
 			host_info.Assigne_Channels_Job.JobID = reply.JobID
 			host_info.Assigne_Channels_Job.JobStatus = "Scheduled"

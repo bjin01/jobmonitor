@@ -42,9 +42,10 @@ type ListPendingJobs struct {
 }
 
 type ListJobs struct {
-	Completed ListCompletedJobs
-	Failed    ListFailedJobs
-	Pending   ListPendingJobs
+	Completed          ListCompletedJobs
+	Failed             ListFailedJobs
+	Pending            ListPendingJobs
+	Found_Pending_Jobs bool
 }
 
 type Job struct {

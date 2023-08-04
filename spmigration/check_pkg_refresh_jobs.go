@@ -14,22 +14,23 @@ func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey)
 
 	for time.Now().Before(deadline) {
 		var l schedules.ListJobs
+		l.Found_Pending_Jobs = false
 		l.GetCompletedJobs(sessionkey)
 		l.GetFailedJobs(sessionkey)
 		l.GetPendingjobs(sessionkey)
 		time.Sleep(10 * time.Second)
 		t.Find_Pkg_Refresh_Jobs(&l)
 
-		if len(l.Pending.Result) == 0 {
+		if l.Found_Pending_Jobs == false {
 			log.Printf("No more pending pkg refresh job. Exit job check.\n")
 			deadline = time.Now()
-			break
+			//break
 		}
 
 		log.Printf("Package refresh Job check 20 seconds. Deadline is %+v\n", deadline)
 		for _, Minion := range t.Minion_List {
-			log.Printf("Package refresh Job Status: %s %s\n", Minion.Host_Job_Info.Pkg_Refresh_Job.JobStatus,
-				Minion.Minion_Name)
+			log.Printf("Package refresh Job Status: %s %s %s\n", Minion.Migration_Stage,
+				Minion.Migration_Stage_Status, Minion.Minion_Name)
 
 		}
 		time.Sleep(10 * time.Second)
@@ -42,11 +43,11 @@ func (t *Target_Minions) Find_Pkg_Refresh_Jobs(alljobs *schedules.ListJobs) {
 	for m, Minion := range t.Minion_List {
 		for _, p := range alljobs.Pending.Result {
 			if p.Id == Minion.Host_Job_Info.Pkg_Refresh_Job.JobID {
+				alljobs.Found_Pending_Jobs = true
 				//fmt.Printf("Pkg Refresh Pending Job ID: %d\n", p.Id)
 				t.Minion_List[m].Host_Job_Info.Pkg_Refresh_Job.JobStatus = "Pending"
 				t.Minion_List[m].Migration_Stage = "Pkg_Refresh"
 				t.Minion_List[m].Migration_Stage_Status = "Pending"
-
 			}
 		}
 
@@ -66,7 +67,6 @@ func (t *Target_Minions) Find_Pkg_Refresh_Jobs(alljobs *schedules.ListJobs) {
 				t.Minion_List[m].Host_Job_Info.Pkg_Refresh_Job.JobStatus = "Failed"
 				t.Minion_List[m].Migration_Stage = "Pkg_Refresh"
 				t.Minion_List[m].Migration_Stage_Status = "Failed"
-
 			}
 		}
 	}

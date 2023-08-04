@@ -146,7 +146,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 			log.Fatalf("Encoding error: %s\n", err)
 		}
 
-		fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
 			log.Fatalf("Get Minions from Group API error: %s\n", err)
@@ -154,7 +154,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalf("ReadAll error: %s\n", err)
+			log.Printf("ReadAll error: %s\n", err)
 		}
 		//fmt.Printf("responseBody: %s\n", responseBody)
 
@@ -176,10 +176,16 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 
 				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				if Contains(active_minion_ids, minion_data.Minion_ID) {
-
-					m.Minion_List = append(m.Minion_List, minion_data)
+					ident, target_migration_base_channel := Find_MigrationTarget(sessionkey, minion_data.Minion_ID, groupsdata)
+					if ident != "" && target_migration_base_channel != "" {
+						m.Minion_List = append(m.Minion_List, minion_data)
+						log.Printf("Minion %s has a valid migration target %s\n",
+							minion_data.Minion_Name, target_migration_base_channel)
+					} else {
+						log.Printf("Minion %s has not a valid migration target\n", minion_data.Minion_Name)
+					}
 				} else {
-					fmt.Printf("Minion %s is not active in group %s\n", minion_data.Minion_Name, group)
+					log.Printf("%s is not active in group %s\n", minion_data.Minion_Name, group)
 				}
 			}
 		}
@@ -200,24 +206,24 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Get_Minions(sessionkey, groupsdata)
 	//target_minions.Show_Minions()
 
-	target_minions.Assign_Channels(sessionkey, groupsdata.Update_Channel_Prefix)
+	target_minions.Assign_Channels(sessionkey, groupsdata)
 	target_minions.Check_Assigne_Channels_Jobs(sessionkey) // deadline 15min
 	//target_minions.Schedule_Pkg_refresh(sessionkey)        // pkg refresh
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
-	JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
+	/* JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
 	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update)
-	target_minions.Pre_Migration_Reboot(sessionkey)
+	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey)
 	target_minions.Schedule_Pkg_refresh(sessionkey) // pkg refresh
 	target_minions.Check_Pkg_Refresh_Jobs(sessionkey)
 	target_minions.ListMigrationTarget(sessionkey, groupsdata)
-	target_minions.Schedule_Migration_DryRun(sessionkey, groupsdata)
-	/*target_minions.Check_SP_Migration_DryRun()
-	target_minions.SP_Migration()
-	target_minions.Check_SP_Migration()
-	target_minions.Post_Migration_Reboot()
-	target_minions.Check_Post_Migration_Reboot_Jobs()
-	*/
+	target_minions.Schedule_Migration(sessionkey, groupsdata, true)
+	target_minions.Check_SP_Migration(sessionkey, true)
+	target_minions.Schedule_Migration(sessionkey, groupsdata, false)
+	target_minions.Check_SP_Migration(sessionkey, false)
+	target_minions.Schedule_Reboot(sessionkey)
+	target_minions.Check_Reboot_Jobs(sessionkey) */
+
 	/* target_minions.Make_Reports() */
 
 }

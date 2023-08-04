@@ -14,16 +14,17 @@ func (t *Target_Minions) Check_Assigne_Channels_Jobs(sessionkey *auth.SumaSessio
 
 	for time.Now().Before(deadline) {
 		var l schedules.ListJobs
+		l.Found_Pending_Jobs = false
 		l.GetCompletedJobs(sessionkey)
 		l.GetFailedJobs(sessionkey)
 		l.GetPendingjobs(sessionkey)
 		time.Sleep(10 * time.Second)
 		t.Find_Assigne_Channels_Jobs(&l)
 
-		if len(l.Pending.Result) == 0 {
+		if l.Found_Pending_Jobs == false {
 			log.Printf("No more pending assign channels job. Exit job check.\n")
 			deadline = time.Now()
-			break
+			//break
 		}
 		log.Printf("Assign Channels Job check 20 seconds. Deadline is %+v\n", deadline)
 		for _, Minion := range t.Minion_List {
@@ -42,6 +43,7 @@ func (t *Target_Minions) Find_Assigne_Channels_Jobs(alljobs *schedules.ListJobs)
 
 		for _, p := range alljobs.Pending.Result {
 			if p.Id == Minion.Host_Job_Info.Assigne_Channels_Job.JobID {
+				alljobs.Found_Pending_Jobs = true
 				//fmt.Printf("Pending Job ID: %d\n", p.Id)
 				t.Minion_List[m].Host_Job_Info.Assigne_Channels_Job.JobStatus = "Pending"
 				t.Minion_List[m].Migration_Stage = "Assign_Channels"

@@ -51,7 +51,7 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 		current_ListSystemInJobs_status.List_Completed_Systems(sessionkey, jobid_pkg_update)
 
 		if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) > 0 {
-			fmt.Printf("Update Pkg bundle job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
+			log.Printf("Update Pkg bundle job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
 				current_ListSystemInJobs_status.ListInProgressSystems)
 			for i, minion := range t.Minion_List {
 				for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {

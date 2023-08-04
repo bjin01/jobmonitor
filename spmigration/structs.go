@@ -3,20 +3,27 @@ package spmigration
 import "time"
 
 type Migration_Groups struct {
-	Groups                []string `json:"groups"`
-	Delay                 int      `json:"delay"`
-	Timeout               int      `json:"timeout"`
-	GatherJobTimeout      int      `json:"gather_job_timeout"`
-	Logfile               string   `json:"logfile"`
-	JobcheckerTimeout     int      `json:"jobchecker_timeout"`
-	JobcheckerEmails      []string `json:"jobchecker_emails"`
-	T7User                string   `json:"t7user"`
-	Token                 string   `json:"authentication_token"`
-	Update_Channel_Prefix string   `json:"update_channel_prefix"`
-	//Target_base_channel   string           `json:"target_base_channel"`
+	Groups            []string `json:"groups"`
+	Delay             int      `json:"delay"`
+	Timeout           int      `json:"timeout"`
+	GatherJobTimeout  int      `json:"gather_job_timeout"`
+	Logfile           string   `json:"logfile"`
+	JobcheckerTimeout int      `json:"jobchecker_timeout"`
+	JobcheckerEmails  []string `json:"jobchecker_emails"`
+	T7User            string   `json:"t7user"`
+	Token             string   `json:"authentication_token"`
+	Assigne_channels  []struct {
+		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
+	} `json:"assigne_channels"`
+
 	Target_Products []struct {
 		Product Target_Product `json:"product"`
 	} `json:"products"`
+}
+
+type Assigne_Channel struct {
+	Current_base_channel string `xmlrpc:"current_base_channel"`
+	New_base_prefix      string `xmlrpc:"new_base_prefix"`
 }
 
 type Target_Product struct {
