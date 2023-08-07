@@ -8,7 +8,7 @@ import (
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dryrun bool) {
+func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dryrun bool, health *bool) {
 	deadline := time.Now().Add(time.Duration(10) * time.Minute)
 	if dryrun == true {
 		log.Printf("Dryrun mode. SP Migration DryRun Jobs will be monitored.\n")
@@ -22,10 +22,18 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 
 	for time.Now().Before(deadline) {
 		var l schedules.ListJobs
+
+		if *health == false {
+			log.Printf("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
+			time.Sleep(125 * time.Second)
+			continue
+		}
+
 		l.Found_Pending_Jobs = false
+		l.GetPendingjobs(sessionkey)
 		l.GetCompletedJobs(sessionkey)
 		l.GetFailedJobs(sessionkey)
-		l.GetPendingjobs(sessionkey)
+
 		time.Sleep(10 * time.Second)
 		t.Find_SPMigration_Jobs(&l, dryrun)
 
@@ -57,6 +65,7 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 
 		}
 		time.Sleep(10 * time.Second)
+		t.Write_Tracking_file()
 	}
 	if dryrun == true {
 		log.Printf("Spmigration dryrun Job check deadline reached. %+v\n", deadline)

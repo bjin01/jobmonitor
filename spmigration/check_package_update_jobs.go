@@ -39,11 +39,18 @@ type ListSystemInJobs_Request struct {
 	ActionId   int    `xmlrpc:"actionId"`
 }
 
-func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int) {
+func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, health *bool) {
 	current_ListSystemInJobs_status := new(ListSystemInJobs)
+
 	deadline := time.Now().Add(time.Duration(20) * time.Minute)
 
 	for time.Now().Before(deadline) {
+		if *health == false {
+			log.Printf("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
+			time.Sleep(125 * time.Second)
+			continue
+		}
+
 		log.Printf("Package Update Job loop check 20 seconds. Deadline is %+v\n", deadline)
 		time.Sleep(10 * time.Second)
 		current_ListSystemInJobs_status.List_InProgress_Systems(sessionkey, jobid_pkg_update)
@@ -100,6 +107,7 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 			}
 		}
 		time.Sleep(10 * time.Second)
+		t.Write_Tracking_file()
 	}
 	log.Printf("Package refresh Job check deadline reached. %+v\n", deadline)
 	return

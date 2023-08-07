@@ -115,8 +115,31 @@ func main() {
 		c.String(http.StatusOK, fmt.Sprintf("System (%s) delete request is sent to SUSE Manager.", deleteSystemRequestObj.MinionName))
 	})
 
+	r.GET("/query_spmigration", func(c *gin.Context) {
+		filename := c.Query("filename")
+		if filename == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing 'filename' parameter"})
+			return
+		}
+
+		data, err := readJSONFile(filename)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, data.MinionList)
+	})
+
 	r.POST("/spmigration", func(c *gin.Context) {
 		var spmigrationRequestObj spmigration.Migration_Groups
+
+		if *health == false {
+			c.String(200, "SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
+			log.Printf("SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
+			return
+		}
+
 		if err := c.ShouldBindJSON(&spmigrationRequestObj); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
@@ -126,9 +149,9 @@ func main() {
 			return
 		}
 
-		fmt.Printf("spmigrationRequestObj %+v\n", spmigrationRequestObj)
+		//fmt.Printf("spmigrationRequestObj %+v\n", spmigrationRequestObj)
 
-		go groups_lookup(SUMAConfig, &spmigrationRequestObj)
+		go groups_lookup(SUMAConfig, &spmigrationRequestObj, health)
 		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for SP Migration through SUSE Manager.", spmigrationRequestObj.Groups))
 		//log.Printf("request data %v for SP Migration through SUSE Manager.\n", spmigrationRequestObj)
 

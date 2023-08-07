@@ -8,16 +8,23 @@ import (
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-func (t *Target_Minions) Check_Assigne_Channels_Jobs(sessionkey *auth.SumaSessionKey) {
+func (t *Target_Minions) Check_Assigne_Channels_Jobs(sessionkey *auth.SumaSessionKey, health *bool) {
 
 	deadline := time.Now().Add(time.Duration(2) * time.Minute)
 
 	for time.Now().Before(deadline) {
+		if *health == false {
+			log.Printf("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
+			time.Sleep(125 * time.Second)
+			continue
+		}
+
 		var l schedules.ListJobs
 		l.Found_Pending_Jobs = false
+		l.GetPendingjobs(sessionkey)
 		l.GetCompletedJobs(sessionkey)
 		l.GetFailedJobs(sessionkey)
-		l.GetPendingjobs(sessionkey)
+
 		time.Sleep(10 * time.Second)
 		t.Find_Assigne_Channels_Jobs(&l)
 
@@ -33,6 +40,7 @@ func (t *Target_Minions) Check_Assigne_Channels_Jobs(sessionkey *auth.SumaSessio
 
 		}
 		time.Sleep(10 * time.Second)
+		t.Write_Tracking_file()
 	}
 	log.Printf("Assign Channels Job check deadline reached. %+v\n", deadline)
 	return

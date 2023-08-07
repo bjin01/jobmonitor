@@ -111,4 +111,5 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 			continue
 		}
 	}
+	t.Write_Tracking_file()
 }

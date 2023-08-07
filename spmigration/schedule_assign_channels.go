@@ -224,6 +224,7 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 			log.Printf("System is already on original channels. %s\n", minion.Minion_Name)
 		}
 	}
+	t.Write_Tracking_file()
 
 }
 

@@ -60,6 +60,7 @@ func (t *Target_Minions) Schedule_Package_Updates(sessionkey *auth.SumaSessionKe
 		fmt.Printf("minion %s has job %d with status %s\n", minion.Minion_Name,
 			minion.Host_Job_Info.Update_Pkg_Job.JobID, minion.Host_Job_Info.Update_Pkg_Job.JobStatus)
 	}
+	t.Write_Tracking_file()
 	if JobID_Pkg_Update > 0 {
 		return JobID_Pkg_Update
 	} else {

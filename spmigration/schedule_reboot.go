@@ -84,4 +84,5 @@ func (t *Target_Minions) Schedule_Reboot(sessionkey *auth.SumaSessionKey) {
 			}
 		}
 	}
+	t.Write_Tracking_file()
 }

@@ -8,22 +8,37 @@ import (
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey) {
+func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey, health *bool) {
 
-	deadline := time.Now().Add(time.Duration(10) * time.Minute)
+	deadline := time.Now().Add(time.Duration(15) * time.Minute)
+	extended_deadline_counter := 0
 
 	for time.Now().Before(deadline) {
 		var l schedules.ListJobs
+		if *health == false {
+			log.Printf("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
+			time.Sleep(125 * time.Second)
+			continue
+		}
+
 		l.Found_Pending_Jobs = false
+		l.GetPendingjobs(sessionkey)
 		l.GetCompletedJobs(sessionkey)
 		l.GetFailedJobs(sessionkey)
-		l.GetPendingjobs(sessionkey)
+
 		time.Sleep(10 * time.Second)
 		t.Find_Pkg_Refresh_Jobs(&l)
 
 		if l.Found_Pending_Jobs == false {
 			log.Printf("No more pending pkg refresh job. Exit job check.\n")
-			deadline = time.Now()
+
+			if extended_deadline_counter == 0 {
+				deadline = time.Now().Add(time.Duration(40) * time.Second)
+				extended_deadline_counter++
+				continue
+			} else {
+				deadline = time.Now()
+			}
 			//break
 		}
 
@@ -34,6 +49,7 @@ func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey)
 
 		}
 		time.Sleep(10 * time.Second)
+		t.Write_Tracking_file()
 	}
 	log.Printf("Package refresh Job check deadline reached. %+v\n", deadline)
 	return

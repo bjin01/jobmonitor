@@ -72,3 +72,38 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 		}
 	}
 }
+
+func api_request_pkg_refresh(sessionkey *auth.SumaSessionKey, sid int) (int, error) {
+	method := "system.schedulePackageRefresh"
+
+	schedule_pkg_refresh_request := Schedule_Pkg_Refresh_Request{
+		Sessionkey:         sessionkey.Sessionkey,
+		Sid:                sid,
+		EarliestOccurrence: time.Now(),
+	}
+
+	buf, err := gorillaxml.EncodeClientRequest(method, &schedule_pkg_refresh_request)
+	if err != nil {
+		return 0, fmt.Errorf("Encoding error: %s\n", err)
+	}
+	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	resp, err := request.MakeRequest(buf)
+	if err != nil {
+		return 0, fmt.Errorf("Encoding error: %s\n", err)
+	}
+	//fmt.Printf("buffer: %s\n", string(buf))
+	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+
+	/* responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("ReadAll error: %s\n", err)
+	}
+	fmt.Printf("responseBody: %s\n", responseBody) */
+	reply := new(Schedule_Pkg_Refresh_Response)
+	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
+	if err != nil {
+		return 0, fmt.Errorf("Decode Pkg Refresh Job response body failed: %s\n", err)
+	}
+	log.Printf("Package refresh JobID: %d\n", reply.JobID)
+	return reply.JobID, nil
+}

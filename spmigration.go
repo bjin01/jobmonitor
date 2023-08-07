@@ -9,7 +9,7 @@ import (
 	"github.com/bjin01/jobmonitor/spmigration"
 )
 
-func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups) {
+func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups, health *bool) {
 
 	//fmt.Printf("SP Migration input data %v\n", groupsdata)
 	var sumaconf Sumaconf
@@ -34,7 +34,7 @@ func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Gro
 	if err != nil {
 		log.Fatal(err)
 	}
-	spmigration.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost))
+	spmigration.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost), health)
 	//fmt.Printf("target_minions: %v\n", target_minions)
 	//fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
 }

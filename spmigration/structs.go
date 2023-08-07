@@ -3,16 +3,17 @@ package spmigration
 import "time"
 
 type Migration_Groups struct {
-	Groups            []string `json:"groups"`
-	Delay             int      `json:"delay"`
-	Timeout           int      `json:"timeout"`
-	GatherJobTimeout  int      `json:"gather_job_timeout"`
-	Logfile           string   `json:"logfile"`
-	JobcheckerTimeout int      `json:"jobchecker_timeout"`
-	JobcheckerEmails  []string `json:"jobchecker_emails"`
-	T7User            string   `json:"t7user"`
-	Token             string   `json:"authentication_token"`
-	Assigne_channels  []struct {
+	Groups                  []string `json:"groups"`
+	Delay                   int      `json:"delay"`
+	Timeout                 int      `json:"timeout"`
+	GatherJobTimeout        int      `json:"gather_job_timeout"`
+	Logfile                 string   `json:"logfile"`
+	JobcheckerTimeout       int      `json:"jobchecker_timeout"`
+	JobcheckerEmails        []string `json:"jobchecker_emails"`
+	T7User                  string   `json:"t7user"`
+	Token                   string   `json:"authentication_token"`
+	Tracking_file_directory string   `json:"tracking_file_directory"`
+	Assigne_channels        []struct {
 		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
 	} `json:"assigne_channels"`
 

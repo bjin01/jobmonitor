@@ -1,11 +1,14 @@
 package spmigration
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -14,7 +17,9 @@ import (
 )
 
 type Target_Minions struct {
-	Minion_List []Minion_Data
+	Minion_List        []Minion_Data
+	Tracking_file_name string
+	Suma_Group         string
 }
 
 type Minion_Data struct {
@@ -201,29 +206,87 @@ func (s *Target_Minions) Show_Minions() {
 	}
 }
 
-func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, sumahost string) {
+func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, sumahost string, health *bool) {
 	var target_minions Target_Minions
-	target_minions.Get_Minions(sessionkey, groupsdata)
-	//target_minions.Show_Minions()
+	if groupsdata.Tracking_file_directory != "" {
+		// create tracking file directory
+		if _, err := os.Stat(groupsdata.Tracking_file_directory); os.IsNotExist(err) {
+			os.Mkdir(groupsdata.Tracking_file_directory, 0755)
+		}
+		file_dir := strings.TrimSuffix(groupsdata.Tracking_file_directory, "/")
+		if groupsdata.T7User != "" {
+			target_minions.Tracking_file_name = fmt.Sprintf("%s/spmigration_%s_%s.yaml",
+				file_dir, groupsdata.T7User, time.Now().Format("20060102150405"))
+		} else {
+			target_minions.Tracking_file_name = fmt.Sprintf("%s/spmigration_%s.yaml", file_dir,
+				time.Now().Format("20060102150405"))
+		}
+		// create tracking file
 
+		if _, err := os.Stat(target_minions.Tracking_file_name); os.IsNotExist(err) {
+			file, err := os.Create(target_minions.Tracking_file_name)
+			if err != nil {
+				log.Fatalf("Error creating tracking file: %s\n", err)
+			}
+
+			defer file.Close()
+		}
+	} else {
+		target_minions.Tracking_file_name = "/var/log/spmigration.yaml"
+	}
+	log.Printf("Tracking file: %s\n", target_minions.Tracking_file_name)
+
+	target_minions.Get_Minions(sessionkey, groupsdata)
+	target_minions.SPMigration_Group(sessionkey, groupsdata)
+	//target_minions.Show_Minions()
+	target_minions.Write_Tracking_file()
 	target_minions.Assign_Channels(sessionkey, groupsdata)
-	target_minions.Check_Assigne_Channels_Jobs(sessionkey) // deadline 15min
+	target_minions.Check_Assigne_Channels_Jobs(sessionkey, health) // deadline 15min
 	//target_minions.Schedule_Pkg_refresh(sessionkey)        // pkg refresh
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
-	/* JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
-	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update)
+	JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
+	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update, health)
 	target_minions.Schedule_Reboot(sessionkey)
-	target_minions.Check_Reboot_Jobs(sessionkey)
-	target_minions.Schedule_Pkg_refresh(sessionkey) // pkg refresh
-	target_minions.Check_Pkg_Refresh_Jobs(sessionkey)
+	target_minions.Check_Reboot_Jobs(sessionkey, health)
+	target_minions.Schedule_Pkg_refresh(sessionkey)           // pkg refresh
+	target_minions.Check_Pkg_Refresh_Jobs(sessionkey, health) // deadline 15min
 	target_minions.ListMigrationTarget(sessionkey, groupsdata)
 	target_minions.Schedule_Migration(sessionkey, groupsdata, true)
-	target_minions.Check_SP_Migration(sessionkey, true)
+	target_minions.Check_SP_Migration(sessionkey, true, health)
 	target_minions.Schedule_Migration(sessionkey, groupsdata, false)
-	target_minions.Check_SP_Migration(sessionkey, false)
+	target_minions.Check_SP_Migration(sessionkey, false, health)
 	target_minions.Schedule_Reboot(sessionkey)
-	target_minions.Check_Reboot_Jobs(sessionkey) */
+	target_minions.Check_Reboot_Jobs(sessionkey, health)
+	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)
 
 	/* target_minions.Make_Reports() */
 
+}
+
+func (t *Target_Minions) Write_Tracking_file() {
+	// create tracking file exists
+	if _, err := os.Stat(t.Tracking_file_name); os.IsNotExist(err) {
+		file, err := os.Create(t.Tracking_file_name)
+		if err != nil {
+			log.Fatalf("Error creating tracking file: %s\n", err)
+		}
+		defer file.Close()
+	}
+	// write tracking file, no append, only write
+
+	file, err := os.OpenFile(t.Tracking_file_name, os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("Error opening tracking file: %s\n", err)
+	}
+
+	// write t struct as json into file
+	json, err := json.MarshalIndent(t, "", "   ")
+	if err != nil {
+		log.Fatalf("Error marshalling tracking file: %s\n", err)
+	}
+	if _, err := file.Write(json); err != nil {
+		log.Fatalf("Error writing tracking file: %s\n", err)
+	}
+
+	defer file.Close()
 }

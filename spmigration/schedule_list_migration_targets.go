@@ -46,10 +46,11 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 	//allchannels := List_All_Channels(sessionkey)
 
 	for i, minion := range t.Minion_List {
-		if minion.Migration_Stage_Status == "Completed" && minion.Migration_Stage == "Pkg_Refresh" {
-			fmt.Printf("Minion %s is ready for spmigration dryrun.\n", minion.Minion_Name)
+		if minion.Migration_Stage_Status == "Completed" &&
+			(minion.Migration_Stage == "Pkg_Refresh" || minion.Migration_Stage == "Reboot") {
+			log.Printf("Minion %s is ready for spmigration dryrun.\n", minion.Minion_Name)
 		} else {
-			fmt.Printf("Minion %s is not ready for spmigration dryrun, previous step <Pkg_Refresh> not successful or finished.\n", minion.Minion_Name)
+			log.Printf("Minion %s is not ready for spmigration dryrun, previous step <Pkg_Refresh> not successful or finished.\n", minion.Minion_Name)
 			continue
 		}
 		//t.Minion_List[i].Target_base_channel = UserData.Target_base_channel
