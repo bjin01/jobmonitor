@@ -126,8 +126,8 @@ func (t *Target_Minions) Create_SPMigration_Group(sessionkey *auth.SumaSessionKe
 	method := "systemgroup.create"
 	params := Create_SPMigration_Group_Request{
 		Sessionkey:  sessionkey.Sessionkey,
-		Name:        fmt.Sprintf("SPMigration_%s_%s", UserData.T7User, time.Now().Format("20060102150405")),
-		Description: fmt.Sprintf("SPMigration_%s_%s", UserData.T7User, time.Now().Format("20060102150405")),
+		Name:        t.Suma_Group,
+		Description: t.Suma_Group,
 	}
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
@@ -152,6 +152,6 @@ func (t *Target_Minions) Create_SPMigration_Group(sessionkey *auth.SumaSessionKe
 	if err != nil {
 		log.Fatalf("Decode Create_SPMigration_Group_Response response body failed: %s\n", err)
 	}
-	t.Suma_Group = reply.Server_group.Name
-	log.Printf("SPMigration group %s created\n", t.Suma_Group)
+
+	log.Printf("SPMigration group %s created\n", reply.Server_group.Name)
 }

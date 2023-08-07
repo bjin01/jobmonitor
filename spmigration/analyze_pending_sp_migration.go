@@ -25,6 +25,9 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 		if minion.Migration_Stage == "Reboot" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
+		if minion.Migration_Stage == "Reboot" && minion.Migration_Stage_Status == "Failed" {
+			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
+		}
 	}
 	analyze_target_minions.Write_Tracking_file()
 	log.Printf("Execute analyze pending sp migration for %d minions\n", len(analyze_target_minions.Minion_List))

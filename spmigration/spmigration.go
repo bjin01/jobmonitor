@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/request"
 	gorillaxml "github.com/divan/gorilla-xmlrpc/xml"
 )
@@ -206,8 +207,11 @@ func (s *Target_Minions) Show_Minions() {
 	}
 }
 
-func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, sumahost string, health *bool) {
+func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, sumahost string, email_template_dir string, health *bool) {
 	var target_minions Target_Minions
+	emails := new(email.SPMigration_Email_Body)
+	emails.Recipients = groupsdata.JobcheckerEmails
+
 	if groupsdata.Tracking_file_directory != "" {
 		// create tracking file directory
 		if _, err := os.Stat(groupsdata.Tracking_file_directory); os.IsNotExist(err) {
@@ -215,11 +219,13 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 		}
 		file_dir := strings.TrimSuffix(groupsdata.Tracking_file_directory, "/")
 		if groupsdata.T7User != "" {
-			target_minions.Tracking_file_name = fmt.Sprintf("%s/spmigration_%s_%s.yaml",
-				file_dir, groupsdata.T7User, time.Now().Format("20060102150405"))
+			target_minions.Suma_Group = fmt.Sprintf("spmigration_%s_%s", groupsdata.T7User, time.Now().Format("20060102150405"))
+			target_minions.Tracking_file_name = fmt.Sprintf("%s/%s.yaml", file_dir, target_minions.Suma_Group)
+
+			emails.T7user = groupsdata.T7User
 		} else {
-			target_minions.Tracking_file_name = fmt.Sprintf("%s/spmigration_%s.yaml", file_dir,
-				time.Now().Format("20060102150405"))
+			target_minions.Suma_Group = fmt.Sprintf("spmigration_%s", time.Now().Format("20060102150405"))
+			target_minions.Tracking_file_name = fmt.Sprintf("%s/%s.yaml", file_dir, target_minions.Suma_Group)
 		}
 		// create tracking file
 
@@ -240,7 +246,10 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.SPMigration_Group(sessionkey, groupsdata)
 	//target_minions.Show_Minions()
 	target_minions.Write_Tracking_file()
+	emails.SPmigration_Tracking_File = target_minions.Tracking_file_name
+	emails.Template_dir = email_template_dir
 	target_minions.Assign_Channels(sessionkey, groupsdata)
+	emails.Send_SPmigration_Email()
 	target_minions.Check_Assigne_Channels_Jobs(sessionkey, health) // deadline 15min
 	//target_minions.Schedule_Pkg_refresh(sessionkey)        // pkg refresh
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
@@ -280,7 +289,11 @@ func (t *Target_Minions) Write_Tracking_file() {
 	}
 
 	// write t struct as json into file
-	json, err := json.MarshalIndent(t, "", "   ")
+	/* json, err := json.MarshalIndent(t, "", "   ")
+	if err != nil {
+		log.Fatalf("Error marshalling tracking file: %s\n", err)
+	} */
+	json, err := json.Marshal(t)
 	if err != nil {
 		log.Fatalf("Error marshalling tracking file: %s\n", err)
 	}

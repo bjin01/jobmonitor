@@ -1,15 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/request"
 	"github.com/bjin01/jobmonitor/spmigration"
 )
 
-func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups, health *bool) {
+func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups, email_template_dir *email.Templates_Dir, health *bool) {
 
 	//fmt.Printf("SP Migration input data %v\n", groupsdata)
 	var sumaconf Sumaconf
@@ -34,7 +36,8 @@ func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Gro
 	if err != nil {
 		log.Fatal(err)
 	}
-	spmigration.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost), health)
+	email_template_directory_string := fmt.Sprintf("%s", email_template_dir.Dir)
+	spmigration.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost), email_template_directory_string, health)
 	//fmt.Printf("target_minions: %v\n", target_minions)
 	//fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
 }

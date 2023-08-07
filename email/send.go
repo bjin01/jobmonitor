@@ -10,16 +10,7 @@ import (
 	"text/template"
 
 	"github.com/bjin01/jobmonitor/schedules"
-	"github.com/bjin01/jobmonitor/spmigration"
 )
-
-type SPMigration_Email_Body struct {
-	Host                      string
-	Port                      int
-	T7user                    string
-	SPmigration_Tracking_File string
-	Target_Minions            []spmigration.Target_Minions
-}
 
 func Sendit(result *schedules.Jobstatus, templates_dir *Templates_Dir) {
 	auth = smtp.PlainAuth("", "", "", "127.0.0.1")
@@ -39,24 +30,21 @@ func Sendit(result *schedules.Jobstatus, templates_dir *Templates_Dir) {
 
 }
 
-func Send_SPmigration_Email(result *spmigration.Target_Minions, UserData *spmigration.Migration_Groups, templates_dir *Templates_Dir) {
+func (s *SPMigration_Email_Body) Send_SPmigration_Email() {
 	auth = smtp.PlainAuth("", "", "", "127.0.0.1")
 
-	r := NewRequest(UserData.JobcheckerEmails, "SPMigration Notification", "")
+	r := NewRequest(s.Recipients, "SPMigration Notification", "")
 	hostname, err := get_hostname_fqdn()
 	if err != nil {
 		log.Default().Println(err.Error())
 	}
-	email_body := SPMigration_Email_Body{
-		Host:                      hostname,
-		Port:                      12345,
-		T7user:                    UserData.T7User,
-		SPmigration_Tracking_File: result.Tracking_file_name,
-		Target_Minions:            []spmigration.Target_Minions{*result},
-	}
+
+	s.Host = hostname
+	s.Port = 12345
+
 	//err := r.ParseTemplate("template.html", result)
-	template_file := fmt.Sprintf("%s/template_spmigration.html", templates_dir.Dir)
-	if err := r.ParseTemplate(template_file, email_body); err == nil {
+	template_file := fmt.Sprintf("%s/template_spmigration.html", s.Template_dir)
+	if err := r.ParseTemplate(template_file, s); err == nil {
 		ok, err1 := r.SendEmail()
 		if err1 != nil {
 			log.Default().Println(err1.Error())
