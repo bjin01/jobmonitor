@@ -288,6 +288,8 @@ func (t *Target_Minions) Write_Tracking_file() {
 		log.Fatalf("Error opening tracking file: %s\n", err)
 	}
 
+	err = file.Truncate(0)
+	_, err = file.Seek(0, 0)
 	// write t struct as json into file
 	/* json, err := json.MarshalIndent(t, "", "   ")
 	if err != nil {
