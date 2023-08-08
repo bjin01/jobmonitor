@@ -8,6 +8,9 @@ type Migration_Groups struct {
 	Timeout                 int      `json:"timeout"`
 	GatherJobTimeout        int      `json:"gather_job_timeout"`
 	Logfile                 string   `json:"logfile"`
+	SaltMaster_Address      string   `json:"salt_master_address"`
+	SaltUser                string   `json:"salt_user"`
+	SaltPassword            string   `json:"salt_password"`
 	JobcheckerTimeout       int      `json:"jobchecker_timeout"`
 	JobcheckerEmails        []string `json:"jobchecker_emails"`
 	T7User                  string   `json:"t7user"`

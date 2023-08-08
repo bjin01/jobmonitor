@@ -13,6 +13,7 @@ import (
 
 	"github.com/bjin01/jobmonitor/delete_systems"
 	"github.com/bjin01/jobmonitor/email"
+	"github.com/bjin01/jobmonitor/saltapi"
 	"github.com/bjin01/jobmonitor/schedules"
 	"github.com/bjin01/jobmonitor/spmigration"
 	"github.com/gin-gonic/gin"
@@ -129,6 +130,21 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, data.MinionList)
+	})
+
+	r.POST("/salt", func(c *gin.Context) {
+		var saltdata saltapi.Salt_Data
+		if err := c.ShouldBindJSON(&saltdata); err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+		}
+		fmt.Printf("saltdata: %v\n", saltdata)
+		saltdata.Login()
+		if saltdata.Token != "" {
+			c.JSON(http.StatusOK, gin.H{"token is": saltdata.Token})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"error": "Authentication failed"})
+		}
+
 	})
 
 	r.POST("/spmigration", func(c *gin.Context) {
