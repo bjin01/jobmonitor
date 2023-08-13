@@ -139,8 +139,10 @@ func main() {
 		}
 		fmt.Printf("saltdata: %v\n", saltdata)
 		saltdata.Login()
+		saltdata.Run()
 		if saltdata.Token != "" {
-			c.JSON(http.StatusOK, gin.H{"token is": saltdata.Token})
+			c.Data(http.StatusOK, "application/json; charset=utf-8", saltdata.Return)
+
 		} else {
 			c.JSON(http.StatusOK, gin.H{"error": "Authentication failed"})
 		}
