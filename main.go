@@ -154,7 +154,7 @@ func main() {
 		if err := c.ShouldBindJSON(&saltdata); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
-		fmt.Printf("SaltJob_Data: %v\n", saltdata.Jid)
+		//fmt.Printf("SaltJob_Data: %v\n", saltdata.Jid)
 		saltdata.Login()
 		saltdata.Query_Jid()
 		if saltdata.Token != "" {

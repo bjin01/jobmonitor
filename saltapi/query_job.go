@@ -68,6 +68,25 @@ func (s *Salt_Data) Query_Jid() {
 	for _, job := range saltResponse.Return {
 		fmt.Println("JID:", job.JID)
 		fmt.Println("Function:", job.Function)
+		if job.Function == "grains.get" && string_array_contains(job.Arguments, "btrfs:for_patching") {
+			for hostname, result := range job.Result {
+				fmt.Println("grains.get btrfs:for_patching result:")
+				fmt.Println("Hostname:", hostname)
+				for key, value := range result.(map[string]interface{}) {
+					if key == "return" {
+						fmt.Printf("Return Value: %s", value.(string))
+					}
+				}
+				fmt.Println()
+			}
+			continue
+		}
+
+		if len(job.Result) == 0 {
+			fmt.Println("No result returned")
+			continue
+		}
+
 		fmt.Println("job returns:", job.Result)
 		for hostname, result := range job.Result {
 			fmt.Println("Hostname:", hostname)
@@ -102,13 +121,14 @@ func parse_interface(data interface{}) {
 	case []interface{}:
 		//fmt.Println("is an array:")
 		for i, u := range v {
-			fmt.Printf("%v: ", i)
+			fmt.Printf("array key %v: ", i)
 			parse_interface(u)
 		}
 	case map[string]interface{}:
 		//fmt.Println("is an object:")
 		for i, u := range v {
-			fmt.Printf("%v: ", i)
+			fmt.Printf("map key %v: ", i)
+
 			parse_interface(u)
 		}
 	default:
@@ -116,23 +136,11 @@ func parse_interface(data interface{}) {
 	}
 }
 
-/* type HostnameResults map[string]ResultData
-
-func (hr *HostnameResults) UnmarshalJSON(data []byte) error {
-	var tmp map[string]json.RawMessage
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-
-	*hr = make(HostnameResults)
-	for key, value := range tmp {
-		fmt.Printf("key: %v, value: %v\n", key, value)
-		var result ResultData
-		if err := json.Unmarshal(value, &result); err != nil {
-			return err
+func string_array_contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
 		}
-		(*hr)[key] = result
 	}
-
-	return nil
-} */
+	return false
+}

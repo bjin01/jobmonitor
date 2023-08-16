@@ -44,7 +44,7 @@ func (s *Salt_Data) Login() {
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
-	fmt.Println(PrettyPrint(result.Return[0].Token))
+	//fmt.Println(PrettyPrint(result.Return[0].Token))
 	s.Token = result.Return[0].Token
 }
 
