@@ -149,6 +149,23 @@ func main() {
 
 	})
 
+	r.POST("/saltjob", func(c *gin.Context) {
+		var saltdata saltapi.Salt_Data
+		if err := c.ShouldBindJSON(&saltdata); err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+		}
+		fmt.Printf("SaltJob_Data: %v\n", saltdata.Jid)
+		saltdata.Login()
+		saltdata.Query_Jid()
+		if saltdata.Token != "" {
+			c.Data(http.StatusOK, "application/json; charset=utf-8", saltdata.Return)
+
+		} else {
+			c.JSON(http.StatusOK, gin.H{"error": "Authentication failed"})
+		}
+
+	})
+
 	r.POST("/spmigration", func(c *gin.Context) {
 		var spmigrationRequestObj spmigration.Migration_Groups
 
