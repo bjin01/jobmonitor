@@ -3,20 +3,25 @@ package spmigration
 import "time"
 
 type Migration_Groups struct {
-	Groups                  []string `json:"groups"`
-	Delay                   int      `json:"delay"`
-	Timeout                 int      `json:"timeout"`
-	GatherJobTimeout        int      `json:"gather_job_timeout"`
-	Logfile                 string   `json:"logfile"`
-	SaltMaster_Address      string   `json:"salt_master_address"`
-	SaltUser                string   `json:"salt_user"`
-	SaltPassword            string   `json:"salt_password"`
-	JobcheckerTimeout       int      `json:"jobchecker_timeout"`
-	JobcheckerEmails        []string `json:"jobchecker_emails"`
-	T7User                  string   `json:"t7user"`
-	Token                   string   `json:"authentication_token"`
-	Tracking_file_directory string   `json:"tracking_file_directory"`
-	Assigne_channels        []struct {
+	Groups                      []string `json:"groups"`
+	Delay                       int      `json:"delay"`
+	Timeout                     int      `json:"timeout"`
+	GatherJobTimeout            int      `json:"gather_job_timeout"`
+	Logfile                     string   `json:"logfile"`
+	SaltMaster_Address          string   `json:"salt_master_address"`
+	SaltApi_Port                int      `json:"salt_api_port"`
+	SaltUser                    string   `json:"salt_user"`
+	SaltPassword                string   `json:"salt_password"`
+	Salt_diskspace_grains_key   string   `json:"salt_diskspace_grains_key"`
+	Salt_diskspace_grains_value string   `json:"salt_diskspace_grains_value"`
+	Salt_Prep_State             string   `json:"salt_prep_state"`
+	Salt_Post_State             string   `json:"salt_post_state"`
+	JobcheckerTimeout           int      `json:"jobchecker_timeout"`
+	JobcheckerEmails            []string `json:"jobchecker_emails"`
+	T7User                      string   `json:"t7user"`
+	Token                       string   `json:"authentication_token"`
+	Tracking_file_directory     string   `json:"tracking_file_directory"`
+	Assigne_channels            []struct {
 		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
 	} `json:"assigne_channels"`
 

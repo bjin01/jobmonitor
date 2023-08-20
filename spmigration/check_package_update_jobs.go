@@ -40,6 +40,11 @@ type ListSystemInJobs_Request struct {
 }
 
 func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, health *bool) {
+	if jobid_pkg_update == 0 {
+		log.Printf("No package update job scheduled. Exit check.\n")
+		return
+	}
+
 	current_ListSystemInJobs_status := new(ListSystemInJobs)
 
 	deadline := time.Now().Add(time.Duration(20) * time.Minute)

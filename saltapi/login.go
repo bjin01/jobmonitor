@@ -46,6 +46,7 @@ func (s *Salt_Data) Login() {
 	}
 	//fmt.Println(PrettyPrint(result.Return[0].Token))
 	s.Token = result.Return[0].Token
+	fmt.Println("Salt login successful")
 }
 
 func PrettyPrint(i interface{}) string {

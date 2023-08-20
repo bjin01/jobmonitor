@@ -69,6 +69,11 @@ func (t *Target_Minions) Schedule_Package_Updates(sessionkey *auth.SumaSessionKe
 }
 
 func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey, minion_id_list []int) int {
+	if len(minion_id_list) == 0 {
+		log.Printf("No minions to schedule package update\n")
+		return 0
+	}
+
 	method := "system.schedulePackageUpdate"
 	params := SchedulePackageUpdates_Request{
 		Sessionkey: sessionkey.Sessionkey,

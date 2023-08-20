@@ -9,7 +9,12 @@ import (
 	"strings"
 )
 
-func (s *Salt_Data) Query_Jid() {
+func (s *Salt_Data) Query_Jid() error {
+	if s.Jid == "" {
+		fmt.Printf("Jid is empty\n")
+		s.Return = []byte("Jid is empty")
+		return nil
+	}
 
 	url := fmt.Sprintf("http://%s:%d/jobs/%s", s.SaltMaster, s.SaltApi_Port, s.Jid)
 	method := "GET"
@@ -22,7 +27,7 @@ func (s *Salt_Data) Query_Jid() {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	req.Header.Add("Accept", "application/json")
@@ -32,27 +37,27 @@ func (s *Salt_Data) Query_Jid() {
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
 		fmt.Printf("Error: %v\n", res.Status)
 		s.Return = []byte(fmt.Sprintf("Error: %s, maybe the job is not finished or deleted from job cache already.", res.Status))
-		return
+		return fmt.Errorf("Error: %s, maybe the job is not finished or deleted from job cache already.", res.Status)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	var prettyJSON bytes.Buffer
 	err = json.Indent(&prettyJSON, body, "", "\t")
 	if err != nil {
 		fmt.Println("Error formatting JSON:", err)
-		return
+		return err
 	}
 
 	s.Return = prettyJSON.Bytes()
@@ -62,7 +67,7 @@ func (s *Salt_Data) Query_Jid() {
 	if err := json.Unmarshal(body, &saltResponse); err != nil {
 		fmt.Println("Error decoding JSON:", err)
 
-		return
+		return err
 	}
 
 	for _, job := range saltResponse.Return {
@@ -78,6 +83,31 @@ func (s *Salt_Data) Query_Jid() {
 					}
 				}
 				fmt.Println()
+			}
+			continue
+		}
+
+		if job.Function == "state.apply" {
+			fmt.Println("State.apply result:")
+			fmt.Printf("number of targets: %d, number of results %d\n", len(job.Target), len(job.Result))
+			if len(job.Target) == len(job.Result) {
+				for hostname, result := range job.Result {
+
+					fmt.Println("Hostname:", hostname)
+					value_result := seek_interface_keyval(result, "success", false)
+					fmt.Printf("value_result: %v\n", value_result)
+					//parse_interface(value_result)
+				}
+				fmt.Println("All minions returned")
+			} else {
+				for hostname, result := range job.Result {
+					fmt.Println("Hostname:", hostname)
+					value_result := seek_interface_keyval(result, "success", false)
+					fmt.Printf("value_result: %v\n", value_result)
+
+				}
+				fmt.Println("Still waiting for other minions to return.")
+				return fmt.Errorf("Error: %s, we will retry.", res.Status)
 			}
 			continue
 		}
@@ -107,7 +137,7 @@ func (s *Salt_Data) Query_Jid() {
 		}
 	}
 	//fmt.Println(string(s.Return))
-	return
+	return nil
 }
 
 func parse_interface(data interface{}) {
@@ -134,6 +164,51 @@ func parse_interface(data interface{}) {
 	default:
 		fmt.Println("unknown type!")
 	}
+}
+
+func seek_interface_keyval(data interface{}, key string, found bool) interface{} {
+	switch v := data.(type) {
+	case string:
+
+		if found {
+			fmt.Printf("return %v\n", v)
+			return v
+		}
+	case float64:
+		if found {
+			fmt.Printf("return %v\n", v)
+			return v
+		}
+	case bool:
+		if found {
+			fmt.Printf("return %v\n", v)
+			return v
+		}
+	case []interface{}:
+		//fmt.Println("is an array:")
+		for _, u := range v {
+			parse_interface(u)
+
+		}
+	case map[string]interface{}:
+		//fmt.Println("is an object:")
+		for i, u := range v {
+			if found {
+				fmt.Printf("return %v\n", u)
+				return u
+			}
+
+			if key == i {
+				found = true
+				parse_interface(u)
+				return u
+			}
+		}
+	default:
+		fmt.Println("unknown type!")
+		return nil
+	}
+	return nil
 }
 
 func string_array_contains(elems []string, v string) bool {

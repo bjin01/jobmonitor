@@ -18,9 +18,10 @@ import (
 )
 
 type Target_Minions struct {
-	Minion_List        []Minion_Data
-	Tracking_file_name string
-	Suma_Group         string
+	Minion_List             []Minion_Data
+	Tracking_file_name      string
+	Suma_Group              string
+	Disk_Check_Disqualified []string
 }
 
 type Minion_Data struct {
@@ -137,7 +138,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 	} */
 
 	method := "systemgroup.listSystemsMinimal"
-	active_minion_ids := Get_Active_Minions_in_Group(sessionkey, groupsdata)
+	//active_minion_ids := Get_Active_Minions_in_Group(sessionkey, groupsdata)
 	//fmt.Printf("active_minion_ids: %v\n", active_minion_ids)
 
 	for _, group := range groupsdata.Groups {
@@ -181,7 +182,8 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
 
 				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
-				if Contains(active_minion_ids, minion_data.Minion_ID) {
+				//if Contains(active_minion_ids, minion_data.Minion_ID) {
+				if minion_data.Minion_ID != 0 {
 					ident, target_migration_base_channel := Find_MigrationTarget(sessionkey, minion_data.Minion_ID, groupsdata)
 					if ident != "" && target_migration_base_channel != "" {
 						m.Minion_List = append(m.Minion_List, minion_data)
@@ -194,6 +196,23 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 					log.Printf("%s is not active in group %s\n", minion_data.Minion_Name, group)
 				}
 			}
+			var salt_minion_list []string
+			for _, minion := range m.Minion_List {
+				salt_minion_list = append(salt_minion_list, minion.Minion_Name)
+			}
+			offline_minions := Get_salt_online_Minions_in_Group(sessionkey, salt_minion_list, groupsdata)
+			var newMinionList []Minion_Data // Assuming Minion is the type of elements in Minion_List
+
+			for _, minion := range m.Minion_List {
+				if !string_array_contains(offline_minions, minion.Minion_Name) {
+					newMinionList = append(newMinionList, minion)
+				} else {
+					log.Printf("Minion %s is offline\n", minion.Minion_Name)
+				}
+			}
+
+			m.Minion_List = newMinionList
+
 		}
 
 	}
@@ -243,7 +262,10 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	log.Printf("Tracking file: %s\n", target_minions.Tracking_file_name)
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
+
+	target_minions.Salt_Disk_Space_Check(sessionkey, groupsdata)
 	target_minions.SPMigration_Group(sessionkey, groupsdata)
+	target_minions.Salt_Run_Prepstate(sessionkey, groupsdata)
 	//target_minions.Show_Minions()
 	target_minions.Write_Tracking_file()
 	emails.SPmigration_Tracking_File = target_minions.Tracking_file_name
@@ -255,7 +277,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
 	JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
 	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update, health)
-	target_minions.Schedule_Reboot(sessionkey)
+	/* target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
 	target_minions.Schedule_Pkg_refresh(sessionkey)           // pkg refresh
 	target_minions.Check_Pkg_Refresh_Jobs(sessionkey, health) // deadline 15min
@@ -266,7 +288,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Check_SP_Migration(sessionkey, false, health)
 	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
-	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)
+	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health) */
 
 	/* target_minions.Make_Reports() */
 

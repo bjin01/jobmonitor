@@ -161,12 +161,12 @@ func (u *Salt_Request_Async) Execute_Command_Async(url string, method string, to
 		return nil
 	}
 
-	async_response := new(Salt_Async_Response)
+	/* async_response := new(Salt_Async_Response)
 	if err := json.Unmarshal(body, &async_response); err != nil { // Parse []byte to go struct pointer
 		log.Println("Can not unmarshal JSON")
 	} else {
 		log.Printf("salt api async_response: %v\n", async_response)
-	}
+	} */
 
 	return body
 }
