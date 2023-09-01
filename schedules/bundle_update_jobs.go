@@ -2,6 +2,7 @@ package schedules
 
 import (
 	"log"
+	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/request"
@@ -36,6 +37,15 @@ func (t *Jobstatus) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, 
 		for _, minion := range scheduled_jobs_by_minions {
 			for _, completed := range current_ListSystemInJobs_status.ListCompletedSystems.Result {
 				if minion.Hostname == completed.Server_name {
+					if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) == 0 {
+						err := create_pkg_refresh_job(sessionkey, completed.Server_id, completed.Server_name)
+						if err != nil {
+							log.Printf("create_pkg_refresh_job error: %s\n", err)
+						}
+						log.Println("Sleep 120 seconds to allow package refresh job to complete")
+						time.Sleep(120 * time.Second)
+					}
+
 					t.Completed = append(t.Completed, minion)
 					log.Printf("Update Pkg bundle job ID: %d: Completed: %v\n", jobid_pkg_update, completed.Server_name)
 				}

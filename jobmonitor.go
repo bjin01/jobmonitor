@@ -194,6 +194,8 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 						if err != nil {
 							log.Default().Printf("ERROR: reboot sls: %s\n", err)
 						}
+						// Now we want to trigger a package update check for all minions
+
 					}
 
 					email.Sendit(jobstatus_result, templates_dir)

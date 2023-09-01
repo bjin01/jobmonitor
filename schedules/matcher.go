@@ -43,6 +43,7 @@ func (j *Jobstatus) Compare(Sessionkey *auth.SumaSessionKey, scheduled_jobs []Jo
 		for _, b := range scheduled_jobs {
 			for _, y := range listjobs.Completed.Result {
 				if y.Id == b.JobID {
+					//err = create_pkg_refresh_job(Sessionkey, b.Hostname)
 					j.Completed = append(j.Completed, b)
 				}
 			}
