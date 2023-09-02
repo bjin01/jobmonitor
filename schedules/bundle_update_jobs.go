@@ -50,12 +50,15 @@ func (t *Jobstatus) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, 
 					log.Printf("Update Pkg bundle job ID: %d: Completed: %v\n", jobid_pkg_update, completed.Server_name)
 				}
 			}
-			if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) == 0 {
-				log.Println("Wait 120 seconds to allow package refresh job to complete")
-				time.Sleep(120 * time.Second)
-			}
+
 		}
 	}
+
+	if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) == 0 {
+		log.Println("Wait 120 seconds to allow package refresh job to complete")
+		time.Sleep(120 * time.Second)
+	}
+
 	if len(current_ListSystemInJobs_status.ListFailedSystems.Result) > 0 {
 		//log.Printf("Update Pkg bundle job ID: %d: ListFailedSystems: %v\n", jobid_pkg_update,
 		//	current_ListSystemInJobs_status.ListFailedSystems)
