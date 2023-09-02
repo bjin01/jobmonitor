@@ -44,13 +44,15 @@ func (t *Jobstatus) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, 
 						if err != nil {
 							log.Printf("create_pkg_refresh_job error: %s\n", err)
 						}
-						log.Println("Sleep 120 seconds to allow package refresh job to complete")
-						time.Sleep(120 * time.Second)
 					}
 
 					t.Completed = append(t.Completed, minion)
 					log.Printf("Update Pkg bundle job ID: %d: Completed: %v\n", jobid_pkg_update, completed.Server_name)
 				}
+			}
+			if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) == 0 {
+				log.Println("Wait 120 seconds to allow package refresh job to complete")
+				time.Sleep(120 * time.Second)
 			}
 		}
 	}
