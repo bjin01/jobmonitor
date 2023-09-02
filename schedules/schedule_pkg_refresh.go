@@ -19,7 +19,7 @@ type Schedule_Pkg_Refresh_Response struct {
 	JobID int `xmlrpc:"id"`
 }
 
-func create_pkg_refresh_job(sessionkey *auth.SumaSessionKey, serverid int, servername string) error {
+func Create_pkg_refresh_job(sessionkey *auth.SumaSessionKey, serverid int, servername string) error {
 	method := "system.schedulePackageRefresh"
 	schedule_pkg_refresh_request := Schedule_Pkg_Refresh_Request{
 		Sessionkey:         sessionkey.Sessionkey,

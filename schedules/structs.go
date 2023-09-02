@@ -50,6 +50,7 @@ type ListJobs struct {
 
 type Job struct {
 	Hostname   string
+	ServerID   int
 	JobID      int
 	Masterplan string
 }
@@ -96,6 +97,8 @@ type Jobstatus struct {
 	T7user               string
 	JobStartTime         string
 	YamlFileName         string
+	YamlFileName_Pending string
+	YamlFileName_Failed  string
 	Reboot_List          string
 	Reboot_SLS           string
 	Reboot_Command       string

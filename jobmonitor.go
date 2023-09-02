@@ -145,6 +145,8 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		Jobstart_starttime := time.Now().Add(time.Duration(jobstatus_result.JobstartDelay) * time.Minute)
 		jobstatus_result.JobStartTime = Jobstart_starttime.Format(time.RFC822Z)
 		jobstatus_result.YamlFileName = fmt.Sprintf("completed_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
+		jobstatus_result.YamlFileName_Pending = fmt.Sprintf("pending_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
+		jobstatus_result.YamlFileName_Failed = fmt.Sprintf("failed_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
 	begin:
 		for time.Now().Before(deadline) {
 			if *health == false {
@@ -165,7 +167,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					log.Printf("Monitor Full Update Job ID: %v\n", alljobs.Full_Update_Jobs.Full_Update_Job_ID)
 					if len(alljobs.Full_Update_Jobs.Full_Update_Job_ID) > 0 {
 						for _, j := range alljobs.Full_Update_Jobs.Full_Update_Job_ID {
-							jobstatus_result.Check_Package_Updates_Jobs(SessionKey, alljobs.AllJobs, j)
+							jobstatus_result.Check_Package_Updates_Jobs(SessionKey, alljobs.AllJobs, j, deadline)
 						}
 					}
 				} else {
@@ -199,6 +201,35 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					}
 
 					email.Sendit(jobstatus_result, templates_dir)
+					break begin
+				}
+				if !time.Now().Before(deadline) {
+					log.Printf("Jobchecker timeout reached. Exit loop. Email sent.")
+
+					if jobstatus_result.JobType == "patching" {
+						if len(jobstatus_result.Pending) > 0 {
+							for _, minion := range jobstatus_result.Pending {
+								err := schedules.Create_pkg_refresh_job(SessionKey, minion.ServerID, minion.Hostname)
+								if err != nil {
+									log.Printf("create_pkg_refresh_job for pending systems error: %s\n", err)
+								}
+							}
+							log.Println("Sleep 120 seconds to allow package refresh job to complete")
+							time.Sleep(120 * time.Second)
+						}
+						if len(jobstatus_result.Completed) > 0 {
+							for _, minion := range jobstatus_result.Completed {
+								err := schedules.Create_pkg_refresh_job(SessionKey, minion.ServerID, minion.Hostname)
+								if err != nil {
+									log.Printf("create_pkg_refresh_job for completed systems error: %s\n", err)
+								}
+							}
+							log.Println("Sleep 120 seconds to allow package refresh job to complete")
+							time.Sleep(120 * time.Second)
+						}
+
+					}
+
 					break begin
 				}
 			}
