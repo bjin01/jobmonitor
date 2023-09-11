@@ -1,6 +1,7 @@
 package spmigration
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -40,6 +41,9 @@ func (m *Target_Minions) Salt_Disk_Space_Check(sessionkey *auth.SumaSessionKey, 
 					*newMinionList = append(*newMinionList, minion)
 				} else {
 					log.Printf("Minion %s is disk space check disqualified\n", minion.Minion_Name)
+					subject := "btrfs disqualified"
+					note := fmt.Sprintf("/ has less than 2GB free space. %s %s", minion.Minion_Name, m.Suma_Group)
+					Add_Note(sessionkey, minion.Minion_ID, subject, note)
 				}
 			}
 			if len(*newMinionList) > 0 {

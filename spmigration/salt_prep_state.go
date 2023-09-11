@@ -10,14 +10,21 @@ import (
 	"github.com/bjin01/jobmonitor/saltapi"
 )
 
-func (m *Target_Minions) Salt_Run_Prepstate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) {
+func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, stage string) {
 	saltdata := new(saltapi.Salt_Data)
 	saltdata.SaltMaster = groupsdata.SaltMaster_Address
 	saltdata.SaltApi_Port = groupsdata.SaltApi_Port
 	saltdata.Username = groupsdata.SaltUser
 	saltdata.Password = groupsdata.SaltPassword
 	saltdata.SaltCmd = "state.apply"
-	saltdata.Arg = []string{groupsdata.Salt_Prep_State}
+	if stage == "pre" {
+		saltdata.Arg = []string{groupsdata.Salt_Prep_State}
+	} else if stage == "post" {
+		saltdata.Arg = []string{groupsdata.Salt_Post_State}
+	} else {
+		log.Printf("Salt_Run_state_apply stage is not pre or post. Exiting.\n")
+		return
+	}
 
 	for _, minion := range m.Minion_List {
 		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
@@ -27,10 +34,10 @@ func (m *Target_Minions) Salt_Run_Prepstate(sessionkey *auth.SumaSessionKey, gro
 	method := "POST"
 
 	if len(saltdata.Online_Minions) > 0 {
-		fmt.Printf("Salt_Run_Prepstate Online_Minions: %s\n", saltdata.Online_Minions)
+		log.Printf("Salt_Run_state_apply Online_Minions: %s\n", saltdata.Online_Minions)
 	} else {
-		fmt.Printf("Salt_Run_Prepstate Online_Minions is empty\n")
-		saltdata.Return = []byte("Salt_Run_Prepstate Online_Minions is empty")
+		log.Printf("Salt_Run_state_apply Online_Minions is empty\n")
+		saltdata.Return = []byte("Salt_Run_state_apply Online_Minions is empty")
 		return
 	}
 
@@ -51,7 +58,7 @@ func (m *Target_Minions) Salt_Run_Prepstate(sessionkey *auth.SumaSessionKey, gro
 
 	url = fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, saltdata.Token)
-	fmt.Println(string(response))
+	//fmt.Println(string(response))
 
 	async_response := new(saltapi.Salt_Async_Response)
 	if err := json.Unmarshal(response, &async_response); err != nil { // Parse []byte to go struct pointer

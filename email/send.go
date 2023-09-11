@@ -30,32 +30,6 @@ func Sendit(result *schedules.Jobstatus, templates_dir *Templates_Dir) {
 
 }
 
-func (s *SPMigration_Email_Body) Send_SPmigration_Email() {
-	auth = smtp.PlainAuth("", "", "", "127.0.0.1")
-
-	r := NewRequest(s.Recipients, "SPMigration Notification", "")
-	hostname, err := get_hostname_fqdn()
-	if err != nil {
-		log.Default().Println(err.Error())
-	}
-
-	s.Host = hostname
-	s.Port = 12345
-
-	//err := r.ParseTemplate("template.html", result)
-	template_file := fmt.Sprintf("%s/template_spmigration.html", s.Template_dir)
-	if err := r.ParseTemplate(template_file, s); err == nil {
-		ok, err1 := r.SendEmail()
-		if err1 != nil {
-			log.Default().Println(err1.Error())
-		}
-		log.Printf("Email sent. %v", ok)
-	} else {
-		log.Default().Println(err.Error())
-	}
-
-}
-
 func NewRequest(to []string, subject, body string) *Request {
 	return &Request{
 		to:      to,

@@ -114,7 +114,7 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 		time.Sleep(10 * time.Second)
 		t.Write_Tracking_file()
 	}
-	log.Printf("Package refresh Job check deadline reached. %+v\n", deadline)
+	log.Printf("Package Update Job check deadline reached. %+v\n", deadline)
 	return
 }
 

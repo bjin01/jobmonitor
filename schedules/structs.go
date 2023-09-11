@@ -49,10 +49,10 @@ type ListJobs struct {
 }
 
 type Job struct {
-	Hostname   string
-	ServerID   int
-	JobID      int
-	Masterplan string
+	Hostname   string `json:"hostname,omitempty"`
+	ServerID   int    `json:"serverid,omitempty"`
+	JobID      int    `json:"jobid,omitempty"`
+	Masterplan string `json:"masterplan,omitempty"`
 }
 
 type Full_Update_Jobs struct {
@@ -84,29 +84,30 @@ type Jobs_Patching struct {
 }
 
 type Jobstatus struct {
-	Pending              []Job
-	Completed            []Job
-	Failed               []Job
-	Cancelled            []Job
-	JobcheckerEmails     []string
-	JobcheckerTimeout    int
-	JobstartDelay        int
-	Offline_minions      []string
-	Disqualified_minions []string
-	No_patch_execptions  []string
-	T7user               string
-	JobStartTime         string
-	YamlFileName         string
-	YamlFileName_Pending string
-	YamlFileName_Failed  string
-	Reboot_List          string
-	Reboot_SLS           string
-	Reboot_Command       string
-	Post_patching_file   string
-	Patch_level          string
-	Post_patching        string
-	Prep_patching        string
-	JobType              string
+	Pending              []Job    `json:"pending,omitempty"`
+	Completed            []Job    `json:"completed,omitempty"`
+	Failed               []Job    `json:"failee,omitempty"`
+	Cancelled            []Job    `json:"cancelled,omitempty"`
+	JobcheckerEmails     []string `json:"jobcheckeremails,omitempty"`
+	JobcheckerTimeout    int      `json:"jobcheckerr timeout,omitempty"`
+	JobstartDelay        int      `json:"job start delay,omitempty"`
+	Offline_minions      []string `json:"offline minions,omitempty"`
+	Disqualified_minions []string `json:"btrfs disqualified,omitempty"`
+	No_patch_execptions  []string `json:"no_patch exceptions,omitempty"`
+	T7user               string   `json:"t7user,omitempty"`
+	JobStartTime         string   `json:"job start time,omitempty"`
+	YamlFileName         string   `json:"completed yaml file,omitempty"`
+	YamlFileName_Pending string   `json:"pending yaml file,omitempty"`
+	YamlFileName_Failed  string   `json:"failed yaml file,omitempty"`
+	YamlFileName_Full    string   `json:"full list yaml file,omitempty"`
+	Reboot_List          string   `json:"reboot list,omitempty"`
+	Reboot_SLS           string   `json:"reboot sls,omitempty"`
+	Reboot_Command       string   `json:"reboot command,omitempty"`
+	Post_patching_file   string   `json:"post patching file,omitempty"`
+	Patch_level          string   `json:"patch level,omitempty"`
+	Post_patching        string   `json:"post patch sls,omitempty"`
+	Prep_patching        string   `json:"prep patch sls,omitempty"`
+	JobType              string   `json:"job type,omitempty"`
 }
 
 type ListSystemInJobs struct {

@@ -43,6 +43,7 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 			} else {
 				log.Printf("No more pending spmigration job. Exit job check.\n")
 			}
+			time.Sleep(60 * time.Second)
 			deadline = time.Now()
 			//break
 		}

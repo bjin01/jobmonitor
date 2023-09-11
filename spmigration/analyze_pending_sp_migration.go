@@ -16,16 +16,31 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 		if minion.Migration_Stage == "Product Migration" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
+		if minion.Migration_Stage == "Product Migration DryRun" && minion.Migration_Stage_Status == "Completed" {
+			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
+		}
 		if minion.Migration_Stage == "Package Update" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
+		if minion.Migration_Stage == "Package Update" && minion.Migration_Stage_Status == "Completed" {
+			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
+		}
 		if minion.Migration_Stage == "Pkg_Refresh" && minion.Migration_Stage_Status == "Failed" {
+			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
+		}
+		if minion.Migration_Stage == "Pkg_Refresh" && minion.Migration_Stage_Status == "Pending" {
+			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
+		}
+		if minion.Migration_Stage == "Pkg_Refresh" && minion.Migration_Stage_Status == "Completed" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
 		if minion.Migration_Stage == "Reboot" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
 		if minion.Migration_Stage == "Reboot" && minion.Migration_Stage_Status == "Failed" {
+			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
+		}
+		if minion.Migration_Stage == "Reboot" && minion.Migration_Stage_Status == "Completed" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
 	}

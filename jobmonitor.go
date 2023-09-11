@@ -147,7 +147,12 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 		jobstatus_result.YamlFileName = fmt.Sprintf("completed_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
 		jobstatus_result.YamlFileName_Pending = fmt.Sprintf("pending_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
 		jobstatus_result.YamlFileName_Failed = fmt.Sprintf("failed_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
+		jobstatus_result.YamlFileName_Full = fmt.Sprintf("all_systems_%s_%s", jobstatus_result.T7user, Jobstart_starttime.Format("20060102150405"))
+
+		tracking_file := fmt.Sprintf("/srv/pillar/sumapatch/%s", jobstatus_result.YamlFileName_Full)
+		schedules.Write_Tracking_file(SessionKey, tracking_file, *jobstatus_result)
 	begin:
+
 		for time.Now().Before(deadline) {
 			if *health == false {
 				log.Printf("SUMA Health check failed. Skip jobcheck loop. We will continue if SUMA is online again.")
@@ -172,7 +177,10 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 					}
 				} else {
 					jobstatus_result.Compare(SessionKey, alljobs.AllJobs)
+
 				}
+
+				schedules.Write_Tracking_file(SessionKey, tracking_file, *jobstatus_result)
 
 				if len(jobstatus_result.Pending) > 0 {
 					log.Printf("Pending Jobs: %+v\n", jobstatus_result.Pending)

@@ -3,25 +3,27 @@ package spmigration
 import "time"
 
 type Migration_Groups struct {
-	Groups                      []string `json:"groups"`
-	Delay                       int      `json:"delay"`
-	Timeout                     int      `json:"timeout"`
-	GatherJobTimeout            int      `json:"gather_job_timeout"`
-	Logfile                     string   `json:"logfile"`
-	SaltMaster_Address          string   `json:"salt_master_address"`
-	SaltApi_Port                int      `json:"salt_api_port"`
-	SaltUser                    string   `json:"salt_user"`
-	SaltPassword                string   `json:"salt_password"`
-	Salt_diskspace_grains_key   string   `json:"salt_diskspace_grains_key"`
-	Salt_diskspace_grains_value string   `json:"salt_diskspace_grains_value"`
-	Salt_Prep_State             string   `json:"salt_prep_state"`
-	Salt_Post_State             string   `json:"salt_post_state"`
-	JobcheckerTimeout           int      `json:"jobchecker_timeout"`
-	JobcheckerEmails            []string `json:"jobchecker_emails"`
-	T7User                      string   `json:"t7user"`
-	Token                       string   `json:"authentication_token"`
-	Tracking_file_directory     string   `json:"tracking_file_directory"`
-	Assigne_channels            []struct {
+	Groups                          []string `json:"groups"`
+	Delay                           int      `json:"delay"`
+	Timeout                         int      `json:"timeout"`
+	GatherJobTimeout                int      `json:"gather_job_timeout"`
+	Logfile                         string   `json:"logfile"`
+	SaltMaster_Address              string   `json:"salt_master_address"`
+	SaltApi_Port                    int      `json:"salt_api_port"`
+	SaltUser                        string   `json:"salt_user"`
+	SaltPassword                    string   `json:"salt_password"`
+	Salt_diskspace_grains_key       string   `json:"salt_diskspace_grains_key"`
+	Salt_diskspace_grains_value     string   `json:"salt_diskspace_grains_value"`
+	Salt_no_upgrade_exception_key   string   `json:"salt_no_upgrade_exception_key"`
+	Salt_no_upgrade_exception_value string   `json:"salt_no_upgrade_exception_value"`
+	Salt_Prep_State                 string   `json:"salt_prep_state"`
+	Salt_Post_State                 string   `json:"salt_post_state"`
+	JobcheckerTimeout               int      `json:"jobchecker_timeout"`
+	JobcheckerEmails                []string `json:"jobchecker_emails"`
+	T7User                          string   `json:"t7user"`
+	Token                           string   `json:"authentication_token"`
+	Tracking_file_directory         string   `json:"tracking_file_directory"`
+	Assigne_channels                []struct {
 		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
 	} `json:"assigne_channels"`
 
@@ -124,46 +126,46 @@ type Job_Chain struct {
 }
 
 type Host_Job_Info struct {
-	Assigne_Channels_Job     Assigne_Channels_Job
-	Pkg_Refresh_Job          Pkg_Refresh_Job
-	Update_Pkg_Job           Update_Pkg_Job
-	Reboot_Pre_MigrationJob  Reboot_Pre_MigrationJob
-	SP_Migration_DryRun_Job  SP_Migration_DryRun_Job
-	SP_Migration_Job         SP_Migration_Job
-	Reboot_Post_MigrationJob Reboot_Post_MigrationJob
+	Assigne_Channels_Job     Assigne_Channels_Job     `json:"Assigne_Channels_Job"`
+	Pkg_Refresh_Job          Pkg_Refresh_Job          `json:"Pkg_Refresh_Job"`
+	Update_Pkg_Job           Update_Pkg_Job           `json:"Update_Pkg_Job"`
+	Reboot_Pre_MigrationJob  Reboot_Pre_MigrationJob  `json:"Reboot_Pre_MigrationJob"`
+	SP_Migration_DryRun_Job  SP_Migration_DryRun_Job  `json:"SP_Migration_DryRun_Job"`
+	SP_Migration_Job         SP_Migration_Job         `json:"SP_Migration_Job"`
+	Reboot_Post_MigrationJob Reboot_Post_MigrationJob `json:"Reboot_Post_MigrationJob"`
 }
 
 type Assigne_Channels_Job struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }
 
 type Pkg_Refresh_Job struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }
 
 type Update_Pkg_Job struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }
 
 type Reboot_Pre_MigrationJob struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }
 
 type SP_Migration_DryRun_Job struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }
 
 type SP_Migration_Job struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }
 
 type Reboot_Post_MigrationJob struct {
-	JobID     int
-	JobStatus string
+	JobID     int    `json:"JobID"`
+	JobStatus string `json:"JobStatus"`
 }

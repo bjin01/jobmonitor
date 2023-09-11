@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
 
 func (s *Salt_Data) Query_Jid() error {
 	if s.Jid == "" {
-		fmt.Printf("Jid is empty\n")
+		log.Printf("Jid is empty\n")
 		s.Return = []byte("Jid is empty")
 		return nil
 	}
@@ -36,27 +37,27 @@ func (s *Salt_Data) Query_Jid() error {
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		fmt.Printf("Error: %v\n", res.Status)
+		log.Printf("Error: %v\n", res.Status)
 		s.Return = []byte(fmt.Sprintf("Error: %s, maybe the job is not finished or deleted from job cache already.", res.Status))
 		return fmt.Errorf("Error: %s, maybe the job is not finished or deleted from job cache already.", res.Status)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 
 	var prettyJSON bytes.Buffer
 	err = json.Indent(&prettyJSON, body, "", "\t")
 	if err != nil {
-		fmt.Println("Error formatting JSON:", err)
+		log.Println("Error formatting JSON:", err)
 		return err
 	}
 
@@ -65,21 +66,21 @@ func (s *Salt_Data) Query_Jid() error {
 
 	var saltResponse SaltResponse
 	if err := json.Unmarshal(body, &saltResponse); err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 
 		return err
 	}
 
 	for _, job := range saltResponse.Return {
-		fmt.Println("JID:", job.JID)
-		fmt.Println("Function:", job.Function)
+		log.Println("JID:", job.JID)
+		log.Println("Function:", job.Function)
 		if job.Function == "grains.get" && string_array_contains(job.Arguments, "btrfs:for_patching") {
 			for hostname, result := range job.Result {
-				fmt.Println("grains.get btrfs:for_patching result:")
-				fmt.Println("Hostname:", hostname)
+				log.Println("grains.get btrfs:for_patching result:")
+				log.Println("Hostname:", hostname)
 				for key, value := range result.(map[string]interface{}) {
 					if key == "return" {
-						fmt.Printf("Return Value: %s", value.(string))
+						log.Printf("Return Value: %s", value.(string))
 					}
 				}
 				fmt.Println()
@@ -88,38 +89,38 @@ func (s *Salt_Data) Query_Jid() error {
 		}
 
 		if job.Function == "state.apply" {
-			fmt.Println("State.apply result:")
-			fmt.Printf("number of targets: %d, number of results %d\n", len(job.Target), len(job.Result))
+			log.Println("State.apply result:")
+			log.Printf("number of targets: %d, number of results %d\n", len(job.Target), len(job.Result))
 			if len(job.Target) == len(job.Result) {
 				for hostname, result := range job.Result {
 
-					fmt.Println("Hostname:", hostname)
+					log.Println("Hostname:", hostname)
 					value_result := seek_interface_keyval(result, "success", false)
-					fmt.Printf("value_result: %v\n", value_result)
+					log.Printf("value_result: %v\n", value_result)
 					//parse_interface(value_result)
 				}
-				fmt.Println("All minions returned")
+				log.Println("All minions returned")
 			} else {
 				for hostname, result := range job.Result {
-					fmt.Println("Hostname:", hostname)
+					log.Println("Hostname:", hostname)
 					value_result := seek_interface_keyval(result, "success", false)
-					fmt.Printf("value_result: %v\n", value_result)
+					log.Printf("value_result: %v\n", value_result)
 
 				}
-				fmt.Println("Still waiting for other minions to return.")
+				log.Println("Still waiting for other minions to return.")
 				return fmt.Errorf("Error: %s, we will retry.", res.Status)
 			}
 			continue
 		}
 
 		if len(job.Result) == 0 {
-			fmt.Println("No result returned")
+			log.Println("No result returned")
 			continue
 		}
 
-		fmt.Println("job returns:", job.Result)
+		log.Println("job returns:", job.Result)
 		for hostname, result := range job.Result {
-			fmt.Println("Hostname:", hostname)
+			log.Println("Hostname:", hostname)
 			parse_interface(result)
 			/* fmt.Println("Minion Overall Result:", result.Success) // This will print the raw JSON for each hostname's result
 
@@ -150,19 +151,19 @@ func parse_interface(data interface{}) {
 		fmt.Printf("%v\n", v)
 	case []interface{}:
 		//fmt.Println("is an array:")
-		for i, u := range v {
-			fmt.Printf("array key %v: ", i)
+		for _, u := range v {
+			//fmt.Printf("array key %v: ", i)
 			parse_interface(u)
 		}
 	case map[string]interface{}:
 		//fmt.Println("is an object:")
-		for i, u := range v {
-			fmt.Printf("map key %v: ", i)
+		for _, u := range v {
+			//fmt.Printf("map key %v: ", i)
 
 			parse_interface(u)
 		}
 	default:
-		fmt.Println("unknown type!")
+		log.Println("unknown type!")
 	}
 }
 
@@ -171,17 +172,17 @@ func seek_interface_keyval(data interface{}, key string, found bool) interface{}
 	case string:
 
 		if found {
-			fmt.Printf("return %v\n", v)
+			//fmt.Printf("return %v\n", v)
 			return v
 		}
 	case float64:
 		if found {
-			fmt.Printf("return %v\n", v)
+			//fmt.Printf("return %v\n", v)
 			return v
 		}
 	case bool:
 		if found {
-			fmt.Printf("return %v\n", v)
+			//fmt.Printf("return %v\n", v)
 			return v
 		}
 	case []interface{}:
@@ -194,7 +195,7 @@ func seek_interface_keyval(data interface{}, key string, found bool) interface{}
 		//fmt.Println("is an object:")
 		for i, u := range v {
 			if found {
-				fmt.Printf("return %v\n", u)
+				//fmt.Printf("return %v\n", u)
 				return u
 			}
 
@@ -205,7 +206,7 @@ func seek_interface_keyval(data interface{}, key string, found bool) interface{}
 			}
 		}
 	default:
-		fmt.Println("unknown type!")
+		log.Println("unknown type!")
 		return nil
 	}
 	return nil

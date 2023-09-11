@@ -18,20 +18,22 @@ import (
 )
 
 type Target_Minions struct {
-	Minion_List             []Minion_Data
-	Tracking_file_name      string
-	Suma_Group              string
-	Disk_Check_Disqualified []string
+	Minion_List             []Minion_Data `json:"Minion_List"`
+	Tracking_file_name      string        `json:"Tracking_file_name"`
+	Suma_Group              string        `json:"Suma_Group"`
+	Disk_Check_Disqualified []string      `json:"Disk_Check_Disqualified"`
+	No_Upgrade_Exceptions   []string      `json:"No_Upgrade_Exceptions"`
+	Offline_Minions         []string      `json:"Offline_Minions"`
 }
 
 type Minion_Data struct {
-	Minion_ID              int
-	Minion_Name            string
-	Host_Job_Info          Host_Job_Info
-	Migration_Stage        string
-	Migration_Stage_Status string
-	Target_base_channel    string
-	Target_Ident           string
+	Minion_ID              int           `json:"Minion_ID"`
+	Minion_Name            string        `json:"Minion_Name"`
+	Host_Job_Info          Host_Job_Info `json:"Host_Job_Info"`
+	Migration_Stage        string        `json:"Migration_Stage"`
+	Migration_Stage_Status string        `json:"Migration_Stage_Status"`
+	Target_base_channel    string        `json:"Target_base_channel"`
+	Target_Ident           string        `json:"Target_Ident"`
 }
 
 func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -180,7 +182,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				// Access specific member values by name
 				minion_data.Minion_Name = valueStruct.GetMemberValue("name").(string)
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
-
+				Delete_Notes(sessionkey, minion_data.Minion_ID)
 				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				//if Contains(active_minion_ids, minion_data.Minion_ID) {
 				if minion_data.Minion_ID != 0 {
@@ -208,10 +210,14 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 					newMinionList = append(newMinionList, minion)
 				} else {
 					log.Printf("Minion %s is offline\n", minion.Minion_Name)
+					subject := "minion offline"
+					body := "minion is offline"
+					Add_Note(sessionkey, minion.Minion_ID, subject, body)
 				}
 			}
 
 			m.Minion_List = newMinionList
+			m.Offline_Minions = offline_minions
 
 		}
 
@@ -262,10 +268,10 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	log.Printf("Tracking file: %s\n", target_minions.Tracking_file_name)
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
-
+	target_minions.Salt_No_Upgrade_Exception_Check(sessionkey, groupsdata)
 	target_minions.Salt_Disk_Space_Check(sessionkey, groupsdata)
 	target_minions.SPMigration_Group(sessionkey, groupsdata)
-	target_minions.Salt_Run_Prepstate(sessionkey, groupsdata)
+	target_minions.Salt_Run_state_apply(sessionkey, groupsdata, "pre")
 	//target_minions.Show_Minions()
 	target_minions.Write_Tracking_file()
 	emails.SPmigration_Tracking_File = target_minions.Tracking_file_name
@@ -277,7 +283,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
 	JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
 	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update, health)
-	/* target_minions.Schedule_Reboot(sessionkey)
+	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
 	target_minions.Schedule_Pkg_refresh(sessionkey)           // pkg refresh
 	target_minions.Check_Pkg_Refresh_Jobs(sessionkey, health) // deadline 15min
@@ -288,10 +294,10 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Check_SP_Migration(sessionkey, false, health)
 	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
-	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health) */
-
+	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)
+	target_minions.Salt_Run_state_apply(sessionkey, groupsdata, "post")
+	emails.Send_SPmigration_Results()
 	/* target_minions.Make_Reports() */
-
 }
 
 func (t *Target_Minions) Write_Tracking_file() {
@@ -317,7 +323,7 @@ func (t *Target_Minions) Write_Tracking_file() {
 	if err != nil {
 		log.Fatalf("Error marshalling tracking file: %s\n", err)
 	} */
-	json, err := json.Marshal(t)
+	json, err := json.MarshalIndent(t, "", "   ")
 	if err != nil {
 		log.Fatalf("Error marshalling tracking file: %s\n", err)
 	}

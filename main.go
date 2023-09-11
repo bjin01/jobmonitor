@@ -174,8 +174,8 @@ func main() {
 			log.Printf("SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
 		}
-
 		if err := c.ShouldBindJSON(&spmigrationRequestObj); err != nil {
+
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
 
@@ -190,6 +190,22 @@ func main() {
 		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for SP Migration through SUSE Manager.", spmigrationRequestObj.Groups))
 		//log.Printf("request data %v for SP Migration through SUSE Manager.\n", spmigrationRequestObj)
 
+	})
+
+	r.GET("/query_jobchecker", func(c *gin.Context) {
+		filename := c.Query("filename")
+		if filename == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing 'filename' parameter"})
+			return
+		}
+
+		data, err := readJSONFile_patching(filename)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, data)
 	})
 
 	r.POST("/jobchecker", func(c *gin.Context) {

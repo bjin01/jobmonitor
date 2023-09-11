@@ -33,11 +33,9 @@ func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey,
 			log.Printf("No more pending pkg refresh job. Exit job check.\n")
 
 			if extended_deadline_counter == 0 {
-				deadline = time.Now().Add(time.Duration(40) * time.Second)
+				deadline = time.Now().Add(time.Duration(240) * time.Second)
 				extended_deadline_counter++
 				continue
-			} else {
-				deadline = time.Now()
 			}
 			//break
 		}
