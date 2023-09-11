@@ -1,7 +1,6 @@
 package spmigration
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -66,7 +65,7 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 		if err != nil {
 			log.Fatalf("Encoding error: %s\n", err)
 		}
-		fmt.Printf("client request spmigration buffer: %s\n", fmt.Sprintf(string(buf)))
+		//fmt.Printf("client request spmigration buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
 			log.Printf("Encoding scheduleProductMigration error: %s\n", err)
