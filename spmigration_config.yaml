@@ -4,7 +4,7 @@ delay: 1
 timeout: 3
 gather_job_timeout: 15
 logfile: "/var/log/patching/sumapatching.log"
-salt_master_address: 192.168.122.23
+salt_master_address: localhost
 salt_api_port: 8000
 salt_user: mysalt
 salt_password: mytest
