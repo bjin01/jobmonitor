@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px green;
+        }
+        h3 {
+            padding-left: 5%;
+            font-weight: bold;
+        }
+        p {
+            padding-left: 7%;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 0.7;
+        }
+        div {
+            border: 2px solid black;
+            outline: #4CAF50 solid 10px;
+            margin: auto;
+        }
+        table, td, th {  
+	  border: 1px solid #ddd;
+	  text-align: left;
+	}
+
+	table {
+	  border-collapse: collapse;
+	  width: 100%;
+	}
+
+	th, td {
+	  padding: 15px;
+	}
+    </style>
+</head>
+<title>SUSE Manager Service Pack Migration Results</title>
+</head>
+<body>
+
+<h1 style="text-align: center;">SUSE Manager - SP Migration - Results</h1>
+<p>Reported by Jobchecker.</p><br><br>
+<br>
+<h1>Minion List</h1>
+<table>
+	<tr>
+		<th>Minion Name</th>
+		<th>Migration Stage</th>
+		<th>Migration Status</th>
+	</tr>
+	{{range .Minion_List}}
+	<tr>
+		<td>{{.Minion_Name}}</td>
+		<td>{{.Migration_Stage}}</td>
+		<td>{{.Migration_Stage_Status}}</td>
+	</tr>
+	{{end}}
+</table>
+<br>
+<h3 style='color:blueviolet;'>Offline Minions:</h3>
+{{with .Offline_Minions}}
+    {{range .}}
+    {{ if ne . "" }}
+    <p>- {{ . }}</p>
+    {{else}}
+    <p></p>
+    {{end}}
+    {{end}}
+{{end}}
+
+<h3 style='color:blueviolet;'>Btrfs disqualified (because / < 2GiB):</h3>
+{{with .Disk_Check_Disqualified}}
+    {{range .}}
+    {{ if ne . "" }}
+    <p>- {{ . }}</p>
+    {{else}}
+    <p></p>
+    {{end}}
+    {{end}}
+{{end}}
+
+<h3 style='color:blueviolet;'>No_Upgrade Exceptions (Systems excluded):</h3>
+{{with .No_Upgrade_Exceptions}}
+    {{range .}}
+    {{ if ne . "" }}
+    <p>- {{ . }}</p>
+    {{else}}
+    <p></p>
+    {{end}}
+    {{end}}
+{{end}}
+
+</body>
+</html>
