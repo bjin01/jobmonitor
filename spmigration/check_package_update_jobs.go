@@ -47,7 +47,7 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 
 	current_ListSystemInJobs_status := new(ListSystemInJobs)
 
-	deadline := time.Now().Add(time.Duration(20) * time.Minute)
+	deadline := time.Now().Add(time.Duration(60) * time.Minute)
 
 	for time.Now().Before(deadline) {
 		if *health == false {

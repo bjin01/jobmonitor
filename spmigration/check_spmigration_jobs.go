@@ -9,7 +9,7 @@ import (
 )
 
 func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dryrun bool, health *bool) {
-	deadline := time.Now().Add(time.Duration(10) * time.Minute)
+	deadline := time.Now().Add(time.Duration(60) * time.Minute)
 	if dryrun == true {
 		log.Printf("Dryrun mode. SP Migration DryRun Jobs will be monitored.\n")
 		deadline = time.Now().Add(time.Duration(5) * time.Minute)

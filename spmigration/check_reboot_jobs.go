@@ -10,7 +10,7 @@ import (
 
 func (t *Target_Minions) Check_Reboot_Jobs(sessionkey *auth.SumaSessionKey, health *bool) {
 
-	deadline := time.Now().Add(time.Duration(10) * time.Minute)
+	deadline := time.Now().Add(time.Duration(50) * time.Minute)
 
 	for time.Now().Before(deadline) {
 		var l schedules.ListJobs
