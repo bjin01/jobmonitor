@@ -1,0 +1,15 @@
+curl --location 'http://192.168.122.23:8000/' \
+--header 'X-Auth-Token: c6088f6ea5fd3b72e37263fe1807db2039d219e89d44918f3efe98a0c21adf42' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: session_id=c6088f6ea5fd3b72e37263fe1807db2039d219e89d44918f3efe98a0c21adf42' \
+--data '{
+    "client": "runner",
+    "tgt": ["jupiter.bo2go.home", "pxesap01.bo2go.home", "pxesap02.bo2go.home"],
+    "tgt_type": "list",
+    "fun": "manage.status",
+    "arg": 
+        [
+            "timeout=5",
+            "gather_job_timeout=10"
+        ]
+}'

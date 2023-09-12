@@ -1,0 +1,8 @@
+curl --location 'http://192.168.122.23:8000/login' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: session_id=c6088f6ea5fd3b72e37263fe1807db2039d219e89d44918f3efe98a0c21adf42' \
+--data '{
+  "username": "mysalt",
+  "password": "mytest",
+  "eauth": "sharedsecret"
+}'

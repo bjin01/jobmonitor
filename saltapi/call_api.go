@@ -95,7 +95,7 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 		fmt.Println("Error marshaling JSON:", err)
 		return nil
 	}
-	/* fmt.Printf("payloadBytes: %v\n", string(payloadBytes)) */
+	fmt.Printf("payloadBytes: %v\n", string(payloadBytes))
 
 	payload := bytes.NewReader(payloadBytes)
 
@@ -108,7 +108,7 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 		Transport: transport,
 	}
 	req, err := http.NewRequest(method, url, payload)
-	//fmt.Printf("req: %v\n", req)
+	fmt.Printf("req: %v\n", req)
 	if err != nil {
 		fmt.Println(err)
 		return nil
