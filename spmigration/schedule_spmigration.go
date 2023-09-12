@@ -70,6 +70,8 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 		if err != nil {
 			log.Printf("Encoding scheduleProductMigration error: %s\n", err)
 		}
+		//fmt.Printf("scheduleProductMigration client request spmigration response: %s\n", resp.Body)
+		defer resp.Body.Close()
 		reply := new(ScheduleSPMigrationDryRun_Response)
 		err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 		if err != nil {

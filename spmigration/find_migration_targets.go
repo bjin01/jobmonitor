@@ -19,7 +19,7 @@ func Find_MigrationTarget(sessionkey *auth.SumaSessionKey, minionid int, UserDat
 	var params ListMigrationTarget_Request
 	params.Sessionkey = sessionkey.Sessionkey
 	params.Sid = minionid
-	params.ExcludeTargetWhereMissingSuccessors = true
+	params.ExcludeTargetWhereMissingSuccessors = false
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
 		log.Fatalf("Encoding error: %s\n", err)
