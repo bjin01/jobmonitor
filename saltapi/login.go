@@ -15,7 +15,14 @@ func (s *Salt_Data) Login() {
 
 	payload := strings.NewReader(fmt.Sprintf(`{"username": "%s", "password": "%s", "eauth": "sharedsecret"}`, s.Username, s.Password))
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		Proxy: nil, // This disables proxy settings
+	}
+
+	//client := &http.Client{}
+	client := &http.Client{
+		Transport: transport,
+	}
 	/* fmt.Printf("url: %s\n", url)
 	fmt.Printf("payload: %v\n", payload) */
 	req, err := http.NewRequest(method, url, payload)

@@ -23,7 +23,15 @@ func (s *Salt_Data) Query_Jid() error {
 	//fmt.Printf("url: %s\n", url)
 	payload := strings.NewReader("")
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		Proxy: nil, // This disables proxy settings
+	}
+
+	//client := &http.Client{}
+	client := &http.Client{
+		Transport: transport,
+	}
+
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {

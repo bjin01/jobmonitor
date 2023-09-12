@@ -98,8 +98,14 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 
 	payload := bytes.NewReader(payloadBytes)
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		Proxy: nil, // This disables proxy settings
+	}
 
+	//client := &http.Client{}
+	client := &http.Client{
+		Transport: transport,
+	}
 	req, err := http.NewRequest(method, url, payload)
 	//fmt.Printf("req: %v\n", req)
 	if err != nil {
@@ -136,7 +142,14 @@ func (u *Salt_Request_Async) Execute_Command_Async(url string, method string, to
 
 	payload := bytes.NewReader(payloadBytes)
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		Proxy: nil, // This disables proxy settings
+	}
+
+	//client := &http.Client{}
+	client := &http.Client{
+		Transport: transport,
+	}
 
 	req, err := http.NewRequest(method, url, payload)
 	//fmt.Printf("req: %v\n", req)
