@@ -28,17 +28,18 @@ func (s *Salt_Data) Run_Manage_Status() {
 		Arg:      []string{},
 	}
 
-	salt_request.Arg = append(salt_request.Arg, "timeout=2")
-	salt_request.Arg = append(salt_request.Arg, "gather_job_timeout=10")
+	salt_request.Arg = append(salt_request.Arg, "timeout=7")
+	salt_request.Arg = append(salt_request.Arg, "gather_job_timeout=20")
 
+	fmt.Printf("Now calling execute_command\n")
 	response := salt_request.Execute_Command(url, method, s.Token)
 
 	minion_status := Runner_Manage_Status_Response{}
 	if err := json.Unmarshal(response, &minion_status); err != nil { // Parse []byte to go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	} else {
-		/* fmt.Printf("minion_status Up: %v\n", minion_status.Return[0].Up)
-		fmt.Printf("minion_status Down: %v\n", minion_status.Return[0].Down) */
+		fmt.Printf("minion_status Up: %v\n", minion_status.Return[0].Up)
+		fmt.Printf("minion_status Down: %v\n", minion_status.Return[0].Down)
 		s.Online_Minions = minion_status.Return[0].Up
 		s.Offline_Minions = minion_status.Return[0].Down
 	}
@@ -121,6 +122,7 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 		fmt.Println(err)
 		return nil
 	}
+	fmt.Printf("execute command res body: %v\n", res.Body)
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
