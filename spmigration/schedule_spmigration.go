@@ -1,6 +1,7 @@
 package spmigration
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -42,6 +43,9 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 
 		if minion.Target_Ident == "" {
 			log.Default().Printf("Target Ident is empty for minion %s\n", minion.Minion_Name)
+			subject := "Target Ident is empty"
+			note := fmt.Sprintf("No valid migration target found. %s", minion.Minion_Name)
+			Add_Note(sessionkey, minion.Minion_ID, subject, note)
 			continue
 		}
 		schedule_spmigration_request := ScheduleSPMigrationDryRun_Request{}

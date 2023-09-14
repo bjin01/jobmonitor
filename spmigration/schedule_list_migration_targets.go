@@ -57,7 +57,7 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 		var params ListMigrationTarget_Request
 		params.Sessionkey = sessionkey.Sessionkey
 		params.Sid = minion.Minion_ID
-		params.ExcludeTargetWhereMissingSuccessors = true
+		params.ExcludeTargetWhereMissingSuccessors = false
 		buf, err := gorillaxml.EncodeClientRequest(method, &params)
 		if err != nil {
 			log.Fatalf("Encoding error: %s\n", err)
