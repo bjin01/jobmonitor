@@ -11,7 +11,7 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	groupsdata *Migration_Groups, health *bool) {
 	// get all minions which Migration Stage is in Product Migration and status is pending
 	var analyze_target_minions Target_Minions
-	analyze_target_minions.Tracking_file_name = fmt.Sprintf("%s.analyze", t.Tracking_file_name)
+	analyze_target_minions.Tracking_file_name = fmt.Sprintf("%s", t.Tracking_file_name)
 	for _, minion := range t.Minion_List {
 		if minion.Migration_Stage == "Product Migration" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
@@ -57,6 +57,8 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	analyze_target_minions.Check_SP_Migration(sessionkey, true, health)
 	analyze_target_minions.Schedule_Migration(sessionkey, groupsdata, false)
 	analyze_target_minions.Check_SP_Migration(sessionkey, false, health)
+	analyze_target_minions.Salt_Set_Patch_Level(sessionkey, groupsdata)
+	analyze_target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	analyze_target_minions.Schedule_Reboot(sessionkey)
 	analyze_target_minions.Check_Reboot_Jobs(sessionkey, health)
 }
@@ -75,7 +77,7 @@ func (t *Target_Minions) Reschedule_Pkg_Refresh(sessionkey *auth.SumaSessionKey)
 			t.Minion_List[i].Migration_Stage = "Pkg_Refresh"
 			t.Minion_List[i].Migration_Stage_Status = "Scheduled"
 		} else {
-			log.Printf("Minion %s is not ready for package refresh\n", recover_minion.Minion_Name)
+			log.Printf("Minion %s - scheduling package refresh failed.\n", recover_minion.Minion_Name)
 			continue
 		}
 	}

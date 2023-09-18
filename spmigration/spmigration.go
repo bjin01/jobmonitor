@@ -268,9 +268,11 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	log.Printf("Tracking file: %s\n", target_minions.Tracking_file_name)
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
+	target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	target_minions.Salt_No_Upgrade_Exception_Check(sessionkey, groupsdata)
 	target_minions.Salt_Disk_Space_Check(sessionkey, groupsdata)
 	target_minions.SPMigration_Group(sessionkey, groupsdata)
+
 	target_minions.Salt_Run_state_apply(sessionkey, groupsdata, "pre")
 	//target_minions.Show_Minions()
 	target_minions.Write_Tracking_file()
@@ -292,6 +294,8 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Check_SP_Migration(sessionkey, true, health)
 	target_minions.Schedule_Migration(sessionkey, groupsdata, false)
 	target_minions.Check_SP_Migration(sessionkey, false, health)
+	target_minions.Salt_Set_Patch_Level(sessionkey, groupsdata)
+	target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
 	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)

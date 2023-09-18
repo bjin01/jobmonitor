@@ -23,6 +23,7 @@ type Salt_Data struct {
 	Salt_diskspace_grains_value     string   `json:"salt_diskspace_grains_value,omitempty"`
 	Salt_no_upgrade_exception_key   string   `json:"salt_no_upgrade_exception_key"`
 	Salt_no_upgrade_exception_value string   `json:"salt_no_upgrade_exception_value"`
+	Patch_Level                     string   `json:"patch_level"`
 	Target_List                     []string `json:"target_list,omitempty"`
 	Arg                             []string `json:"arg,omitempty"`
 	Return                          []byte   `json:"return,omitempty"`
