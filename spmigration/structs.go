@@ -170,3 +170,7 @@ type Reboot_Post_MigrationJob struct {
 	JobID     int    `json:"JobID"`
 	JobStatus string `json:"JobStatus"`
 }
+
+type All_Minions_In_Group struct {
+	Minion_List map[string][]string
+}

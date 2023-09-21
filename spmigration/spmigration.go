@@ -24,6 +24,8 @@ type Target_Minions struct {
 	Disk_Check_Disqualified []string      `json:"Disk_Check_Disqualified"`
 	No_Upgrade_Exceptions   []string      `json:"No_Upgrade_Exceptions"`
 	Offline_Minions         []string      `json:"Offline_Minions"`
+	No_Targets_Minions      []string      `json:"No_Targets_Minions"`
+	CSV_Reports             []string      `json:"CSV_Reports"`
 }
 
 type Minion_Data struct {
@@ -176,22 +178,29 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 		//fmt.Printf("response: %v\n", response)if len(response.Params.Param.Value.Array.Data.Values) == 1 {
 
 		if len(response.Params.Param.Value.Array.Data.Values) > 0 {
-
+			all_minions_in_group := make(map[string][]string)
+			no_target_minions := []string{}
+			valid_target_minions := []Minion_Data{}
 			for _, valueStruct := range response.Params.Param.Value.Array.Data.Values {
 				var minion_data Minion_Data
 				// Access specific member values by name
 				minion_data.Minion_Name = valueStruct.GetMemberValue("name").(string)
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
 				Delete_Notes(sessionkey, minion_data.Minion_ID)
+				all_minions_in_group[group] = append(all_minions_in_group[group], minion_data.Minion_Name)
 				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				//if Contains(active_minion_ids, minion_data.Minion_ID) {
 				if minion_data.Minion_ID != 0 {
 					ident, target_migration_base_channel := Find_MigrationTarget(sessionkey, minion_data.Minion_ID, groupsdata)
 					if ident != "" && target_migration_base_channel != "" {
-						m.Minion_List = append(m.Minion_List, minion_data)
+						valid_target_minions = append(valid_target_minions, minion_data)
 						log.Printf("Minion %s has a valid migration target %s\n",
 							minion_data.Minion_Name, target_migration_base_channel)
 					} else {
+						no_target_minions = append(no_target_minions, minion_data.Minion_Name)
+						subject := "no valid migration target"
+						body := "minion does not have a valid migration target."
+						Add_Note(sessionkey, minion_data.Minion_ID, subject, body)
 						log.Printf("Minion %s has not a valid migration target\n", minion_data.Minion_Name)
 					}
 				} else {
@@ -199,13 +208,13 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				}
 			}
 			var salt_minion_list []string
-			for _, minion := range m.Minion_List {
+			for _, minion := range valid_target_minions {
 				salt_minion_list = append(salt_minion_list, minion.Minion_Name)
 			}
 			offline_minions := Get_salt_online_Minions_in_Group(sessionkey, salt_minion_list, groupsdata)
 			var newMinionList []Minion_Data // Assuming Minion is the type of elements in Minion_List
 
-			for _, minion := range m.Minion_List {
+			for _, minion := range valid_target_minions {
 				if !string_array_contains(offline_minions, minion.Minion_Name) {
 					newMinionList = append(newMinionList, minion)
 				} else {
@@ -216,8 +225,22 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				}
 			}
 
-			m.Minion_List = newMinionList
-			m.Offline_Minions = offline_minions
+			//log.Printf("Minions in group %s: %v\n", group, all_minions_in_group[group])
+			m.Add_Online_Minions(newMinionList)
+			m.Add_Offline_Minions(offline_minions)
+			m.Add_No_Target_Minions(no_target_minions)
+
+			// write all minions in group to a yaml file with group name
+			// create tracking file exists
+			if _, err := os.Stat(fmt.Sprintf("%s/%s.yaml", groupsdata.Tracking_file_directory, group)); os.IsNotExist(err) {
+				file, err := os.Create(fmt.Sprintf("%s/all_%s_minions.yaml", groupsdata.Tracking_file_directory, group))
+				if err != nil {
+					log.Printf("Error creating tracking file: %s\n", err)
+				}
+				defer file.Close()
+			}
+			// write tracking file, no append, only write
+			writeMapToYAML(fmt.Sprintf("%s/all_%s_minions.yaml", groupsdata.Tracking_file_directory, group), all_minions_in_group)
 
 		}
 
@@ -268,6 +291,8 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	log.Printf("Tracking file: %s\n", target_minions.Tracking_file_name)
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
+	//fmt.Printf("Minions in group: %v\n", target_minions.Minion_List)
+	target_minions.Write_Tracking_file()
 	target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	target_minions.Salt_No_Upgrade_Exception_Check(sessionkey, groupsdata)
 	target_minions.Salt_Disk_Space_Check(sessionkey, groupsdata)
@@ -299,9 +324,9 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
 	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)
+	target_minions.Salt_CSV_Report(sessionkey, groupsdata)
 	target_minions.Salt_Run_state_apply(sessionkey, groupsdata, "post")
 	emails.Send_SPmigration_Results()
-	/* target_minions.Make_Reports() */
 }
 
 func (t *Target_Minions) Write_Tracking_file() {

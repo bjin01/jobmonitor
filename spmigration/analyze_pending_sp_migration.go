@@ -11,7 +11,7 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	groupsdata *Migration_Groups, health *bool) {
 	// get all minions which Migration Stage is in Product Migration and status is pending
 	var analyze_target_minions Target_Minions
-	analyze_target_minions.Tracking_file_name = fmt.Sprintf("%s", t.Tracking_file_name)
+	analyze_target_minions.Tracking_file_name = fmt.Sprintf("%s.analyse", t.Tracking_file_name)
 	for _, minion := range t.Minion_List {
 		if minion.Migration_Stage == "Product Migration" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
@@ -44,23 +44,59 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)
 		}
 	}
-	analyze_target_minions.Write_Tracking_file()
+	t.Write_Tracking_file()
 	log.Printf("Execute analyze pending sp migration for %d minions\n", len(analyze_target_minions.Minion_List))
+
 	analyze_target_minions.Reschedule_Pkg_Refresh(sessionkey)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.Check_Pkg_Refresh_Jobs(sessionkey, health)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	jobid := analyze_target_minions.Schedule_Package_Updates(sessionkey)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.Check_Package_Updates_Jobs(sessionkey, jobid, health)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.Schedule_Reboot(sessionkey)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
 	analyze_target_minions.Check_Reboot_Jobs(sessionkey, health)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.ListMigrationTarget(sessionkey, groupsdata)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.Schedule_Migration(sessionkey, groupsdata, true)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
 	analyze_target_minions.Check_SP_Migration(sessionkey, true, health)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.Schedule_Migration(sessionkey, groupsdata, false)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
 	analyze_target_minions.Check_SP_Migration(sessionkey, false, health)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
+
 	analyze_target_minions.Salt_Set_Patch_Level(sessionkey, groupsdata)
 	analyze_target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
+
 	analyze_target_minions.Schedule_Reboot(sessionkey)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
 	analyze_target_minions.Check_Reboot_Jobs(sessionkey, health)
+	t.Update_Target_Minion_Status(&analyze_target_minions)
+	t.Write_Tracking_file()
 }
 
 func (t *Target_Minions) Reschedule_Pkg_Refresh(sessionkey *auth.SumaSessionKey) {

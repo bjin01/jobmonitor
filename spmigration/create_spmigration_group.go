@@ -84,8 +84,13 @@ func (t *Target_Minions) SPMigration_Group(sessionkey *auth.SumaSessionKey, User
 func (t *Target_Minions) Add_Systems_To_SPMigration_Group(sessionkey *auth.SumaSessionKey) {
 	method := "systemgroup.addOrRemoveSystems"
 	var serverids []int
+	var serveridsMap = make(map[int]bool)
 	for _, minion := range t.Minion_List {
-		serverids = append(serverids, minion.Minion_ID)
+		if _, exists := serveridsMap[minion.Minion_ID]; !exists {
+			// If it's not in the map, add it to the slice and mark it as seen in the map
+			serverids = append(serverids, minion.Minion_ID)
+			serveridsMap[minion.Minion_ID] = true
+		}
 	}
 	params := AddOrRemoveSystems_Request{
 		Sessionkey:      sessionkey.Sessionkey,
