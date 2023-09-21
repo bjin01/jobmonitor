@@ -31,5 +31,11 @@
 <p>Reported by Jobchecker.</p><br><br>
 <h3>http://{{ .Host }}:{{ .Port }}/query_spmigration?filename={{ .SPmigration_Tracking_File }}</h3></p>
 <br>
+<div>
+    <p>Tracking file name: {{ .SPmigration_Tracking_File }}</p>
+
+    <p>To view the file:</p>
+    <p>cat {{ .SPmigration_Tracking_File }}</p>
+</div>
 </body>
 </html>
