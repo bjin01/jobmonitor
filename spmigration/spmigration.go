@@ -26,6 +26,8 @@ type Target_Minions struct {
 	Offline_Minions         []string      `json:"Offline_Minions"`
 	No_Targets_Minions      []string      `json:"No_Targets_Minions"`
 	CSV_Reports             []string      `json:"CSV_Reports"`
+	Jobcheck_Timeout        int           `json:"Jobcheck_Timeout"`
+	Reboot_Timeout          int           `json:"Reboot_Timeout"`
 }
 
 type Minion_Data struct {
@@ -259,6 +261,22 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	var target_minions Target_Minions
 	emails := new(email.SPMigration_Email_Body)
 	emails.Recipients = groupsdata.JobcheckerEmails
+
+	if groupsdata.JobcheckerTimeout != 0 && groupsdata.JobcheckerTimeout > 50 {
+		target_minions.Jobcheck_Timeout = groupsdata.JobcheckerTimeout
+		log.Printf("Set Jobchecker timeout: %d\n", target_minions.Jobcheck_Timeout)
+	} else {
+		target_minions.Jobcheck_Timeout = 60
+		log.Printf("Use default Jobchecker timeout: %d\n", target_minions.Jobcheck_Timeout)
+	}
+
+	if groupsdata.Reboot_timeout != 0 && groupsdata.Reboot_timeout > 20 {
+		target_minions.Reboot_Timeout = groupsdata.Reboot_timeout
+		log.Printf("Set Reboot timeout: %d\n", target_minions.Reboot_Timeout)
+	} else {
+		target_minions.Reboot_Timeout = 50
+		log.Printf("Use default Reboot timeout: %d\n", target_minions.Reboot_Timeout)
+	}
 
 	if groupsdata.Tracking_file_directory != "" {
 		// create tracking file directory
