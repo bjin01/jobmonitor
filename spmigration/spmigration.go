@@ -343,6 +343,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
 	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)
 	target_minions.Salt_CSV_Report(sessionkey, groupsdata)
+	target_minions.Write_Tracking_file()
 	target_minions.Salt_Run_state_apply(sessionkey, groupsdata, "post")
 	emails.Send_SPmigration_Results()
 }

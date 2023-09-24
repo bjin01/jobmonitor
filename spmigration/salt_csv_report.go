@@ -29,6 +29,7 @@ func (m *Target_Minions) Salt_CSV_Report(sessionkey *auth.SumaSessionKey, groups
 		csv_report_return := saltdata.Run_CSV_Report(input_file, csv_file)
 		if len(csv_report_return) > 0 {
 			log.Printf("Minions CSV report return: %v\n", csv_report_return)
+			m.CSV_Reports = append(m.CSV_Reports, csv_file)
 		}
 	}
 
