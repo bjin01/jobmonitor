@@ -116,7 +116,7 @@ func (s *Salt_Data) Query_Jid() error {
 
 				}
 				log.Println("Still waiting for other minions to return.")
-				return fmt.Errorf("Error: %s, we will retry.", res.Status)
+				return fmt.Errorf("Status code: %s, we will retry until all minions returned.", res.Status)
 			}
 			continue
 		}

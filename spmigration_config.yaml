@@ -15,6 +15,7 @@ salt_no_upgrade_exception_value: 'true'
 salt_prep_state: orch.prepatch_states
 salt_post_state: orch.postpatch_states
 jobchecker_timeout: 20
+reboot_timeout: 50
 jobchecker_emails:
 - bo.jin@jinbo01.com
 - bo.jin@suseconsulting.ch

@@ -54,9 +54,9 @@ func (s *Salt_Data) Run() {
 	method := "POST"
 
 	if len(s.Online_Minions) > 0 {
-		fmt.Printf("Online_Minions: %s\n", s.Target_List)
+		log.Printf("Online_Minions: %s\n", s.Target_List)
 	} else {
-		fmt.Printf("Online_Minions is empty\n")
+		log.Printf("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -84,7 +84,7 @@ func (s *Salt_Data) Run() {
 
 	url = fmt.Sprintf("http://%s:%d/minions", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, s.Token)
-	fmt.Println(string(response))
+	//fmt.Println(string(response))
 	s.Return = response
 }
 

@@ -53,7 +53,7 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	fmt.Println(string(response))
+	//fmt.Println(string(response))
 	s.Return = response
 	return fmt.Sprintln(string(response))
 
