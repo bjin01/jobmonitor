@@ -310,6 +310,12 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
 	//fmt.Printf("Minions in group: %v\n", target_minions.Minion_List)
+	fmt.Printf("what is val of qualifying: %v\n", groupsdata.Qualifying_only)
+	if groupsdata.Qualifying_only {
+		log.Printf("Qualifying only is set true so we exit here.\n")
+		return
+	}
+
 	target_minions.Write_Tracking_file()
 	target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	target_minions.Salt_No_Upgrade_Exception_Check(sessionkey, groupsdata)

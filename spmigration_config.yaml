@@ -1,5 +1,6 @@
 groups:
 - testgrp
+qualifying_only: true
 delay: 1
 timeout: 3
 gather_job_timeout: 15

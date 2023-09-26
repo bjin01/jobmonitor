@@ -1,6 +1,7 @@
 package spmigration
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -36,14 +37,15 @@ func Find_MigrationTarget(sessionkey *auth.SumaSessionKey, minionid int, UserDat
 		log.Default().Printf("Decode ListMigrationTarget response body failed: %s\n", err)
 	}
 	for _, target := range reply.Result {
-		//split_result := Convert_String_to_maps(target.Friendly)
+		split_result := Convert_String_to_maps(target.Friendly)
 		if UserData.Target_Products != nil {
 
 			for _, v := range UserData.Target_Products {
-				//fmt.Printf("v: %s\n", v)
-				//fmt.Printf("target: %s value: %s\n", target.Ident, v.Product.Ident)
-				//fmt.Printf("target: %s value: %s\n", split_result["base"], v.Product.Name)
+				log.Printf("v: %s\n", v)
+				log.Printf("target ident: %s vs. defined ident: %s\n", target.Ident, v.Product.Ident)
+				log.Printf("target product: %s vs. defined product: %s\n", split_result["base"], v.Product.Name)
 				if strings.Contains(target.Ident, v.Product.Ident) {
+					fmt.Printf("Ident Match found %s\n", target.Ident)
 					ident = target.Ident
 					migrate_base_channel = v.Product.Base_Channel
 				}

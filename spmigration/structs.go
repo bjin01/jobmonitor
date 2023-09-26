@@ -4,6 +4,7 @@ import "time"
 
 type Migration_Groups struct {
 	Groups                          []string `json:"groups"`
+	Qualifying_only                 bool     `json:"qualifying_only"`
 	Delay                           int      `json:"delay"`
 	Timeout                         int      `json:"timeout"`
 	GatherJobTimeout                int      `json:"gather_job_timeout"`
