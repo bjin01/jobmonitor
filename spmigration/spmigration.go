@@ -18,26 +18,28 @@ import (
 )
 
 type Target_Minions struct {
-	Minion_List             []Minion_Data `json:"Minion_List"`
-	Tracking_file_name      string        `json:"Tracking_file_name"`
-	Suma_Group              string        `json:"Suma_Group"`
-	Disk_Check_Disqualified []string      `json:"Disk_Check_Disqualified"`
-	No_Upgrade_Exceptions   []string      `json:"No_Upgrade_Exceptions"`
-	Offline_Minions         []string      `json:"Offline_Minions"`
-	No_Targets_Minions      []string      `json:"No_Targets_Minions"`
-	CSV_Reports             []string      `json:"CSV_Reports"`
-	Jobcheck_Timeout        int           `json:"Jobcheck_Timeout"`
-	Reboot_Timeout          int           `json:"Reboot_Timeout"`
+	Minion_List             []Minion_Data       `json:"Minion_List"`
+	Tracking_file_name      string              `json:"Tracking_file_name"`
+	Suma_Group              string              `json:"Suma_Group"`
+	Disk_Check_Disqualified []string            `json:"Disk_Check_Disqualified"`
+	No_Upgrade_Exceptions   []string            `json:"No_Upgrade_Exceptions"`
+	Offline_Minions         []string            `json:"Offline_Minions"`
+	No_Targets_Minions      []string            `json:"No_Targets_Minions"`
+	CSV_Reports             []string            `json:"CSV_Reports"`
+	Jobcheck_Timeout        int                 `json:"Jobcheck_Timeout"`
+	Reboot_Timeout          int                 `json:"Reboot_Timeout"`
+	Minion_Environment_List []map[string]string `json:"Minion_Environment_List"`
 }
 
 type Minion_Data struct {
-	Minion_ID              int           `json:"Minion_ID"`
-	Minion_Name            string        `json:"Minion_Name"`
-	Host_Job_Info          Host_Job_Info `json:"Host_Job_Info"`
-	Migration_Stage        string        `json:"Migration_Stage"`
-	Migration_Stage_Status string        `json:"Migration_Stage_Status"`
-	Target_base_channel    string        `json:"Target_base_channel"`
-	Target_Ident           string        `json:"Target_Ident"`
+	Minion_ID                int           `json:"Minion_ID"`
+	Minion_Name              string        `json:"Minion_Name"`
+	Host_Job_Info            Host_Job_Info `json:"Host_Job_Info"`
+	Migration_Stage          string        `json:"Migration_Stage"`
+	Migration_Stage_Status   string        `json:"Migration_Stage_Status"`
+	Target_base_channel      string        `json:"Target_base_channel"`
+	Target_Ident             string        `json:"Target_Ident"`
+	Target_Optional_Channels []string      `json:"Target_Optional_Channels"`
 }
 
 func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -259,6 +261,7 @@ func (s *Target_Minions) Show_Minions() {
 
 func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, sumahost string, email_template_dir string, health *bool) {
 	var target_minions Target_Minions
+	target_minions.Minion_Environment_List = make([]map[string]string, 0)
 	emails := new(email.SPMigration_Email_Body)
 	emails.Recipients = groupsdata.JobcheckerEmails
 
@@ -347,7 +350,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	target_minions.Schedule_Reboot(sessionkey)
 	target_minions.Check_Reboot_Jobs(sessionkey, health)
-	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, health)
+	target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, email_template_dir, health)
 	target_minions.Salt_CSV_Report(sessionkey, groupsdata)
 	target_minions.Write_Tracking_file()
 	target_minions.Salt_Run_state_apply(sessionkey, groupsdata, "post")

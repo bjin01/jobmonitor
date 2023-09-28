@@ -5,13 +5,19 @@ import (
 	"log"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 )
 
 func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessionKey,
-	groupsdata *Migration_Groups, health *bool) {
+	groupsdata *Migration_Groups, email_template_dir string, health *bool) {
 	// get all minions which Migration Stage is in Product Migration and status is pending
 	var analyze_target_minions Target_Minions
+	emails := new(email.SPMigration_Email_Body)
+	emails.Recipients = groupsdata.JobcheckerEmails
 	analyze_target_minions.Tracking_file_name = fmt.Sprintf("%s.analyse", t.Tracking_file_name)
+	emails.SPmigration_Tracking_File = analyze_target_minions.Tracking_file_name
+	emails.Template_dir = email_template_dir
+
 	for _, minion := range t.Minion_List {
 		if minion.Migration_Stage == "Product Migration" && minion.Migration_Stage_Status == "Pending" {
 			analyze_target_minions.Minion_List = append(analyze_target_minions.Minion_List, minion)

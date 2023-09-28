@@ -53,10 +53,23 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 		schedule_spmigration_request.Sid = minion.Minion_ID
 		schedule_spmigration_request.TargetIdent = minion.Target_Ident
 		schedule_spmigration_request.BaseChannelLabel = minion.Target_base_channel
-		schedule_spmigration_request.OptionalChildChannels = []string{}
+		schedule_spmigration_request.OptionalChildChannels = minion.Target_Optional_Channels
 		schedule_spmigration_request.AllowVendorChange = true
 		schedule_spmigration_request.RemoveProductsWithNoSuccessorAfterMigration = true
 		schedule_spmigration_request.EarliestOccurrence = time.Now()
+
+		/* for _, v := range UserData.Target_Products {
+			if strings.TrimSpace(v.Product.Base_Channel) == minion.Target_base_channel {
+				if len(v.Product.OptionalChildChannels) > 0 {
+					for _, child := range v.Product.OptionalChildChannels {
+						log.Printf("%s: Add optional channel to schedule spmigration: %s\n",
+							minion.Minion_Name, child)
+						schedule_spmigration_request.OptionalChildChannels =
+							append(schedule_spmigration_request.OptionalChildChannels, strings.TrimSpace(child))
+					}
+				}
+			}
+		} */
 
 		if dryrun == true {
 			schedule_spmigration_request.DryRun = true

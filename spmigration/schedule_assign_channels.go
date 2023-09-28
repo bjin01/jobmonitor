@@ -124,12 +124,42 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 			var temp_base_channel_label string
 			var temp_Child_label string
 			update_channel_prefix := new(string)
-
+			fmt.Println("Channel: ", channel.Label)
 			if strings.TrimSpace(channel.Clone_original) != "" {
 
 				if strings.TrimSpace(channel.Parent_channel_label) == "" {
 					log.Printf("Channel %s has no parent channel label\n", channel.Label)
 					break
+				} else {
+					parts := strings.Split(strings.TrimSpace(channel.Parent_channel_label), "-")
+					host_already_exist := false
+					if len(parts) > 2 {
+						for _, map_keyval := range t.Minion_Environment_List {
+							for host := range map_keyval {
+								if host == minion.Minion_Name {
+									host_already_exist = true
+								}
+							}
+						}
+						if !host_already_exist {
+							var minion_env = map[string]string{minion.Minion_Name: parts[1]}
+							t.Minion_Environment_List = append(t.Minion_Environment_List, minion_env)
+							log.Printf("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
+						}
+					} else {
+						log.Printf("%s: Channel %s could not be parsed.\n", minion.Minion_Name, channel.Label)
+						for _, map_keyval := range t.Minion_Environment_List {
+							for host := range map_keyval {
+								if host == minion.Minion_Name {
+									host_already_exist = true
+								}
+							}
+						}
+						if !host_already_exist {
+							var minion_env = map[string]string{minion.Minion_Name: ""}
+							t.Minion_Environment_List = append(t.Minion_Environment_List, minion_env)
+						}
+					}
 				}
 
 				for _, group := range groupsdata.Assigne_channels {
@@ -152,6 +182,19 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 				set_channels_request.ChildLabels = append(set_channels_request.ChildLabels, temp_Child_label)
 
 			} else {
+				host_already_exist := false
+				for _, map_keyval := range t.Minion_Environment_List {
+					for host := range map_keyval {
+						if host == minion.Minion_Name {
+							host_already_exist = true
+						}
+					}
+				}
+				if !host_already_exist {
+					var minion_env = map[string]string{minion.Minion_Name: ""}
+					t.Minion_Environment_List = append(t.Minion_Environment_List, minion_env)
+				}
+
 				for _, group := range groupsdata.Assigne_channels {
 
 					if strings.Contains(strings.TrimSpace(group.Assigne_Channel.Current_base_channel),

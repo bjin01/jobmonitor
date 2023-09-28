@@ -93,8 +93,50 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 						fmt.Printf("Found matching Target product name: %s\n", split_result["base"])
 						fmt.Printf("Found matching Target product base channel: %s\n", v.Product.Base_Channel)
 						fmt.Println()
-						t.Minion_List[i].Target_base_channel = v.Product.Base_Channel
-						t.Minion_List[i].Target_Ident = target.Ident
+
+						// we do this so that every system gets the base channel with
+						// the clm project and same environment as pior service pack clm env. set.
+
+						for _, v := range t.Minion_Environment_List {
+							for hostname, environment := range v {
+								//fmt.Printf("hostname: [%s] original_environment: [%s]\n", k, v)
+								if hostname == minion.Minion_Name {
+									minion.Host_Job_Info.Channel_Environment = environment
+									log.Printf("Set hostname: [%s] to original environment label: [%s]\n", minion.Minion_Name, environment)
+								}
+							}
+						}
+
+						if minion.Host_Job_Info.Channel_Environment != "" &&
+							v.Product.Clm_Project_Label != "" &&
+							v.Product.Base_Channel != "" {
+							target_base_channel := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(v.Product.Clm_Project_Label),
+								minion.Host_Job_Info.Channel_Environment, strings.TrimSpace(v.Product.Base_Channel))
+							t.Minion_List[i].Target_base_channel = target_base_channel
+							t.Minion_List[i].Target_Ident = target.Ident
+							if v.Product.OptionalChildChannels != nil {
+								for _, child := range v.Product.OptionalChildChannels {
+									log.Printf("%s: Add clm optional channel to schedule spmigration: %s\n",
+										minion.Minion_Name, child)
+									optional_channel := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(v.Product.Clm_Project_Label),
+										minion.Host_Job_Info.Channel_Environment, strings.TrimSpace(child))
+									t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels, optional_channel)
+								}
+							}
+						} else {
+							// if the env is not provided or empty then we use the base channel only.
+							t.Minion_List[i].Target_base_channel = strings.TrimSpace(v.Product.Base_Channel)
+							t.Minion_List[i].Target_Ident = target.Ident
+							if v.Product.OptionalChildChannels != nil {
+								for _, child := range v.Product.OptionalChildChannels {
+									log.Printf("%s: Add optional channel to schedule spmigration: %s\n",
+										minion.Minion_Name, child)
+									optional_channel := strings.TrimSpace(child)
+									t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels, optional_channel)
+								}
+							}
+						}
+
 					}
 				}
 			} else {

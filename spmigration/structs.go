@@ -41,9 +41,11 @@ type Assigne_Channel struct {
 }
 
 type Target_Product struct {
-	Name         string `json:"name"`
-	Ident        string `json:"ident"`
-	Base_Channel string `json:"base_channel_label"`
+	Name                  string   `json:"name"`
+	Ident                 string   `json:"ident"`
+	Base_Channel          string   `json:"base_channel_label"`
+	Clm_Project_Label     string   `json:"clm_project_label"`
+	OptionalChildChannels []string `json:"optionalChildChannels"`
 }
 
 type Generic_Job_Response struct {
@@ -136,6 +138,7 @@ type Host_Job_Info struct {
 	SP_Migration_DryRun_Job  SP_Migration_DryRun_Job  `json:"SP_Migration_DryRun_Job"`
 	SP_Migration_Job         SP_Migration_Job         `json:"SP_Migration_Job"`
 	Reboot_Post_MigrationJob Reboot_Post_MigrationJob `json:"Reboot_Post_MigrationJob"`
+	Channel_Environment      string                   `json:"Channel_Environment"`
 }
 
 type Assigne_Channels_Job struct {
