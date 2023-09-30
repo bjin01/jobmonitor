@@ -88,11 +88,11 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 					//fmt.Printf("target: %s value: %s\n", target.Ident, v.Product.Ident)
 					//fmt.Printf("target: %s value: %s\n", split_result["base"], v.Product.Name)
 					if strings.Contains(target.Ident, v.Product.Ident) {
-						fmt.Printf("%s\n", minion.Minion_Name)
+						/* fmt.Printf("%s\n", minion.Minion_Name)
 						fmt.Printf("Found matching Target product ident: %s\n", target.Ident)
 						fmt.Printf("Found matching Target product name: %s\n", split_result["base"])
 						fmt.Printf("Found matching Target product base channel: %s\n", v.Product.Base_Channel)
-						fmt.Println()
+						fmt.Println() */
 
 						// we do this so that every system gets the base channel with
 						// the clm project and same environment as pior service pack clm env. set.

@@ -32,7 +32,7 @@ func (m *Target_Minions) Salt_Set_Patch_Level(sessionkey *auth.SumaSessionKey, g
 		saltdata.Login()
 		set_pl_return := saltdata.Run_Set_Patch_Level()
 		if len(set_pl_return) > 0 {
-			log.Printf("Minions set patch level return: %v\n", set_pl_return)
+			log.Printf("Minions set patch level done: %d returned\n", len(set_pl_return))
 		}
 	}
 

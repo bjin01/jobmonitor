@@ -35,7 +35,7 @@ products:
 - product:
     ident: '1565,1576,1609,1592,1572,1616,1580,935,1633,1614'
     name: SUSE Linux Enterprise Server for SAP Applications 15 SP5 x86_64
-    base_channel_label: mysap15sp5-test-sle-product-sles_sap15-sp5-pool-x86_64
+    base_channel_label: sle-product-sles_sap15-sp5-pool-x86_64
     clm_project_label: mysap15sp5
     optionalChildChannels:
       - rke2-sles15sp5
