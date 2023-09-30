@@ -313,7 +313,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
 	//fmt.Printf("Minions in group: %v\n", target_minions.Minion_List)
-	fmt.Printf("what is val of qualifying: %v\n", groupsdata.Qualifying_only)
+	log.Printf("what is val of qualifying: %v\n", groupsdata.Qualifying_only)
 	if groupsdata.Qualifying_only {
 		log.Printf("Qualifying only is set true so we exit here.\n")
 		return

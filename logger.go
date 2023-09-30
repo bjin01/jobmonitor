@@ -2,22 +2,40 @@ package main
 
 import (
 	"io"
-	"log"
+
 	"os"
+	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var errorlog *os.File
 
-//var logger *log.Logger
+var logger *log.Logger
 
 func init() {
-	logfile := "/var/log/sumapatch/jobchecker.log"
+	logdir := "/var/log/sumapatch"
+	logfile := filepath.Join(logdir, "jobchecker.log")
+
+	if err := os.MkdirAll(logdir, 0755); err != nil {
+		log.Fatalf("Failed to create log directory: %v", err)
+	}
+
 	errorlog, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Printf("error opening file: %v", err)
-		os.Exit(1)
+		log.Fatalf("Failed to open log file: %v", err)
 	}
-	mw := io.MultiWriter(os.Stdout, errorlog)
+
+	logger = log.New()
+	logger.SetOutput(io.MultiWriter(os.Stdout, errorlog))
+	formatter := &log.TextFormatter{
+		TimestampFormat: "2006/01/02 15:04:05",
+		FullTimestamp:   true,
+	}
+
+	logger.SetFormatter(formatter)
+	logger.Infof("Logging to: %v", logfile)
+	/* mw := io.MultiWriter(os.Stdout, errorlog)
 	log.SetOutput(mw)
-	log.Printf("Logging to: %s\n", logfile)
+	log.Printf("Logging to: %s\n", logfile) */
 }

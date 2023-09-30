@@ -12,6 +12,12 @@ import (
 )
 
 func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups, email_template_dir *email.Templates_Dir, health *bool) {
+	if health != nil {
+		if *health == false {
+			log.Default().Printf("Health check failed. Skipping groups lookup.")
+			return
+		}
+	}
 
 	//fmt.Printf("SP Migration input data %v\n", groupsdata)
 	var sumaconf Sumaconf
