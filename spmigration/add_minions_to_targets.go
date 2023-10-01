@@ -14,7 +14,7 @@ func (m *Target_Minions) Add_Online_Minions(list []Minion_Data) {
 			}
 		}
 		if !exists {
-			//fmt.Printf("Adding Minion to Minion_List: %s\n", minion.Minion_Name)
+			//logger.Infof("Adding Minion to Minion_List: %s\n", minion.Minion_Name)
 			unique_minions = append(unique_minions, minion)
 		}
 

@@ -2,7 +2,6 @@ package spmigration
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -72,7 +71,7 @@ func (t *Target_Minions) SPMigration_Group(sessionkey *auth.SumaSessionKey, User
 	}
 
 	if len(t.Minion_List) == 0 {
-		log.Println("Minion list is empty, no need to create SPMigration group")
+		logger.Infof("Minion list is empty, no need to create SPMigration group")
 		return
 	}
 
@@ -100,29 +99,29 @@ func (t *Target_Minions) Add_Systems_To_SPMigration_Group(sessionkey *auth.SumaS
 	}
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
-		log.Fatalf("Encoding systemgroup.addOrRemoveSystems error: %s\n", err)
+		logger.Fatalf("Encoding systemgroup.addOrRemoveSystems error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("response: %s\n", responseBody) */
+	logger.Infof("response: %s\n", responseBody) */
 
 	reply := new(AddOrRemoveSystems_Response)
 
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
-		log.Printf("Decode AddOrRemoveSystems_Response response body failed: %s\n", err)
+		logger.Infof("Decode AddOrRemoveSystems_Response response body failed: %s\n", err)
 	}
 	if reply.Result_ID == 1 {
-		log.Printf("%d Minions added to group %s\n", len(serverids), t.Suma_Group)
+		logger.Infof("%d Minions added to group %s\n", len(serverids), t.Suma_Group)
 	} else {
-		log.Printf("Failed to add minions to group %s\n", t.Suma_Group)
+		logger.Infof("Failed to add minions to group %s\n", t.Suma_Group)
 	}
 }
 
@@ -137,26 +136,26 @@ func (t *Target_Minions) Create_SPMigration_Group(sessionkey *auth.SumaSessionKe
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
-		log.Fatalf("Encoding systemgroup.create error: %s\n", err)
+		logger.Fatalf("Encoding systemgroup.create error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("response: %v\n", resp.Body)
+	//logger.Infof("response: %v\n", resp.Body)
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("response: %s\n", responseBody) */
+	logger.Infof("response: %s\n", responseBody) */
 	reply := new(Create_SPMigration_Group_Response)
 
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
-		log.Fatalf("Decode Create_SPMigration_Group_Response response body failed: %s\n", err)
+		logger.Fatalf("Decode Create_SPMigration_Group_Response response body failed: %s\n", err)
 	}
 
-	log.Printf("SPMigration group %s created\n", reply.Server_group.Name)
+	logger.Infof("SPMigration group %s created\n", reply.Server_group.Name)
 }

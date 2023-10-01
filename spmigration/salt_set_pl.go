@@ -1,8 +1,6 @@
 package spmigration
 
 import (
-	"log"
-
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/saltapi"
 )
@@ -10,7 +8,7 @@ import (
 func (m *Target_Minions) Salt_Set_Patch_Level(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) {
 
 	if groupsdata.Patch_Level == "" {
-		log.Printf("Patch Level is not provided. Skipping.\n")
+		logger.Infof("Patch Level is not provided. Skipping.\n")
 		return
 	}
 
@@ -32,7 +30,7 @@ func (m *Target_Minions) Salt_Set_Patch_Level(sessionkey *auth.SumaSessionKey, g
 		saltdata.Login()
 		set_pl_return := saltdata.Run_Set_Patch_Level()
 		if len(set_pl_return) > 0 {
-			log.Printf("Minions set patch level done: %d returned\n", len(set_pl_return))
+			logger.Infof("Minions set patch level done: %d returned\n", len(set_pl_return))
 		}
 	}
 

@@ -1,4 +1,4 @@
-package main
+package delete_systems
 
 import (
 	"io"

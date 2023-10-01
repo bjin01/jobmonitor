@@ -3,7 +3,6 @@ package email
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/mail"
 	"net/smtp"
 	"os/exec"
@@ -21,11 +20,11 @@ func Sendit(result *schedules.Jobstatus, templates_dir *Templates_Dir) {
 	if err := r.ParseTemplate(template_file, result); err == nil {
 		ok, err1 := r.SendEmail()
 		if err1 != nil {
-			log.Default().Println(err1.Error())
+			logger.Infoln(err1.Error())
 		}
-		log.Printf("Email sent. %v", ok)
+		logger.Infof("Email sent. %v", ok)
 	} else {
-		log.Default().Println(err.Error())
+		logger.Infoln(err.Error())
 	}
 
 }
@@ -55,7 +54,7 @@ func get_hostname_fqdn() (string, error) {
 func (r *Request) SendEmail() (bool, error) {
 	hostname, err := get_hostname_fqdn()
 	if err != nil {
-		log.Default().Printf("Failed to get FQDN: %s\n", err)
+		logger.Infof("Failed to get FQDN: %s\n", err)
 	}
 
 	fromName := "SUSE Manager"

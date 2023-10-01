@@ -1,8 +1,6 @@
 package spmigration
 
 import (
-	"fmt"
-
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/saltapi"
 )
@@ -19,15 +17,15 @@ func Get_salt_online_Minions_in_Group(sessionkey *auth.SumaSessionKey, minion_li
 	saltdata.Run_Manage_Status()
 	if len(saltdata.Offline_Minions) > 0 {
 		offline_minion_list = saltdata.Offline_Minions
-		fmt.Printf("Salt offline minions: %v\n", offline_minion_list)
+		logger.Infof("Salt offline minions: %v\n", offline_minion_list)
 	} else {
 		offline_minion_list = []string{}
 	}
 
 	if len(saltdata.Online_Minions) > 0 {
-		fmt.Printf("Salt online minions: %v\n", saltdata.Online_Minions)
+		logger.Infof("Salt online minions: %v\n", saltdata.Online_Minions)
 	} else {
-		fmt.Printf("Salt online minions is empty\n")
+		logger.Infof("Salt online minions is empty\n")
 	}
 	return offline_minion_list
 }

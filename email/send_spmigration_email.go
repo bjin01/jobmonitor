@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/smtp"
 )
 
@@ -14,7 +13,7 @@ func (s *SPMigration_Email_Body) Send_SPmigration_Email() {
 	r := NewRequest(s.Recipients, "SPMigration Notification - Info", "")
 	hostname, err := get_hostname_fqdn()
 	if err != nil {
-		log.Default().Println(err.Error())
+		logger.Warningln(err.Error())
 	}
 
 	s.Host = hostname
@@ -25,11 +24,11 @@ func (s *SPMigration_Email_Body) Send_SPmigration_Email() {
 	if err := r.ParseTemplate(template_file, s); err == nil {
 		ok, err1 := r.SendEmail()
 		if err1 != nil {
-			log.Default().Println(err1.Error())
+			logger.Warningln(err1.Error())
 		}
-		log.Printf("SPMigration Info Email sent. %v", ok)
+		logger.Infof("SPMigration Info Email sent. %v", ok)
 	} else {
-		log.Default().Println(err.Error())
+		logger.Warningln(err.Error())
 	}
 
 }
@@ -40,7 +39,7 @@ func (s *SPMigration_Email_Body) Send_SPmigration_Results() {
 	r := NewRequest(s.Recipients, "SPMigration Notification - Result", "")
 	hostname, err := get_hostname_fqdn()
 	if err != nil {
-		log.Default().Println(err.Error())
+		logger.Warningln(err.Error())
 	}
 
 	s.Host = hostname
@@ -51,18 +50,18 @@ func (s *SPMigration_Email_Body) Send_SPmigration_Results() {
 	//err := r.ParseTemplate("template.html", result)
 	targets, err := readJSONFile(s.SPmigration_Tracking_File)
 	if err != nil {
-		log.Default().Println(err.Error())
+		logger.Warningln(err.Error())
 	}
 
 	template_file := fmt.Sprintf("%s/template_spmigration_results.html", s.Template_dir)
 	if err := r.ParseTemplate(template_file, targets); err == nil {
 		ok, err1 := r.SendEmail()
 		if err1 != nil {
-			log.Default().Println(err1.Error())
+			logger.Warningln(err1.Error())
 		}
-		log.Printf("SPMigration Results Email sent. %v", ok)
+		logger.Infof("SPMigration Results Email sent. %v", ok)
 	} else {
-		log.Default().Println(err.Error())
+		logger.Warningln(err.Error())
 	}
 
 }

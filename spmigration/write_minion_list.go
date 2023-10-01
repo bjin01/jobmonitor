@@ -2,7 +2,6 @@ package spmigration
 
 import (
 	"io/ioutil"
-	"log"
 
 	"gopkg.in/yaml.v2"
 )
@@ -19,6 +18,6 @@ func writeMapToYAML(filename string, data map[string][]string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("Wrote all minions in group to", filename)
+	logger.Infoln("Wrote all minions in group to", filename)
 	return nil
 }

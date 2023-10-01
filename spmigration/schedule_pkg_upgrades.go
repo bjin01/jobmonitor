@@ -1,8 +1,6 @@
 package spmigration
 
 import (
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -49,15 +47,15 @@ func (t *Target_Minions) Schedule_Package_Updates(sessionkey *auth.SumaSessionKe
 		//minion.Get_Upgradable_Packages(sessionkey)
 		/* if minion.Migration_Stage_Status == "Completed" && minion.Migration_Stage == "Pkg_Refresh" {
 
-			fmt.Printf("Minion %s is ready to schedule package upgrade\n", minion.Minion_Name)
+			logger.Infof("Minion %s is ready to schedule package upgrade\n", minion.Minion_Name)
 			minion.Get_Upgradable_Packages(sessionkey)
 		 }*/
 	}
 	JobID_Pkg_Update := t.schedulePackageUpdates(sessionkey, minion_id_list)
 	for _, minion := range t.Minion_List {
-		fmt.Printf("minion %s is in stage %s with status %s\n", minion.Minion_Name,
+		logger.Infof("minion %s is in stage %s with status %s\n", minion.Minion_Name,
 			minion.Migration_Stage, minion.Migration_Stage_Status)
-		fmt.Printf("minion %s has job %d with status %s\n", minion.Minion_Name,
+		logger.Infof("minion %s has job %d with status %s\n", minion.Minion_Name,
 			minion.Host_Job_Info.Update_Pkg_Job.JobID, minion.Host_Job_Info.Update_Pkg_Job.JobStatus)
 	}
 	t.Write_Tracking_file()
@@ -70,7 +68,7 @@ func (t *Target_Minions) Schedule_Package_Updates(sessionkey *auth.SumaSessionKe
 
 func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey, minion_id_list []int) int {
 	if len(minion_id_list) == 0 {
-		log.Printf("No minions to schedule package update\n")
+		logger.Infof("No minions to schedule package update\n")
 		return 0
 	}
 
@@ -84,28 +82,28 @@ func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey,
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", string(buf))
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", string(buf))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s\n", responseBody) */
 	reply := new(Generic_Job_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
-		log.Fatalf("Decode Pkg Update Job response body failed: %s\n", err)
+		logger.Fatalf("Decode Pkg Update Job response body failed: %s\n", err)
 	}
 	if reply.JobID > 0 {
-		log.Printf("Job %d has been scheduled to update packages on %d minions\n", reply.JobID, len(minion_id_list))
-		log.Printf("Package Update Job starts at %s\n", params.EarliestOccurrence.Format("2006-01-02 15:04:05"))
+		logger.Infof("Job %d has been scheduled to update packages on %d minions\n", reply.JobID, len(minion_id_list))
+		logger.Infof("Package Update Job starts at %s\n", params.EarliestOccurrence.Format("2006-01-02 15:04:05"))
 		for i, minion := range t.Minion_List {
 			for _, minion_id := range minion_id_list {
 				if minion.Minion_ID == minion_id {
@@ -135,27 +133,27 @@ func (m *Minion_Data) Get_Upgradable_Packages(sessionkey *auth.SumaSessionKey) {
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", string(buf))
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", string(buf))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s\n", responseBody) */
 	reply := new(Get_Upgradable_Packages_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
-		log.Fatalf("Decode Pkg Update Job response body failed: %s\n", err)
+		logger.Fatalf("Decode Pkg Update Job response body failed: %s\n", err)
 	}
 	if len(reply.Result) > 0 {
-		fmt.Printf("Minion %s has %d packages to upgrade\n", m.Minion_Name, len(reply.Result))
+		logger.Infof("Minion %s has %d packages to upgrade\n", m.Minion_Name, len(reply.Result))
 	}
 }

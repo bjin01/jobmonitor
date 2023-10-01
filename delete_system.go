@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func Delete_System(SUMAConfig *SUMAConfig, deleteSystemdata *delete_systems.DeleteSystemRequest) {
-	fmt.Printf("deleteSystemdata %s\n", deleteSystemdata.MinionName)
+	logger.Infof("deleteSystemdata %s\n", deleteSystemdata.MinionName)
 	var sumaconf Sumaconf
 	key := os.Getenv("SUMAKEY")
 	if len(key) == 0 {
@@ -34,8 +33,8 @@ func Delete_System(SUMAConfig *SUMAConfig, deleteSystemdata *delete_systems.Dele
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
-	fmt.Printf("Deleting System in SUMA: %s\n", deleteSystemdata.MinionName)
+	logger.Infof("sessionkey: %s\n", SessionKey.Sessionkey)
+	logger.Infof("Deleting System in SUMA: %s\n", deleteSystemdata.MinionName)
 	err = delete_systems.Delete_System(SessionKey, deleteSystemdata, sumaconf.Email_to)
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +43,7 @@ func Delete_System(SUMAConfig *SUMAConfig, deleteSystemdata *delete_systems.Dele
 }
 
 func isValidAuthToken(token string) bool {
-	fmt.Printf("token: %s\n", token)
+	logger.Infof("token: %s\n", token)
 	if token == os.Getenv("SUMAKEY") {
 		return true
 	} else {

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/bjin01/jobmonitor/schedules"
@@ -28,16 +27,16 @@ func WriteYaml(result *schedules.Jobstatus) (string, error) {
 
 		if _, err := os.Stat("/srv/pillar/sumapatch"); os.IsNotExist(err) {
 			// path/to/whatever does not exist
-			log.Default().Printf("Directory for yaml output file is missing: %s\n", "/srv/pillar/sumapatch")
+			logger.Infof("Directory for yaml output file is missing: %s\n", "/srv/pillar/sumapatch")
 			return "", err
 		} else {
 
 			err = ioutil.WriteFile(filename, b.Bytes(), 0644)
 			if err != nil {
-				log.Default().Printf("Unable to write data into the file: %v\n", filename)
+				logger.Infof("Unable to write data into the file: %v\n", filename)
 				return "", err
 			}
-			log.Default().Printf("List of systems with completed jobs has been written to: %s\n", filename)
+			logger.Infof("List of systems with completed jobs has been written to: %s\n", filename)
 
 		}
 
@@ -56,16 +55,16 @@ func WriteYaml(result *schedules.Jobstatus) (string, error) {
 
 			if _, err := os.Stat("/srv/pillar/sumapatch"); os.IsNotExist(err) {
 				// path/to/whatever does not exist
-				log.Default().Printf("Directory for yaml output file is missing: %s\n", "/srv/pillar/sumapatch")
+				logger.Infof("Directory for yaml output file is missing: %s\n", "/srv/pillar/sumapatch")
 				return "", err
 			} else {
 
 				err = ioutil.WriteFile(filename, b.Bytes(), 0644)
 				if err != nil {
-					log.Default().Printf("Unable to write data into the file: %v\n", filename)
+					logger.Infof("Unable to write data into the file: %v\n", filename)
 					return "", err
 				}
-				log.Default().Printf("List of systems with pending jobs has been written to: %s\n", filename)
+				logger.Infof("List of systems with pending jobs has been written to: %s\n", filename)
 
 			}
 		}
@@ -85,16 +84,16 @@ func WriteYaml(result *schedules.Jobstatus) (string, error) {
 
 			if _, err := os.Stat("/srv/pillar/sumapatch"); os.IsNotExist(err) {
 				// path/to/whatever does not exist
-				log.Default().Printf("Directory for yaml output file is missing: %s\n", "/srv/pillar/sumapatch")
+				logger.Infof("Directory for yaml output file is missing: %s\n", "/srv/pillar/sumapatch")
 				return "", err
 			} else {
 
 				err = ioutil.WriteFile(filename, b.Bytes(), 0644)
 				if err != nil {
-					log.Default().Printf("Unable to write data into the file: %v\n", filename)
+					logger.Infof("Unable to write data into the file: %v\n", filename)
 					return "", err
 				}
-				log.Default().Printf("List of systems with failed jobs has been written to: %s\n", filename)
+				logger.Infof("List of systems with failed jobs has been written to: %s\n", filename)
 
 			}
 		}

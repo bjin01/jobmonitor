@@ -3,7 +3,6 @@ package spmigration
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -22,7 +21,7 @@ func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, g
 	} else if stage == "post" {
 		saltdata.Arg = []string{groupsdata.Salt_Post_State}
 	} else {
-		log.Printf("Salt_Run_state_apply stage is not pre or post. Exiting.\n")
+		logger.Infof("Salt_Run_state_apply stage is not pre or post. Exiting.\n")
 		return
 	}
 
@@ -34,9 +33,9 @@ func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, g
 	method := "POST"
 
 	if len(saltdata.Online_Minions) > 0 {
-		log.Printf("Salt_Run_state_apply Online_Minions: %s\n", saltdata.Online_Minions)
+		logger.Infof("Salt_Run_state_apply Online_Minions: %s\n", saltdata.Online_Minions)
 	} else {
-		log.Printf("Salt_Run_state_apply Online_Minions is empty\n")
+		logger.Infof("Salt_Run_state_apply Online_Minions is empty\n")
 		saltdata.Return = []byte("Salt_Run_state_apply Online_Minions is empty")
 		return
 	}
@@ -53,18 +52,18 @@ func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, g
 	if len(saltdata.Arg) > 0 {
 		salt_request.Arg = saltdata.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, saltdata.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 
 	async_response := new(saltapi.Salt_Async_Response)
 	if err := json.Unmarshal(response, &async_response); err != nil { // Parse []byte to go struct pointer
-		log.Println("Can not unmarshal JSON")
+		logger.Infof("Can not unmarshal JSON")
 	} else {
-		log.Printf("salt state.apply jid: %s\n", async_response.Return[0].Jid)
+		logger.Infof("salt state.apply jid: %s\n", async_response.Return[0].Jid)
 		saltdata.Jid = async_response.Return[0].Jid
 	}
 	saltdata.Return = response
@@ -76,8 +75,8 @@ func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, g
 	for time.Now().Before(deadline) {
 		err := saltdata.Query_Jid()
 		if err != nil {
-			log.Println(err)
-			log.Println("We will retry salt job query in 5 seconds and final deadline is ", deadline)
+			logger.Infoln(err)
+			logger.Infoln("We will retry salt job query in 5 seconds and final deadline is ", deadline)
 		} else {
 			deadline = time.Now()
 		}

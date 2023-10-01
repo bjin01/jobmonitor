@@ -1,8 +1,6 @@
 package spmigration
 
 import (
-	"log"
-
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/saltapi"
 )
@@ -23,7 +21,7 @@ func (m *Target_Minions) Salt_Refresh_Grains(sessionkey *auth.SumaSessionKey, gr
 		saltdata.Login()
 		refresh_grains_return := saltdata.Saltutil_Refresh_Grains()
 		if len(refresh_grains_return) > 0 {
-			log.Printf("Minions saltutil.refresh_grains return: %v\n", refresh_grains_return)
+			logger.Infof("Minions saltutil.refresh_grains return: %v\n", refresh_grains_return)
 		}
 	}
 

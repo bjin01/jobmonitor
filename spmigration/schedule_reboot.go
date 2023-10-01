@@ -1,8 +1,6 @@
 package spmigration
 
 import (
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -27,7 +25,7 @@ func (t *Target_Minions) Schedule_Reboot(sessionkey *auth.SumaSessionKey) {
 		if minion.Migration_Stage_Status == "Completed" &&
 			(minion.Migration_Stage == "Package Update" || minion.Migration_Stage == "Product Migration") {
 
-			fmt.Printf("Minion %s is ready for reboot\n", minion.Minion_Name)
+			logger.Infof("Minion %s is ready for reboot\n", minion.Minion_Name)
 
 			schedule_reboot_request := Schedule_Reboot_Request{
 				Sessionkey:         sessionkey.Sessionkey,
@@ -37,27 +35,27 @@ func (t *Target_Minions) Schedule_Reboot(sessionkey *auth.SumaSessionKey) {
 
 			buf, err := gorillaxml.EncodeClientRequest(method, &schedule_reboot_request)
 			if err != nil {
-				log.Fatalf("Encoding error: %s\n", err)
+				logger.Fatalf("Encoding error: %s\n", err)
 			}
-			//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+			//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 			resp, err := request.MakeRequest(buf)
 			if err != nil {
-				log.Fatalf("Encoding error: %s\n", err)
+				logger.Fatalf("Encoding error: %s\n", err)
 			}
-			//fmt.Printf("buffer: %s\n", string(buf))
-			//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+			//logger.Infof("buffer: %s\n", string(buf))
+			//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 
 			/* responseBody, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				log.Fatalf("ReadAll error: %s\n", err)
+				logger.Fatalf("ReadAll error: %s\n", err)
 			}
-			fmt.Printf("responseBody: %s\n", responseBody) */
+			logger.Infof("responseBody: %s\n", responseBody) */
 			reply := new(Schedule_Reboot_Response)
 			err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 			if err != nil {
-				log.Fatalf("Decode reboot Job response body failed: %s\n", err)
+				logger.Fatalf("Decode reboot Job response body failed: %s\n", err)
 			}
-			log.Printf("Reboot JobID: %d %s\n", reply.JobID, minion.Minion_Name)
+			logger.Infof("Reboot JobID: %d %s\n", reply.JobID, minion.Minion_Name)
 
 			if reply.JobID > 0 {
 				var host_info Host_Job_Info
@@ -76,10 +74,10 @@ func (t *Target_Minions) Schedule_Reboot(sessionkey *auth.SumaSessionKey) {
 					t.Minion_List[i].Migration_Stage = "Post Migration Reboot"
 					t.Minion_List[i].Migration_Stage_Status = "Scheduled"
 				} else {
-					log.Printf("Unknown Migration Stage: %s %s\n", minion.Migration_Stage, minion.Minion_Name)
+					logger.Infof("Unknown Migration Stage: %s %s\n", minion.Migration_Stage, minion.Minion_Name)
 				}
 			} else {
-				log.Printf("Minion %s is not ready for reboot\n", minion.Minion_Name)
+				logger.Infof("Minion %s is not ready for reboot\n", minion.Minion_Name)
 				continue
 			}
 		}

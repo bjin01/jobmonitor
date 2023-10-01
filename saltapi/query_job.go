@@ -5,14 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
 
 func (s *Salt_Data) Query_Jid() error {
 	if s.Jid == "" {
-		log.Printf("Jid is empty\n")
+		logger.Infof("Jid is empty\n")
 		s.Return = []byte("Jid is empty")
 		return nil
 	}
@@ -20,7 +19,7 @@ func (s *Salt_Data) Query_Jid() error {
 	url := fmt.Sprintf("http://%s:%d/jobs/%s", s.SaltMaster, s.SaltApi_Port, s.Jid)
 	method := "GET"
 
-	//fmt.Printf("url: %s\n", url)
+	//logger.Infof("url: %s\n", url)
 	payload := strings.NewReader("")
 
 	transport := &http.Transport{
@@ -35,7 +34,7 @@ func (s *Salt_Data) Query_Jid() error {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 
@@ -45,133 +44,133 @@ func (s *Salt_Data) Query_Jid() error {
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Printf("Error: %v\n", res.Status)
+		logger.Infof("Error: %v\n", res.Status)
 		s.Return = []byte(fmt.Sprintf("Error: %s, maybe the job is not finished or deleted from job cache already.", res.Status))
 		return fmt.Errorf("Error: %s, maybe the job is not finished or deleted from job cache already.", res.Status)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 
 	var prettyJSON bytes.Buffer
 	err = json.Indent(&prettyJSON, body, "", "\t")
 	if err != nil {
-		log.Println("Error formatting JSON:", err)
+		logger.Infoln("Error formatting JSON:", err)
 		return err
 	}
 
 	s.Return = prettyJSON.Bytes()
-	//fmt.Printf("prettyJSON: %v\n", string(prettyJSON.Bytes()))
+	//logger.Infof("prettyJSON: %v\n", string(prettyJSON.Bytes()))
 
 	var saltResponse SaltResponse
 	if err := json.Unmarshal(body, &saltResponse); err != nil {
-		log.Println("Error decoding JSON:", err)
+		logger.Infoln("Error decoding JSON:", err)
 
 		return err
 	}
 
 	for _, job := range saltResponse.Return {
-		log.Println("JID:", job.JID)
-		log.Println("Function:", job.Function)
+		logger.Infoln("JID:", job.JID)
+		logger.Infoln("Function:", job.Function)
 		if job.Function == "grains.get" && string_array_contains(job.Arguments, "btrfs:for_patching") {
 			for hostname, result := range job.Result {
-				log.Println("grains.get btrfs:for_patching result:")
-				log.Println("Hostname:", hostname)
+				logger.Infoln("grains.get btrfs:for_patching result:")
+				logger.Infoln("Hostname:", hostname)
 				for key, value := range result.(map[string]interface{}) {
 					if key == "return" {
-						log.Printf("Return Value: %s", value.(string))
+						logger.Infof("Return Value: %s", value.(string))
 					}
 				}
-				fmt.Println()
+				logger.Infoln()
 			}
 			continue
 		}
 
 		if job.Function == "state.apply" {
-			log.Println("State.apply result:")
-			log.Printf("number of targets: %d, number of results %d\n", len(job.Target), len(job.Result))
+			logger.Infoln("State.apply result:")
+			logger.Infof("number of targets: %d, number of results %d\n", len(job.Target), len(job.Result))
 			if len(job.Target) == len(job.Result) {
 				for hostname, result := range job.Result {
 
-					log.Println("Hostname:", hostname)
+					logger.Infoln("Hostname:", hostname)
 					value_result := seek_interface_keyval(result, "success", false)
-					log.Printf("value_result: %v\n", value_result)
+					logger.Infof("value_result: %v\n", value_result)
 					//parse_interface(value_result)
 				}
-				log.Println("All minions returned")
+				logger.Infoln("All minions returned")
 			} else {
 				for hostname, result := range job.Result {
-					log.Println("Hostname:", hostname)
+					logger.Infoln("Hostname:", hostname)
 					value_result := seek_interface_keyval(result, "success", false)
-					log.Printf("value_result: %v\n", value_result)
+					logger.Infof("value_result: %v\n", value_result)
 
 				}
-				log.Println("Still waiting for other minions to return.")
+				logger.Infoln("Still waiting for other minions to return.")
 				return fmt.Errorf("Status code: %s, we will retry until all minions returned.", res.Status)
 			}
 			continue
 		}
 
 		if len(job.Result) == 0 {
-			log.Println("No result returned")
+			logger.Infoln("No result returned")
 			continue
 		}
 
-		log.Println("job returns:", job.Result)
+		logger.Infoln("job returns:", job.Result)
 		for hostname, result := range job.Result {
-			log.Println("Hostname:", hostname)
+			logger.Infoln("Hostname:", hostname)
 			parse_interface(result)
-			/* fmt.Println("Minion Overall Result:", result.Success) // This will print the raw JSON for each hostname's result
+			/* logger.Infoln("Minion Overall Result:", result.Success) // This will print the raw JSON for each hostname's result
 
 			for key, minion := range result.Return {
 
-				fmt.Println("Key:", key)
-				fmt.Println("Name:", minion.Name)
-				fmt.Println("Changes:", minion.Changes)
-				fmt.Println("Result:", minion.Result)
-				fmt.Println("Comment:", minion.Comment)
-				fmt.Println("SLS:", minion.Sls)
-				fmt.Println("SLS ID:", minion.Sls_Id)
-				fmt.Println()
+				logger.Infoln("Key:", key)
+				logger.Infoln("Name:", minion.Name)
+				logger.Infoln("Changes:", minion.Changes)
+				logger.Infoln("Result:", minion.Result)
+				logger.Infoln("Comment:", minion.Comment)
+				logger.Infoln("SLS:", minion.Sls)
+				logger.Infoln("SLS ID:", minion.Sls_Id)
+				logger.Infoln()
 			}*/
 		}
 	}
-	//fmt.Println(string(s.Return))
+	//logger.Infoln(string(s.Return))
 	return nil
 }
 
 func parse_interface(data interface{}) {
 	switch v := data.(type) {
 	case string:
-		fmt.Printf("%v\n", v)
+		logger.Infof("%v\n", v)
 	case float64:
-		fmt.Printf("%v\n", v)
+		logger.Infof("%v\n", v)
 	case bool:
-		fmt.Printf("%v\n", v)
+		logger.Infof("%v\n", v)
 	case []interface{}:
-		//fmt.Println("is an array:")
+		//logger.Infoln("is an array:")
 		for _, u := range v {
-			//fmt.Printf("array key %v: ", i)
+			//logger.Infof("array key %v: ", i)
 			parse_interface(u)
 		}
 	case map[string]interface{}:
-		//fmt.Println("is an object:")
+		//logger.Infoln("is an object:")
 		for _, u := range v {
-			//fmt.Printf("map key %v: ", i)
+			//logger.Infof("map key %v: ", i)
 
 			parse_interface(u)
 		}
 	default:
-		log.Println("unknown type!")
+		logger.Infoln("unknown type!")
 	}
 }
 
@@ -180,30 +179,30 @@ func seek_interface_keyval(data interface{}, key string, found bool) interface{}
 	case string:
 
 		if found {
-			//fmt.Printf("return %v\n", v)
+			//logger.Infof("return %v\n", v)
 			return v
 		}
 	case float64:
 		if found {
-			//fmt.Printf("return %v\n", v)
+			//logger.Infof("return %v\n", v)
 			return v
 		}
 	case bool:
 		if found {
-			//fmt.Printf("return %v\n", v)
+			//logger.Infof("return %v\n", v)
 			return v
 		}
 	case []interface{}:
-		//fmt.Println("is an array:")
+		//logger.Infoln("is an array:")
 		for _, u := range v {
 			parse_interface(u)
 
 		}
 	case map[string]interface{}:
-		//fmt.Println("is an object:")
+		//logger.Infoln("is an object:")
 		for i, u := range v {
 			if found {
-				//fmt.Printf("return %v\n", u)
+				//logger.Infof("return %v\n", u)
 				return u
 			}
 
@@ -214,7 +213,7 @@ func seek_interface_keyval(data interface{}, key string, found bool) interface{}
 			}
 		}
 	default:
-		log.Println("unknown type!")
+		logger.Infoln("unknown type!")
 		return nil
 	}
 	return nil

@@ -30,14 +30,14 @@ func main() {
 	flag.Parse()
 
 	SUMAConfig := GetConfig(*sumafile_path)
-	log.Printf("interval is: %v\n", *api_interval)
+	logger.Infof("interval is: %v\n", *api_interval)
 
 	if _, err := os.Stat(*templates_dir); os.IsNotExist(err) {
 		// path/to/whatever does not exist
-		log.Fatalf("templates directory missing: %s\n", *templates_dir)
+		logger.Fatalf("templates directory missing: %s\n", *templates_dir)
 	}
 	templates := &email.Templates_Dir{Dir: *templates_dir}
-	log.Printf("templates_dir is: %s\n", templates.Dir)
+	logger.Infof("templates_dir is: %s\n", templates.Dir)
 
 	health := new(bool)
 	go func() {
@@ -50,7 +50,7 @@ func main() {
 			healthcheck_interval_field := value.FieldByName("Healthcheck_interval")
 			if healthcheck_email_to_field.IsValid() && len(b.Healthcheck_email_to) > 0 {
 				*emails_to = b.Healthcheck_email_to
-				log.Printf("Health check email recipients: %v\n", *emails_to)
+				logger.Infof("Health check email recipients: %v\n", *emails_to)
 			}
 
 			if healthcheck_interval_field.IsValid() && b.Healthcheck_interval > 60 {
@@ -58,7 +58,7 @@ func main() {
 			} else {
 				*healthcheck_interval = 60
 			}
-			log.Printf("Health check interval: %ds\n", *healthcheck_interval)
+			logger.Infof("Health check interval: %ds\n", *healthcheck_interval)
 		}
 		//error_counter := 0
 		interval := time.Duration(*healthcheck_interval) * time.Second
@@ -67,10 +67,10 @@ func main() {
 		err := performHealthCheck(SUMAConfig)
 		if err != nil {
 			*health = false
-			log.Printf("SUSE Manager initial health check failed. %v %s\n", *health, err)
+			logger.Infof("SUSE Manager initial health check failed. %v %s\n", *health, err)
 		} else {
 			*health = true
-			log.Printf("SUSE Manager health check passed. %v\n", *health)
+			logger.Infof("SUSE Manager health check passed. %v\n", *health)
 		}
 
 		// Start the loop to perform the API call periodically
@@ -78,10 +78,10 @@ func main() {
 			err = performHealthCheck(SUMAConfig)
 			if err != nil {
 				*health = false
-				log.Printf("SUSE Manager health check failed. %s\n", err)
+				logger.Infof("SUSE Manager health check failed. %s\n", err)
 			} else {
 				*health = true
-				log.Printf("SUSE Manager health check passed. %v\n", *health)
+				logger.Infof("SUSE Manager health check passed. %v\n", *health)
 			}
 
 			/* subject := "SUSE Manager health check failed"
@@ -89,7 +89,7 @@ func main() {
 			if len(*emails_to) > 0 {
 				email.Send_system_emails(*emails_to, subject, message)
 			} else {
-				log.Println("Alarm: SUSE Manager health check failed 5 times in row.")
+				logger.Infof("Alarm: SUSE Manager health check failed 5 times in row.")
 			} */
 
 		}
@@ -137,7 +137,7 @@ func main() {
 		if err := c.ShouldBindJSON(&saltdata); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
-		fmt.Printf("saltdata: %v\n", saltdata)
+		logger.Fatalf("saltdata: %v\n", saltdata)
 		saltdata.Login()
 		saltdata.Run()
 		if saltdata.Token != "" {
@@ -154,7 +154,7 @@ func main() {
 		if err := c.ShouldBindJSON(&saltdata); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
-		//fmt.Printf("SaltJob_Data: %v\n", saltdata.Jid)
+		//logger.Fatalf("SaltJob_Data: %v\n", saltdata.Jid)
 		saltdata.Login()
 		saltdata.Query_Jid()
 		if saltdata.Token != "" {
@@ -171,7 +171,7 @@ func main() {
 
 		if *health == false {
 			c.String(200, "SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
-			log.Printf("SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
+			logger.Infof("SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
 		}
 		if err := c.ShouldBindJSON(&spmigrationRequestObj); err != nil {
@@ -184,11 +184,11 @@ func main() {
 			return
 		}
 
-		//fmt.Printf("spmigrationRequestObj %+v\n", spmigrationRequestObj)
+		//logger.Fatalf("spmigrationRequestObj %+v\n", spmigrationRequestObj)
 
 		go groups_lookup(SUMAConfig, &spmigrationRequestObj, templates, health)
 		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for SP Migration through SUSE Manager.", spmigrationRequestObj.Groups))
-		//log.Printf("request data %v for SP Migration through SUSE Manager.\n", spmigrationRequestObj)
+		//logger.Infof("request data %v for SP Migration through SUSE Manager.\n", spmigrationRequestObj)
 
 	})
 
@@ -211,14 +211,14 @@ func main() {
 	r.POST("/jobchecker", func(c *gin.Context) {
 		// create copy to be used inside the goroutine
 		cCp := c.Copy()
-		//fmt.Printf("cCp %+v\n", cCp.Request.Body)
+		//logger.Fatalf("cCp %+v\n", cCp.Request.Body)
 		var instance_jobs_patching schedules.Jobs_Patching
 		var alljobs schedules.ScheduledJobs
 		var full_update_jobs schedules.Full_Update_Jobs
 
 		if *health == false {
 			c.String(200, "Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
-			log.Printf("Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
+			logger.Infof("Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
 		}
 
@@ -230,7 +230,7 @@ func main() {
 			if instance_jobs_patching.Full_Update_Job_ID != nil {
 				for _, elem := range instance_jobs_patching.Full_Update_Job_ID {
 					for k, v := range elem.(map[string]interface{}) {
-						//fmt.Printf("k: %v, elem: %v\n", k, elem)
+						//logger.Fatalf("k: %v, elem: %v\n", k, elem)
 						jobid, _ := strconv.Atoi(k)
 						if len(full_update_jobs.Full_Update_Job_ID) == 0 {
 							full_update_jobs.Full_Update_Job_ID = append(full_update_jobs.Full_Update_Job_ID, jobid)
@@ -248,12 +248,12 @@ func main() {
 						}
 					}
 				}
-				log.Printf("Bundle full_update_jobs %+v\n", full_update_jobs)
+				logger.Infof("Bundle full_update_jobs %+v\n", full_update_jobs)
 				alljobs.Full_Update_Jobs = full_update_jobs
 			}
 			for x, y := range elem.(map[string]interface{}) {
 				var instance_jobs_patching schedules.Job
-				//log.Printf("%s:\n", x)
+				//logger.Infof("%s:\n", x)
 				instance_jobs_patching.Hostname = x
 				for k, v := range y.(map[string]interface{}) {
 					switch k {
@@ -271,7 +271,7 @@ func main() {
 				}
 
 				alljobs.AllJobs = append(alljobs.AllJobs, instance_jobs_patching)
-				log.Printf("instance_jobs_patching %+v\n", instance_jobs_patching)
+				logger.Infof("instance_jobs_patching %+v\n", instance_jobs_patching)
 			}
 		}
 

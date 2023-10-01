@@ -2,7 +2,6 @@ package saltapi
 
 import (
 	"fmt"
-	"log"
 )
 
 type Salt_CSV_Report_return struct {
@@ -11,7 +10,7 @@ type Salt_CSV_Report_return struct {
 
 func (s *Salt_Data) Run_CSV_Report(input_file string, csv_file string) string {
 	if input_file == "" {
-		log.Printf("input_file not provided. Skipping.\n")
+		logger.Infof("input_file not provided. Skipping.\n")
 		return fmt.Sprintln("input_file is not provided. Skipping.")
 	}
 
@@ -23,9 +22,9 @@ func (s *Salt_Data) Run_CSV_Report(input_file string, csv_file string) string {
 	s.Arg = []string{input_file, csv_file, "presence_check=True"}
 
 	/* if len(s.Online_Minions) > 0 {
-		log.Printf("Run csv report for Online_Minions: %s\n", s.Online_Minions)
+		logger.Infof("Run csv report for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		log.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return fmt.Sprintln("Online_Minions is empty")
 	} */
@@ -49,12 +48,12 @@ func (s *Salt_Data) Run_CSV_Report(input_file string, csv_file string) string {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 	s.Return = response
 	return fmt.Sprintln(string(response))
 

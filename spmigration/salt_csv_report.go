@@ -2,7 +2,6 @@ package spmigration
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -12,7 +11,7 @@ import (
 func (m *Target_Minions) Salt_CSV_Report(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) {
 
 	if groupsdata.Patch_Level == "" {
-		log.Printf("Patch Level is not provided. Skipping.\n")
+		logger.Infof("Patch Level is not provided. Skipping.\n")
 		return
 	}
 
@@ -28,7 +27,7 @@ func (m *Target_Minions) Salt_CSV_Report(sessionkey *auth.SumaSessionKey, groups
 		saltdata.Login()
 		csv_report_return := saltdata.Run_CSV_Report(input_file, csv_file)
 		if len(csv_report_return) > 0 {
-			log.Printf("Minions CSV report finished: %d returned\n", len(csv_report_return))
+			logger.Infof("Minions CSV report finished: %d returned\n", len(csv_report_return))
 			m.CSV_Reports = append(m.CSV_Reports, csv_file)
 		}
 	}

@@ -48,9 +48,9 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 	for i, minion := range t.Minion_List {
 		if minion.Migration_Stage_Status == "Completed" &&
 			(minion.Migration_Stage == "Pkg_Refresh" || minion.Migration_Stage == "Reboot") {
-			log.Printf("Minion %s is ready for spmigration dryrun.\n", minion.Minion_Name)
+			logger.Infof("Minion %s is ready for spmigration dryrun.\n", minion.Minion_Name)
 		} else {
-			log.Printf("Minion %s is not ready for spmigration dryrun, previous step <Pkg_Refresh> not successful or finished.\n", minion.Minion_Name)
+			logger.Infof("Minion %s is not ready for spmigration dryrun, previous step <Pkg_Refresh> not successful or finished.\n", minion.Minion_Name)
 			continue
 		}
 		//t.Minion_List[i].Target_base_channel = UserData.Target_base_channel
@@ -60,49 +60,49 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 		params.ExcludeTargetWhereMissingSuccessors = false
 		buf, err := gorillaxml.EncodeClientRequest(method, &params)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
-		//fmt.Printf("buffer: %s\n", string(buf))
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		//logger.Infof("buffer: %s\n", string(buf))
+		//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 		/* responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalf("ReadAll error: %s\n", err)
+			logger.Fatalf("ReadAll error: %s\n", err)
 		}
-		fmt.Printf("responseBody: %s\n", responseBody) */
+		logger.Infof("responseBody: %s\n", responseBody) */
 		reply := new(ListMigrationTarget_Response)
 		err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 		if err != nil {
-			log.Fatalf("Decode ListMigrationTarget response body failed: %s\n", err)
+			logger.Fatalf("Decode ListMigrationTarget response body failed: %s\n", err)
 		}
 		for _, target := range reply.Result {
 			split_result := Convert_String_to_maps(target.Friendly)
 			if UserData.Target_Products != nil {
 
 				for _, v := range UserData.Target_Products {
-					//fmt.Printf("v: %s\n", v)
-					//fmt.Printf("target: %s value: %s\n", target.Ident, v.Product.Ident)
-					//fmt.Printf("target: %s value: %s\n", split_result["base"], v.Product.Name)
+					//logger.Infof("v: %s\n", v)
+					//logger.Infof("target: %s value: %s\n", target.Ident, v.Product.Ident)
+					//logger.Infof("target: %s value: %s\n", split_result["base"], v.Product.Name)
 					if strings.Contains(target.Ident, v.Product.Ident) {
-						/* fmt.Printf("%s\n", minion.Minion_Name)
-						fmt.Printf("Found matching Target product ident: %s\n", target.Ident)
-						fmt.Printf("Found matching Target product name: %s\n", split_result["base"])
-						fmt.Printf("Found matching Target product base channel: %s\n", v.Product.Base_Channel)
-						fmt.Println() */
+						/* logger.Infof("%s\n", minion.Minion_Name)
+						logger.Infof("Found matching Target product ident: %s\n", target.Ident)
+						logger.Infof("Found matching Target product name: %s\n", split_result["base"])
+						logger.Infof("Found matching Target product base channel: %s\n", v.Product.Base_Channel)
+						logger.Infoln() */
 
 						// we do this so that every system gets the base channel with
 						// the clm project and same environment as pior service pack clm env. set.
 
 						for _, v := range t.Minion_Environment_List {
 							for hostname, environment := range v {
-								//fmt.Printf("hostname: [%s] original_environment: [%s]\n", k, v)
+								//logger.Infof("hostname: [%s] original_environment: [%s]\n", k, v)
 								if hostname == minion.Minion_Name {
 									minion.Host_Job_Info.Channel_Environment = environment
-									log.Printf("Set hostname: [%s] to original environment label: [%s]\n", minion.Minion_Name, environment)
+									logger.Infof("Set hostname: [%s] to original environment label: [%s]\n", minion.Minion_Name, environment)
 								}
 							}
 						}
@@ -116,7 +116,7 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 							t.Minion_List[i].Target_Ident = target.Ident
 							if v.Product.OptionalChildChannels != nil {
 								for _, child := range v.Product.OptionalChildChannels {
-									log.Printf("%s: Add clm optional channel to schedule spmigration: %s\n",
+									logger.Infof("%s: Add clm optional channel to schedule spmigration: %s\n",
 										minion.Minion_Name, child)
 									optional_channel := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(v.Product.Clm_Project_Label),
 										minion.Host_Job_Info.Channel_Environment, strings.TrimSpace(child))
@@ -129,7 +129,7 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 							t.Minion_List[i].Target_Ident = target.Ident
 							if v.Product.OptionalChildChannels != nil {
 								for _, child := range v.Product.OptionalChildChannels {
-									log.Printf("%s: Add optional channel to schedule spmigration: %s\n",
+									logger.Infof("%s: Add optional channel to schedule spmigration: %s\n",
 										minion.Minion_Name, child)
 									optional_channel := strings.TrimSpace(child)
 									t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels, optional_channel)
@@ -181,7 +181,7 @@ func Convert_String_to_maps(mystring string) map[string]string {
 
 	// Print the resulting map
 	/* for key, value := range m {
-		fmt.Printf("%s: %s\n", key, value)
+		logger.Infof("%s: %s\n", key, value)
 	} */
 	return m
 }
@@ -206,7 +206,7 @@ func Convert_String_IntSlices(mystring string) []int {
 	}
 
 	// Print the resulting slice
-	//fmt.Println(intSlice)
+	//logger.Infoln(intSlice)
 	return intSlice
 }
 
@@ -217,26 +217,26 @@ func List_All_Channels(sessionkey *auth.SumaSessionKey) *ListAllChannels_Respons
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", string(buf))
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", string(buf))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s\n", responseBody) */
 	reply := new(ListAllChannels_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
-		log.Fatalf("Decode List_All_Channels response body failed: %s\n", err)
+		logger.Fatalf("Decode List_All_Channels response body failed: %s\n", err)
 	}
-	//fmt.Printf("List_All_Vendor_Channels: %v\n", reply.Result)
+	//logger.Infof("List_All_Vendor_Channels: %v\n", reply.Result)
 	return reply
 }
 
@@ -256,7 +256,7 @@ func Parse_Product_info(inputString string) {
 	// Extracting the name_of_product
 	nameOfProduct := strings.TrimSpace(strings.Split(inputString, majorVersion)[0])
 
-	fmt.Println("major_version:", majorVersion)
-	fmt.Println("service_pack:", servicePack)
-	fmt.Println("name_of_product:", nameOfProduct)
+	logger.Infoln("major_version:", majorVersion)
+	logger.Infoln("service_pack:", servicePack)
+	logger.Infoln("name_of_product:", nameOfProduct)
 }

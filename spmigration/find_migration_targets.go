@@ -1,7 +1,6 @@
 package spmigration
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -23,12 +22,12 @@ func Find_MigrationTarget(sessionkey *auth.SumaSessionKey, minionid int, UserDat
 	params.ExcludeTargetWhereMissingSuccessors = false
 	buf, err := gorillaxml.EncodeClientRequest(method, &params)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
 	defer resp.Body.Close()
 	reply := new(ListMigrationTarget_Response)
@@ -41,11 +40,11 @@ func Find_MigrationTarget(sessionkey *auth.SumaSessionKey, minionid int, UserDat
 		if UserData.Target_Products != nil {
 
 			for _, v := range UserData.Target_Products {
-				//log.Printf("v: %s\n", v)
-				//log.Printf("target ident: %s vs. defined ident: %s\n", target.Ident, v.Product.Ident)
-				//log.Printf("target product: %s vs. defined product: %s\n", split_result["base"], v.Product.Name)
+				//logger.Infof("v: %s\n", v)
+				//logger.Infof("target ident: %s vs. defined ident: %s\n", target.Ident, v.Product.Ident)
+				//logger.Infof("target product: %s vs. defined product: %s\n", split_result["base"], v.Product.Name)
 				if strings.Contains(target.Ident, v.Product.Ident) {
-					fmt.Printf("Ident Match found %s\n", target.Ident)
+					logger.Infof("Ident Match found %s\n", target.Ident)
 					ident = target.Ident
 					migrate_base_channel = v.Product.Base_Channel
 				}

@@ -3,7 +3,6 @@ package saltapi
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 )
@@ -14,7 +13,7 @@ type No_Upgrade_Grains_return struct {
 
 func (s *Salt_Data) Run_No_Upgrade_Grains_Check() []string {
 	if s.Salt_no_upgrade_exception_key == "" || s.Salt_no_upgrade_exception_value == "" {
-		log.Printf("Salt no_upgrade grains key and or value is not provided. Skipping.\n")
+		logger.Infof("Salt no_upgrade grains key and or value is not provided. Skipping.\n")
 		return nil
 	}
 
@@ -25,9 +24,9 @@ func (s *Salt_Data) Run_No_Upgrade_Grains_Check() []string {
 	s.Arg = []string{s.Salt_no_upgrade_exception_key}
 
 	if len(s.Online_Minions) > 0 {
-		log.Printf("Run no_upgrade grains key check for Online_Minions: %s\n", s.Online_Minions)
+		logger.Infof("Run no_upgrade grains key check for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		log.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return nil
 	}
@@ -51,26 +50,26 @@ func (s *Salt_Data) Run_No_Upgrade_Grains_Check() []string {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 	s.Return = response
 
 	var saltResponse No_Upgrade_Grains_return
 	if err := json.Unmarshal(response, &saltResponse); err != nil {
-		log.Println("Error decoding JSON:", err)
+		logger.Infoln("Error decoding JSON:", err)
 		return nil
 	}
 
 	no_upgrade_exception_minions := []string{}
 	for _, minion := range saltResponse.Return {
-		//fmt.Printf("show raw no upgrade exception minion return: %v\n", minion)
+		//logger.Info("show raw no upgrade exception minion return: %v\n", minion)
 		if minion.(map[string]interface{}) != nil {
 			for k, v := range minion.(map[string]interface{}) {
-				//fmt.Printf("%s no upgrade exception minion is not string: %s\n", k, reflect.TypeOf(v))
+				//logger.Info("%s no upgrade exception minion is not string: %s\n", k, reflect.TypeOf(v))
 				if reflect.TypeOf(v).String() == "string" {
 					if v.(string) == s.Salt_no_upgrade_exception_value {
 						no_upgrade_exception_minions = append(no_upgrade_exception_minions, k)

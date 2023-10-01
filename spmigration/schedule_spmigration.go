@@ -33,10 +33,10 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 	for i, minion := range t.Minion_List {
 		if dryrun == true && minion.Migration_Stage_Status == "Completed" &&
 			minion.Migration_Stage == "Pkg_Refresh" {
-			log.Printf("Minion %s is ready for migration dryrun\n", minion.Minion_Name)
+			logger.Infof("Minion %s is ready for migration dryrun\n", minion.Minion_Name)
 		} else if dryrun == false && minion.Migration_Stage_Status == "Completed" &&
 			minion.Migration_Stage == "Product Migration DryRun" {
-			log.Printf("Minion %s is ready for migration\n", minion.Minion_Name)
+			logger.Infof("Minion %s is ready for migration\n", minion.Minion_Name)
 		} else {
 			continue
 		}
@@ -62,7 +62,7 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 			if strings.TrimSpace(v.Product.Base_Channel) == minion.Target_base_channel {
 				if len(v.Product.OptionalChildChannels) > 0 {
 					for _, child := range v.Product.OptionalChildChannels {
-						log.Printf("%s: Add optional channel to schedule spmigration: %s\n",
+						logger.Infof("%s: Add optional channel to schedule spmigration: %s\n",
 							minion.Minion_Name, child)
 						schedule_spmigration_request.OptionalChildChannels =
 							append(schedule_spmigration_request.OptionalChildChannels, strings.TrimSpace(child))
@@ -74,31 +74,31 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 		if dryrun == true {
 			schedule_spmigration_request.DryRun = true
 		} else {
-			log.Printf("Schedule Product Migration for %s now!\n", minion.Minion_Name)
+			logger.Infof("Schedule Product Migration for %s now!\n", minion.Minion_Name)
 			schedule_spmigration_request.DryRun = false
 		}
 
 		buf, err := gorillaxml.EncodeClientRequest(method, &schedule_spmigration_request)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
-		//fmt.Printf("client request spmigration buffer: %s\n", fmt.Sprintf(string(buf)))
+		//logger.Infof("client request spmigration buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
-			log.Printf("Encoding scheduleProductMigration error: %s\n", err)
+			logger.Infof("Encoding scheduleProductMigration error: %s\n", err)
 		}
-		//fmt.Printf("scheduleProductMigration client request spmigration response: %s\n", resp.Body)
+		//logger.Infof("scheduleProductMigration client request spmigration response: %s\n", resp.Body)
 		defer resp.Body.Close()
 		reply := new(ScheduleSPMigrationDryRun_Response)
 		err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 		if err != nil {
 			if dryrun == true {
-				log.Printf("Decode scheduleProductMigration_DryRun Job response body failed: %s %s\n", err, minion.Minion_Name)
+				logger.Infof("Decode scheduleProductMigration_DryRun Job response body failed: %s %s\n", err, minion.Minion_Name)
 			} else {
-				log.Printf("Decode scheduleProductMigration Job response body failed: %s %s\n", err, minion.Minion_Name)
+				logger.Infof("Decode scheduleProductMigration Job response body failed: %s %s\n", err, minion.Minion_Name)
 			}
 		}
-		//log.Printf("scheduleProductMigration_DryRun JobID: %d\n", reply.JobID)
+		//logger.Infof("scheduleProductMigration_DryRun JobID: %d\n", reply.JobID)
 		var host_info Host_Job_Info
 		if dryrun == true {
 			host_info.SP_Migration_DryRun_Job.JobID = reply.JobID
@@ -112,19 +112,19 @@ func (t *Target_Minions) Schedule_Migration(sessionkey *auth.SumaSessionKey,
 			t.Minion_List[i].Host_Job_Info = host_info
 			if dryrun == true {
 				t.Minion_List[i].Migration_Stage = "Product Migration DryRun"
-				log.Printf("Product migration dryrun JobID: %d %s\n",
+				logger.Infof("Product migration dryrun JobID: %d %s\n",
 					t.Minion_List[i].Host_Job_Info.SP_Migration_DryRun_Job.JobID, minion.Minion_Name)
 			} else {
 				t.Minion_List[i].Migration_Stage = "Product Migration"
-				log.Printf("Product migration JobID: %d %s\n", t.Minion_List[i].Host_Job_Info.SP_Migration_Job.JobID, minion.Minion_Name)
+				logger.Infof("Product migration JobID: %d %s\n", t.Minion_List[i].Host_Job_Info.SP_Migration_Job.JobID, minion.Minion_Name)
 			}
 			t.Minion_List[i].Migration_Stage_Status = "Scheduled"
 
 		} else {
 			if dryrun == true {
-				log.Printf("Minion %s product migration dryrun not possible.\n", minion.Minion_Name)
+				logger.Infof("Minion %s product migration dryrun not possible.\n", minion.Minion_Name)
 			} else {
-				log.Printf("Minion %s product migration not possible.\n", minion.Minion_Name)
+				logger.Infof("Minion %s product migration not possible.\n", minion.Minion_Name)
 			}
 			continue
 		}

@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -48,7 +47,7 @@ func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 	if err := d.DecodeElement(&v, &start); err != nil {
 		return err
 	}
-	//fmt.Printf("raw time data: %s\n", v)
+	//logger.Infof("raw time data: %s\n", v)
 	year, _ := strconv.Atoi(v[0:4])
 	month, _ := strconv.Atoi(v[4:6])
 	day, _ := strconv.Atoi(v[6:8])
@@ -70,7 +69,7 @@ func Convert_to_ISO8601_DateTime(date time.Time) string {
 func (s Struct) GetMemberValue(name string) interface{} {
 	for _, member := range s.Members {
 		if member.Name == name {
-			//fmt.Printf("member name: %s\n", name)
+			//logger.Infof("member name: %s\n", name)
 			return member.Value.GetFieldValue()
 		}
 	}
@@ -79,13 +78,13 @@ func (s Struct) GetMemberValue(name string) interface{} {
 
 func (v InnerValue) GetFieldValue() interface{} {
 	if v.StringValue != nil {
-		//fmt.Printf("String value: %s\n", *v.StringValue)
+		//logger.Infof("String value: %s\n", *v.StringValue)
 		return *v.StringValue
 	} else if v.IntegerValue != nil {
-		//fmt.Printf("Found integration value. %d\n", v.IntegerValue)
+		//logger.Infof("Found integration value. %d\n", v.IntegerValue)
 		return *v.IntegerValue
 	} else if v.Int != nil {
-		//fmt.Printf("Found int value. %d\n", *v.Int)
+		//logger.Infof("Found int value. %d\n", *v.Int)
 		return *v.Int
 	} else if v.DateTimeValue != nil {
 		return v.DateTimeValue
@@ -106,24 +105,24 @@ func Get_Active_Minions_in_Group(sessionkey *auth.SumaSessionKey, groupsdata *Mi
 		}
 		buf, err := gorillaxml.EncodeClientRequest(method, &get_system_by_group_request)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
 
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
-			log.Fatalf("Get Minions from Group API error: %s\n", err)
+			logger.Fatalf("Get Minions from Group API error: %s\n", err)
 		}
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalf("ReadAll error: %s\n", err)
+			logger.Fatalf("ReadAll error: %s\n", err)
 		}
-		//fmt.Printf("responseBody: %s\n", string(responseBody))
+		//logger.Infof("responseBody: %s\n", string(responseBody))
 		var response MethodResponse_ActiveSystems_in_Group
 		if err := xml.Unmarshal(responseBody, &response); err != nil {
-			log.Fatalf("Unmarshal error: %s\n", err)
+			logger.Fatalf("Unmarshal error: %s\n", err)
 		}
-		//fmt.Printf("response of active systems in group: %v\n", response.Params.Param.Value.Array.Data.Values)
+		//logger.Infof("response of active systems in group: %v\n", response.Params.Param.Value.Array.Data.Values)
 		minion_list = append(minion_list, response.Params.Param.Value.Array.Data.Values...)
 	}
 	return minion_list
@@ -131,7 +130,7 @@ func Get_Active_Minions_in_Group(sessionkey *auth.SumaSessionKey, groupsdata *Mi
 
 func Contains(s []int, e int) bool {
 	for _, a := range s {
-		//fmt.Printf("acive id: %d - minion_id e: %d\n", a, e)
+		//logger.Infof("acive id: %d - minion_id e: %d\n", a, e)
 		if a == e {
 			return true
 		}
@@ -141,13 +140,13 @@ func Contains(s []int, e int) bool {
 
 func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups) error {
 	/* if groupsdata.Target_base_channel == "" {
-		log.Printf("Error: Target base channel is not defined")
+		logger.Infof("Error: Target base channel is not defined")
 		return errors.New("Target base channel is not defined")
 	} */
 
 	method := "systemgroup.listSystemsMinimal"
 	//active_minion_ids := Get_Active_Minions_in_Group(sessionkey, groupsdata)
-	//fmt.Printf("active_minion_ids: %v\n", active_minion_ids)
+	//logger.Infof("active_minion_ids: %v\n", active_minion_ids)
 
 	for _, group := range groupsdata.Groups {
 		get_system_by_group_request := Get_System_by_Group_Request{
@@ -155,31 +154,31 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 			GroupName:  group,
 		}
 
-		//fmt.Printf("get_system_by_group_request: %v\n", &get_system_by_group_request)
+		//logger.Infof("get_system_by_group_request: %v\n", &get_system_by_group_request)
 		buf, err := gorillaxml.EncodeClientRequest(method, &get_system_by_group_request)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
 
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
-			log.Fatalf("Get Minions from Group API error: %s\n", err)
+			logger.Fatalf("Get Minions from Group API error: %s\n", err)
 		}
 
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Printf("ReadAll error: %s\n", err)
+			logger.Infof("ReadAll error: %s\n", err)
 		}
-		//fmt.Printf("responseBody: %s\n", responseBody)
+		//logger.Infof("responseBody: %s\n", responseBody)
 
 		var response MethodResponse
 		if err := xml.Unmarshal(responseBody, &response); err != nil {
-			log.Printf("Failed to parse XML-RPC response: %v", err)
+			logger.Infof("Failed to parse XML-RPC response: %v", err)
 			return err
 		}
 
-		//fmt.Printf("response: %v\n", response)if len(response.Params.Param.Value.Array.Data.Values) == 1 {
+		//logger.Infof("response: %v\n", response)if len(response.Params.Param.Value.Array.Data.Values) == 1 {
 
 		if len(response.Params.Param.Value.Array.Data.Values) > 0 {
 			all_minions_in_group := make(map[string][]string)
@@ -192,23 +191,23 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
 				Delete_Notes(sessionkey, minion_data.Minion_ID)
 				all_minions_in_group[group] = append(all_minions_in_group[group], minion_data.Minion_Name)
-				//fmt.Printf("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
+				//logger.Infof("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				//if Contains(active_minion_ids, minion_data.Minion_ID) {
 				if minion_data.Minion_ID != 0 {
 					ident, target_migration_base_channel := Find_MigrationTarget(sessionkey, minion_data.Minion_ID, groupsdata)
 					if ident != "" && target_migration_base_channel != "" {
 						valid_target_minions = append(valid_target_minions, minion_data)
-						log.Printf("Minion %s has a valid migration target %s\n",
+						logger.Infof("Minion %s has a valid migration target %s\n",
 							minion_data.Minion_Name, target_migration_base_channel)
 					} else {
 						no_target_minions = append(no_target_minions, minion_data.Minion_Name)
 						subject := "no valid migration target"
 						body := "minion does not have a valid migration target."
 						Add_Note(sessionkey, minion_data.Minion_ID, subject, body)
-						log.Printf("Minion %s has not a valid migration target\n", minion_data.Minion_Name)
+						logger.Infof("Minion %s has not a valid migration target\n", minion_data.Minion_Name)
 					}
 				} else {
-					log.Printf("%s is not active in group %s\n", minion_data.Minion_Name, group)
+					logger.Infof("%s is not active in group %s\n", minion_data.Minion_Name, group)
 				}
 			}
 			var salt_minion_list []string
@@ -222,14 +221,14 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 				if !string_array_contains(offline_minions, minion.Minion_Name) {
 					newMinionList = append(newMinionList, minion)
 				} else {
-					log.Printf("Minion %s is offline\n", minion.Minion_Name)
+					logger.Infof("Minion %s is offline\n", minion.Minion_Name)
 					subject := "minion offline"
 					body := "minion is offline"
 					Add_Note(sessionkey, minion.Minion_ID, subject, body)
 				}
 			}
 
-			//log.Printf("Minions in group %s: %v\n", group, all_minions_in_group[group])
+			//logger.Infof("Minions in group %s: %v\n", group, all_minions_in_group[group])
 			m.Add_Online_Minions(newMinionList)
 			m.Add_Offline_Minions(offline_minions)
 			m.Add_No_Target_Minions(no_target_minions)
@@ -239,7 +238,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 			if _, err := os.Stat(fmt.Sprintf("%s/%s.yaml", groupsdata.Tracking_file_directory, group)); os.IsNotExist(err) {
 				file, err := os.Create(fmt.Sprintf("%s/all_%s_minions.yaml", groupsdata.Tracking_file_directory, group))
 				if err != nil {
-					log.Printf("Error creating tracking file: %s\n", err)
+					logger.Infof("Error creating tracking file: %s\n", err)
 				}
 				defer file.Close()
 			}
@@ -255,7 +254,7 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 
 func (s *Target_Minions) Show_Minions() {
 	for _, minion := range s.Minion_List {
-		fmt.Printf("Minion name: %s, Minion ID: %d\n", minion.Minion_Name, minion.Minion_ID)
+		logger.Infof("Minion name: %s, Minion ID: %d\n", minion.Minion_Name, minion.Minion_ID)
 	}
 }
 
@@ -267,18 +266,18 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 
 	if groupsdata.JobcheckerTimeout != 0 && groupsdata.JobcheckerTimeout > 50 {
 		target_minions.Jobcheck_Timeout = groupsdata.JobcheckerTimeout
-		log.Printf("Set Jobchecker timeout: %d\n", target_minions.Jobcheck_Timeout)
+		logger.Infof("Set Jobchecker timeout: %d\n", target_minions.Jobcheck_Timeout)
 	} else {
 		target_minions.Jobcheck_Timeout = 60
-		log.Printf("Use default Jobchecker timeout: %d\n", target_minions.Jobcheck_Timeout)
+		logger.Infof("Use default Jobchecker timeout: %d\n", target_minions.Jobcheck_Timeout)
 	}
 
 	if groupsdata.Reboot_timeout != 0 && groupsdata.Reboot_timeout > 20 {
 		target_minions.Reboot_Timeout = groupsdata.Reboot_timeout
-		log.Printf("Set Reboot timeout: %d\n", target_minions.Reboot_Timeout)
+		logger.Infof("Set Reboot timeout: %d\n", target_minions.Reboot_Timeout)
 	} else {
 		target_minions.Reboot_Timeout = 50
-		log.Printf("Use default Reboot timeout: %d\n", target_minions.Reboot_Timeout)
+		logger.Infof("Use default Reboot timeout: %d\n", target_minions.Reboot_Timeout)
 	}
 
 	if groupsdata.Tracking_file_directory != "" {
@@ -301,7 +300,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 		if _, err := os.Stat(target_minions.Tracking_file_name); os.IsNotExist(err) {
 			file, err := os.Create(target_minions.Tracking_file_name)
 			if err != nil {
-				log.Fatalf("Error creating tracking file: %s\n", err)
+				logger.Fatalf("Error creating tracking file: %s\n", err)
 			}
 
 			defer file.Close()
@@ -309,13 +308,13 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	} else {
 		target_minions.Tracking_file_name = "/var/log/spmigration.yaml"
 	}
-	log.Printf("Tracking file: %s\n", target_minions.Tracking_file_name)
+	logger.Infof("Tracking file: %s\n", target_minions.Tracking_file_name)
 
 	target_minions.Get_Minions(sessionkey, groupsdata)
-	//fmt.Printf("Minions in group: %v\n", target_minions.Minion_List)
-	log.Printf("what is val of qualifying: %v\n", groupsdata.Qualifying_only)
+	//logger.Infof("Minions in group: %v\n", target_minions.Minion_List)
+	logger.Infof("what is val of qualifying: %v\n", groupsdata.Qualifying_only)
 	if groupsdata.Qualifying_only {
-		log.Printf("Qualifying only is set true so we exit here.\n")
+		logger.Infof("Qualifying only is set true so we exit here.\n")
 		return
 	}
 
@@ -362,7 +361,7 @@ func (t *Target_Minions) Write_Tracking_file() {
 	if _, err := os.Stat(t.Tracking_file_name); os.IsNotExist(err) {
 		file, err := os.Create(t.Tracking_file_name)
 		if err != nil {
-			log.Fatalf("Error creating tracking file: %s\n", err)
+			logger.Fatalf("Error creating tracking file: %s\n", err)
 		}
 		defer file.Close()
 	}
@@ -370,7 +369,7 @@ func (t *Target_Minions) Write_Tracking_file() {
 
 	file, err := os.OpenFile(t.Tracking_file_name, os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatalf("Error opening tracking file: %s\n", err)
+		logger.Fatalf("Error opening tracking file: %s\n", err)
 	}
 
 	err = file.Truncate(0)
@@ -378,14 +377,14 @@ func (t *Target_Minions) Write_Tracking_file() {
 	// write t struct as json into file
 	/* json, err := json.MarshalIndent(t, "", "   ")
 	if err != nil {
-		log.Fatalf("Error marshalling tracking file: %s\n", err)
+		logger.Fatalf("Error marshalling tracking file: %s\n", err)
 	} */
 	json, err := json.MarshalIndent(t, "", "   ")
 	if err != nil {
-		log.Fatalf("Error marshalling tracking file: %s\n", err)
+		logger.Fatalf("Error marshalling tracking file: %s\n", err)
 	}
 	if _, err := file.Write(json); err != nil {
-		log.Fatalf("Error writing tracking file: %s\n", err)
+		logger.Fatalf("Error writing tracking file: %s\n", err)
 	}
 
 	defer file.Close()

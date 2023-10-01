@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -14,16 +13,16 @@ import (
 func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups, email_template_dir *email.Templates_Dir, health *bool) {
 	if health != nil {
 		if *health == false {
-			log.Default().Printf("Health check failed. Skipping groups lookup.")
+			logger.Infof("Health check failed. Skipping groups lookup.")
 			return
 		}
 	}
 
-	//fmt.Printf("SP Migration input data %v\n", groupsdata)
+	//logger.Info("SP Migration input data %v\n", groupsdata)
 	var sumaconf Sumaconf
 	key := os.Getenv("SUMAKEY")
 	if len(key) == 0 {
-		log.Default().Printf("SUMAKEY is not set. This might cause error for password decryption.")
+		logger.Infof("SUMAKEY is not set. This might cause error for password decryption.")
 	}
 	for a, b := range SUMAConfig.SUMA {
 		sumaconf.Server = a
@@ -40,10 +39,10 @@ func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Gro
 	request.Sumahost = &sumaconf.Server
 	*SessionKey, err = auth.Login("auth.login", MysumaLogin)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatalln(err)
 	}
 	email_template_directory_string := fmt.Sprintf("%s", email_template_dir.Dir)
 	spmigration.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost), email_template_directory_string, health)
-	//fmt.Printf("target_minions: %v\n", target_minions)
-	//fmt.Printf("sessionkey: %s\n", SessionKey.Sessionkey)
+	//logger.Info("target_minions: %v\n", target_minions)
+	//logger.Info("sessionkey: %s\n", SessionKey.Sessionkey)
 }

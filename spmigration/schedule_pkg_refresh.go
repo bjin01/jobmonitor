@@ -2,7 +2,6 @@ package spmigration
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -26,7 +25,7 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 	for i, minion := range t.Minion_List {
 		if minion.Migration_Stage_Status == "Completed" && minion.Migration_Stage == "Reboot" {
 
-			fmt.Printf("Minion %s is ready for package refresh\n", minion.Minion_Name)
+			logger.Infof("Minion %s is ready for package refresh\n", minion.Minion_Name)
 
 			schedule_pkg_refresh_request := Schedule_Pkg_Refresh_Request{
 				Sessionkey:         sessionkey.Sessionkey,
@@ -36,27 +35,27 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 
 			buf, err := gorillaxml.EncodeClientRequest(method, &schedule_pkg_refresh_request)
 			if err != nil {
-				log.Fatalf("Encoding error: %s\n", err)
+				logger.Fatalf("Encoding error: %s\n", err)
 			}
-			//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+			//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 			resp, err := request.MakeRequest(buf)
 			if err != nil {
-				log.Fatalf("Encoding error: %s\n", err)
+				logger.Fatalf("Encoding error: %s\n", err)
 			}
-			//fmt.Printf("buffer: %s\n", string(buf))
-			//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+			//logger.Infof("buffer: %s\n", string(buf))
+			//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 
 			/* responseBody, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				log.Fatalf("ReadAll error: %s\n", err)
+				logger.Fatalf("ReadAll error: %s\n", err)
 			}
-			fmt.Printf("responseBody: %s\n", responseBody) */
+			logger.Infof("responseBody: %s\n", responseBody) */
 			reply := new(Schedule_Pkg_Refresh_Response)
 			err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 			if err != nil {
-				log.Fatalf("Decode Pkg Refresh Job response body failed: %s\n", err)
+				logger.Fatalf("Decode Pkg Refresh Job response body failed: %s\n", err)
 			}
-			log.Printf("Package refresh JobID: %d\n", reply.JobID)
+			logger.Infof("Package refresh JobID: %d\n", reply.JobID)
 			var host_info Host_Job_Info
 			host_info.Pkg_Refresh_Job.JobID = reply.JobID
 			host_info.Pkg_Refresh_Job.JobStatus = "Scheduled"
@@ -67,7 +66,7 @@ func (t *Target_Minions) Schedule_Pkg_refresh(sessionkey *auth.SumaSessionKey) {
 				t.Minion_List[i].Migration_Stage_Status = "Scheduled"
 			}
 		} else {
-			log.Printf("Minion %s is not ready for package refresh\n", minion.Minion_Name)
+			logger.Infof("Minion %s is not ready for package refresh\n", minion.Minion_Name)
 			continue
 		}
 	}
@@ -86,24 +85,24 @@ func api_request_pkg_refresh(sessionkey *auth.SumaSessionKey, sid int) (int, err
 	if err != nil {
 		return 0, fmt.Errorf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
 		return 0, fmt.Errorf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", string(buf))
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", string(buf))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s\n", responseBody) */
 	reply := new(Schedule_Pkg_Refresh_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
 		return 0, fmt.Errorf("Decode Pkg Refresh Job response body failed: %s\n", err)
 	}
-	log.Printf("Package refresh JobID: %d\n", reply.JobID)
+	logger.Infof("Package refresh JobID: %d\n", reply.JobID)
 	return reply.JobID, nil
 }

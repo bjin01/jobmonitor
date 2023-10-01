@@ -29,12 +29,12 @@ func (s *Salt_Data) Login() {
 	client := &http.Client{
 		Transport: transport,
 	}
-	/* fmt.Printf("url: %s\n", url)
-	fmt.Printf("payload: %v\n", payload) */
+	/* logger.Infof("url: %s\n", url)
+	logger.Infof("payload: %v\n", payload) */
 	req, err := http.NewRequest(method, url, payload)
-	//fmt.Printf("req: %v\n", req)
+	//logger.Infof("req: %v\n", req)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return
 	}
 	req.Header.Add("Accept", "application/json")
@@ -42,17 +42,17 @@ func (s *Salt_Data) Login() {
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return
 	}
-	//fmt.Println(string(body))
+	//logger.Infoln(string(body))
 	apiResponse := string(body)
 	if strings.Contains(apiResponse, "<title>401: Unauthorized</title>") {
 		// Extract the status code and message from the HTML content
@@ -86,11 +86,11 @@ func (s *Salt_Data) Login() {
 
 	var result Login_Response
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		logger.Infoln("Can not unmarshal JSON")
 	}
-	//fmt.Println(PrettyPrint(result.Return[0].Token))
+	//logger.Infoln(PrettyPrint(result.Return[0].Token))
 	s.Token = result.Return[0].Token
-	log.Println("Salt login successful")
+	logger.Infoln("Salt login successful")
 }
 
 func PrettyPrint(i interface{}) string {

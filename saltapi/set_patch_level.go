@@ -2,7 +2,6 @@ package saltapi
 
 import (
 	"fmt"
-	"log"
 )
 
 type Salt_Set_Patch_Level_return struct {
@@ -11,7 +10,7 @@ type Salt_Set_Patch_Level_return struct {
 
 func (s *Salt_Data) Run_Set_Patch_Level() string {
 	if s.Patch_Level == "" {
-		log.Printf("Patch Level is not provided. Skipping.\n")
+		logger.Infof("Patch Level is not provided. Skipping.\n")
 		return fmt.Sprintln("Patch Level is not provided. Skipping.")
 	}
 
@@ -22,9 +21,9 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 	s.Arg = []string{s.Patch_Level}
 
 	if len(s.Online_Minions) > 0 {
-		log.Printf("Run set patch level for Online_Minions: %s\n", s.Online_Minions)
+		logger.Infof("Run set patch level for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		log.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return fmt.Sprintln("Online_Minions is empty")
 	}
@@ -48,12 +47,12 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 	s.Return = response
 	return fmt.Sprintln(string(response))
 

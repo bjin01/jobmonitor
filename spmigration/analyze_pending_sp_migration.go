@@ -2,7 +2,6 @@ package spmigration
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/email"
@@ -51,7 +50,7 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 		}
 	}
 	t.Write_Tracking_file()
-	log.Printf("Execute analyze pending sp migration for %d minions\n", len(analyze_target_minions.Minion_List))
+	logger.Infof("Execute analyze pending sp migration for %d minions\n", len(analyze_target_minions.Minion_List))
 
 	analyze_target_minions.Reschedule_Pkg_Refresh(sessionkey)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
@@ -109,7 +108,7 @@ func (t *Target_Minions) Reschedule_Pkg_Refresh(sessionkey *auth.SumaSessionKey)
 	for i, recover_minion := range t.Minion_List {
 		jobid, err := api_request_pkg_refresh(sessionkey, recover_minion.Minion_ID)
 		if err != nil {
-			log.Printf("api_request_pkg_refresh Error: %s\n", err)
+			logger.Infof("api_request_pkg_refresh Error: %s\n", err)
 		}
 		if jobid > 0 {
 			var host_info Host_Job_Info
@@ -119,7 +118,7 @@ func (t *Target_Minions) Reschedule_Pkg_Refresh(sessionkey *auth.SumaSessionKey)
 			t.Minion_List[i].Migration_Stage = "Pkg_Refresh"
 			t.Minion_List[i].Migration_Stage_Status = "Scheduled"
 		} else {
-			log.Printf("Minion %s - scheduling package refresh failed.\n", recover_minion.Minion_Name)
+			logger.Infof("Minion %s - scheduling package refresh failed.\n", recover_minion.Minion_Name)
 			continue
 		}
 	}

@@ -1,4 +1,4 @@
-package main
+package spmigration
 
 import (
 	"io"
@@ -15,7 +15,7 @@ var logger *log.Logger
 
 func init() {
 	logdir := "/var/log/sumapatch"
-	logfile := filepath.Join(logdir, "jobchecker.log")
+	logfile := filepath.Join(logdir, "spmigration.log")
 
 	if err := os.MkdirAll(logdir, 0755); err != nil {
 		log.Fatalf("Failed to create log directory: %v", err)

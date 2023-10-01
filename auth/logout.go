@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"log"
-
 	"github.com/bjin01/jobmonitor/request"
 
 	"github.com/divan/gorilla-xmlrpc/xml"
@@ -14,20 +12,20 @@ func Logout(method string, args SumaSessionKey) error {
 
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Logout API error: %s\n", err)
+		logger.Fatalf("Logout API error: %s\n", err)
 	}
 
 	LogoutResult := new(SumaLogout)
-	//fmt.Printf("Raw xml: %s\n", fmt.Sprintln(resp))
+	//logger.Info("Raw xml: %s\n", fmt.Sprintln(resp))
 	err = xml.DecodeClientResponse(resp.Body, LogoutResult)
 	if err != nil {
-		log.Fatalf("Decode Logout response body failed: %s\n", err)
+		logger.Fatalf("Decode Logout response body failed: %s\n", err)
 	}
 
 	if LogoutResult.ReturnInt == 1 {
-		log.Println("Logout successful.")
+		logger.Infoln("Logout successful.")
 	} else {
-		log.Println("Logout failed.")
+		logger.Infoln("Logout failed.")
 	}
 
 	return nil

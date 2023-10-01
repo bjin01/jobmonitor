@@ -11,12 +11,12 @@ import (
 func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dryrun bool, health *bool) {
 	deadline := time.Now().Add(time.Duration(t.Jobcheck_Timeout) * time.Minute)
 	if dryrun == true {
-		log.Printf("Dryrun mode. SP Migration DryRun Jobs will be monitored.\n")
+		logger.Infof("Dryrun mode. SP Migration DryRun Jobs will be monitored.\n")
 		deadline = time.Now().Add(time.Duration(15) * time.Minute)
 	}
 
 	if dryrun == false {
-		log.Printf("SP Migration Jobs will be monitored.\n")
+		logger.Infof("SP Migration Jobs will be monitored.\n")
 		deadline = time.Now().Add(time.Duration(t.Jobcheck_Timeout) * time.Minute)
 	}
 
@@ -24,7 +24,7 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 		var l schedules.ListJobs
 
 		if *health == false {
-			log.Printf("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
+			logger.Infof("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
 			time.Sleep(125 * time.Second)
 			continue
 		}
@@ -39,9 +39,9 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 
 		if l.Found_Pending_Jobs == false {
 			if dryrun == true {
-				log.Printf("No more pending spmigration dryrun job. Exit job check.\n")
+				logger.Infof("No more pending spmigration dryrun job. Exit job check.\n")
 			} else {
-				log.Printf("No more pending spmigration job. Exit job check.\n")
+				logger.Infof("No more pending spmigration job. Exit job check.\n")
 			}
 			time.Sleep(60 * time.Second)
 			deadline = time.Now()
@@ -49,18 +49,18 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 		}
 
 		if dryrun == true {
-			log.Printf("Spmigration dryrun Job check 20 seconds. Deadline is %+v\n", deadline)
+			logger.Infof("Spmigration dryrun Job check 20 seconds. Deadline is %+v\n", deadline)
 		} else {
-			log.Printf("Spmigration Job check 20 seconds. Deadline is %+v\n", deadline)
+			logger.Infof("Spmigration Job check 20 seconds. Deadline is %+v\n", deadline)
 		}
 
 		for _, Minion := range t.Minion_List {
 			if dryrun == true {
-				log.Printf("Spmigration dryrun Job Status: %s %s %s %d\n", Minion.Migration_Stage,
+				logger.Infof("Spmigration dryrun Job Status: %s %s %s %d\n", Minion.Migration_Stage,
 					Minion.Migration_Stage_Status, Minion.Minion_Name,
 					Minion.Host_Job_Info.SP_Migration_DryRun_Job.JobID)
 			} else {
-				log.Printf("Spmigration Job Status: %s %s %s %d\n", Minion.Migration_Stage,
+				logger.Infof("Spmigration Job Status: %s %s %s %d\n", Minion.Migration_Stage,
 					Minion.Migration_Stage_Status, Minion.Minion_Name, Minion.Host_Job_Info.SP_Migration_Job.JobID)
 			}
 
@@ -69,9 +69,9 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 		t.Write_Tracking_file()
 	}
 	if dryrun == true {
-		log.Printf("Spmigration dryrun Job check deadline reached. %+v\n", deadline)
+		logger.Infof("Spmigration dryrun Job check deadline reached. %+v\n", deadline)
 	} else {
-		log.Printf("Spmigration Job check deadline reached. %+v\n", deadline)
+		logger.Infof("Spmigration Job check deadline reached. %+v\n", deadline)
 	}
 	return
 }
@@ -93,7 +93,7 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 			}
 			if p.Id == *jobid {
 				alljobs.Found_Pending_Jobs = true
-				//fmt.Printf("SP Migration DryRun Pending Job ID: %d\n", p.Id)
+				//logger.Infof("SP Migration DryRun Pending Job ID: %d\n", p.Id)
 
 				if dryrun == true {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_DryRun_Job.JobStatus = "Pending"
@@ -117,7 +117,7 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 			}
 
 			if p.Id == *jobid {
-				//fmt.Printf("SP Migration DryRun Completed Job ID: %d\n", p.Id)
+				//logger.Infof("SP Migration DryRun Completed Job ID: %d\n", p.Id)
 
 				if dryrun == true {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_DryRun_Job.JobStatus = "Completed"
@@ -139,7 +139,7 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 			}
 			if p.Id == *jobid {
 
-				//fmt.Printf("SP Migration DryRun Failed Job ID: %d\n", p.Id)
+				//logger.Infof("SP Migration DryRun Failed Job ID: %d\n", p.Id)
 
 				if dryrun == true {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_DryRun_Job.JobStatus = "Failed"

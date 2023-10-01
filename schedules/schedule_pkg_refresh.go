@@ -1,7 +1,6 @@
 package schedules
 
 import (
-	"log"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -29,27 +28,27 @@ func Create_pkg_refresh_job(sessionkey *auth.SumaSessionKey, serverid int, serve
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &schedule_pkg_refresh_request)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", string(buf))
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", string(buf))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s\n", err)
 	}
-	fmt.Printf("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s\n", responseBody) */
 	reply := new(Schedule_Pkg_Refresh_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
-		log.Printf("Decode Pkg Refresh Job response body failed: %s\n", err)
+		logger.Infof("Decode Pkg Refresh Job response body failed: %s\n", err)
 	}
-	log.Printf("%s: Package refresh JobID: %d\n", servername, reply.JobID)
+	logger.Infof("%s: Package refresh JobID: %d\n", servername, reply.JobID)
 	return nil
 
 }

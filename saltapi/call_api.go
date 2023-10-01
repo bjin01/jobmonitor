@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -14,9 +13,9 @@ func (s *Salt_Data) Run_Manage_Status() {
 	method := "POST"
 
 	if len(s.Target_List) > 0 {
-		fmt.Printf("Target_List: %s\n", s.Target_List)
+		logger.Infof("Target_List: %s\n", s.Target_List)
 	} else {
-		fmt.Printf("Target_List is empty\n")
+		logger.Infof("Target_List is empty\n")
 		return
 	}
 
@@ -31,19 +30,19 @@ func (s *Salt_Data) Run_Manage_Status() {
 	salt_request.Arg = append(salt_request.Arg, "timeout=7")
 	salt_request.Arg = append(salt_request.Arg, "gather_job_timeout=20")
 
-	fmt.Printf("Now calling execute_command\n")
+	logger.Infof("Now calling execute_command\n")
 	response := salt_request.Execute_Command(url, method, s.Token)
 
 	minion_status := Runner_Manage_Status_Response{}
 	if err := json.Unmarshal(response, &minion_status); err != nil { // Parse []byte to go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		logger.Infoln("Can not unmarshal JSON")
 	} else {
-		fmt.Printf("minion_status Up: %v\n", minion_status.Return[0].Up)
-		fmt.Printf("minion_status Down: %v\n", minion_status.Return[0].Down)
+		logger.Infof("minion_status Up: %v\n", minion_status.Return[0].Up)
+		logger.Infof("minion_status Down: %v\n", minion_status.Return[0].Down)
 		s.Online_Minions = minion_status.Return[0].Up
 		s.Offline_Minions = minion_status.Return[0].Down
 	}
-	//fmt.Println(string(body))
+	//logger.Infoln(string(body))
 
 }
 
@@ -54,9 +53,9 @@ func (s *Salt_Data) Run() {
 	method := "POST"
 
 	if len(s.Online_Minions) > 0 {
-		log.Printf("Online_Minions: %s\n", s.Target_List)
+		logger.Infof("Online_Minions: %s\n", s.Target_List)
 	} else {
-		log.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -79,12 +78,12 @@ func (s *Salt_Data) Run() {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/minions", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, s.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 	s.Return = response
 }
 
@@ -92,10 +91,10 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 
 	payloadBytes, err := json.MarshalIndent(u, "", "   ")
 	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
+		logger.Infoln("Error marshaling JSON:", err)
 		return nil
 	}
-	//fmt.Printf("payloadBytes: %v\n", string(payloadBytes))
+	//logger.Infof("payloadBytes: %v\n", string(payloadBytes))
 
 	payload := bytes.NewReader(payloadBytes)
 
@@ -108,26 +107,26 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 		Transport: transport,
 	}
 	req, err := http.NewRequest(method, url, payload)
-	//fmt.Printf("req: %v\n", req)
+	//logger.Infof("req: %v\n", req)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return nil
 	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Auth-Token", token)
-	//fmt.Printf("req: %v\n", req)
+	//logger.Infof("req: %v\n", req)
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return nil
 	}
-	//fmt.Printf("execute command res body: %v\n", res.Body)
+	//logger.Infof("execute command res body: %v\n", res.Body)
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return nil
 	}
 	return body
@@ -137,10 +136,10 @@ func (u *Salt_Request_Async) Execute_Command_Async(url string, method string, to
 
 	payloadBytes, err := json.MarshalIndent(u, "", "   ")
 	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
+		logger.Infoln("Error marshaling JSON:", err)
 		return nil
 	}
-	/* fmt.Printf("payloadBytes: %v\n", string(payloadBytes)) */
+	/* logger.Infof("payloadBytes: %v\n", string(payloadBytes)) */
 
 	payload := bytes.NewReader(payloadBytes)
 
@@ -154,33 +153,33 @@ func (u *Salt_Request_Async) Execute_Command_Async(url string, method string, to
 	}
 
 	req, err := http.NewRequest(method, url, payload)
-	//fmt.Printf("req: %v\n", req)
+	//logger.Infof("req: %v\n", req)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return nil
 	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Auth-Token", token)
-	//fmt.Printf("req: %v\n", req)
+	//logger.Infof("req: %v\n", req)
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return nil
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 		return nil
 	}
 
 	/* async_response := new(Salt_Async_Response)
 	if err := json.Unmarshal(body, &async_response); err != nil { // Parse []byte to go struct pointer
-		log.Println("Can not unmarshal JSON")
+		logger.Infof("Can not unmarshal JSON")
 	} else {
-		log.Printf("salt api async_response: %v\n", async_response)
+		logger.Infof("salt api async_response: %v\n", async_response)
 	} */
 
 	return body

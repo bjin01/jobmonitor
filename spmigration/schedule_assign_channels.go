@@ -2,7 +2,6 @@ package spmigration
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -93,26 +92,26 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 
 		buf, err := gorillaxml.EncodeClientRequest(method, &params)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
-		//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+		//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 		resp, err := request.MakeRequest(buf)
 		if err != nil {
-			log.Fatalf("Encoding error: %s\n", err)
+			logger.Fatalf("Encoding error: %s\n", err)
 		}
 
 		/* responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalf("ReadAll error: %s\n", err)
+			logger.Fatalf("ReadAll error: %s\n", err)
 		}
-		fmt.Printf("responseBody: %s\n", responseBody) */
+		logger.Infof("responseBody: %s\n", responseBody) */
 
 		reply := new(Get_Channels_Response)
 		err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 		if err != nil {
-			log.Fatalf("Decode Get Channel Reponse body failed: %s\n", err)
+			logger.Fatalf("Decode Get Channel Reponse body failed: %s\n", err)
 		}
-		//fmt.Printf("Channel list %v\n", reply.Result)
+		//logger.Infof("Channel list %v\n", reply.Result)
 		var set_channels_request Change_Channels_Request
 		set_channels_request.Sessionkey = sessionkey.Sessionkey
 		set_channels_request.Sid = minion.Minion_ID
@@ -120,15 +119,15 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 
 		var old_base_channel_label string
 		for _, channel := range reply.Result {
-			//fmt.Printf("Channel: %v\n", channel)
+			//logger.Infof("Channel: %v\n", channel)
 			var temp_base_channel_label string
 			var temp_Child_label string
 			update_channel_prefix := new(string)
-			fmt.Println("Channel: ", channel.Label)
+			logger.Infoln("Channel: ", channel.Label)
 			if strings.TrimSpace(channel.Clone_original) != "" {
 
 				if strings.TrimSpace(channel.Parent_channel_label) == "" {
-					log.Printf("Channel %s has no parent channel label\n", channel.Label)
+					logger.Infof("Channel %s has no parent channel label\n", channel.Label)
 					break
 				} else {
 					parts := strings.Split(strings.TrimSpace(channel.Parent_channel_label), "-")
@@ -144,10 +143,10 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 						if !host_already_exist {
 							var minion_env = map[string]string{minion.Minion_Name: parts[1]}
 							t.Minion_Environment_List = append(t.Minion_Environment_List, minion_env)
-							log.Printf("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
+							logger.Infof("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
 						}
 					} else {
-						log.Printf("%s: Channel %s could not be parsed.\n", minion.Minion_Name, channel.Label)
+						logger.Infof("%s: Channel %s could not be parsed.\n", minion.Minion_Name, channel.Label)
 						for _, map_keyval := range t.Minion_Environment_List {
 							for host := range map_keyval {
 								if host == minion.Minion_Name {
@@ -214,45 +213,45 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 				}
 			}
 
-			/* fmt.Printf("Channel ID: %v\n", channel.Id)
-			fmt.Printf("Channel Name: %v\n", channel.Name)
-			fmt.Printf("Channel Label: %v\n", channel.Label)
-			fmt.Printf("Channel Parent Label: %v\n", channel.Parent_channel_label)
-			fmt.Printf("Channel Clone_original Name: %v\n", channel.Clone_original) */
-			//fmt.Println()
+			/* logger.Infof("Channel ID: %v\n", channel.Id)
+			logger.Infof("Channel Name: %v\n", channel.Name)
+			logger.Infof("Channel Label: %v\n", channel.Label)
+			logger.Infof("Channel Parent Label: %v\n", channel.Parent_channel_label)
+			logger.Infof("Channel Clone_original Name: %v\n", channel.Clone_original) */
+			//logger.Infoln()
 		}
 
 		if strings.TrimSpace(set_channels_request.BaseChannelLabel) != "" {
 			if old_base_channel_label == set_channels_request.BaseChannelLabel {
-				log.Printf("Existing %s is already assigned on %s\n", set_channels_request.BaseChannelLabel,
+				logger.Infof("Existing %s is already assigned on %s\n", set_channels_request.BaseChannelLabel,
 					minion.Minion_Name)
 				continue
 			}
 
-			log.Printf("Assigne %s including child channels for: %s\n",
+			logger.Infof("Assigne %s including child channels for: %s\n",
 				set_channels_request.BaseChannelLabel, minion.Minion_Name)
 			buf, err := gorillaxml.EncodeClientRequest("system.scheduleChangeChannels", &set_channels_request)
 			if err != nil {
-				log.Fatalf("Encoding error: %s\n", err)
+				logger.Fatalf("Encoding error: %s\n", err)
 			}
-			//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+			//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 			resp, err := request.MakeRequest(buf)
 			if err != nil {
-				log.Fatalf("Encoding error: %s\n", err)
+				logger.Fatalf("Encoding error: %s\n", err)
 			}
 
 			/* responseBody, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				log.Fatalf("ReadAll error: %s\n", err)
+				logger.Fatalf("ReadAll error: %s\n", err)
 			}
-			fmt.Printf("responseBody: %s\n", responseBody) */
+			logger.Infof("responseBody: %s\n", responseBody) */
 
 			reply := new(Generic_Job_Response)
 			err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 			if err != nil {
-				log.Fatalf("Decode scheduleChangeChannels Job response body failed: %s\n", err)
+				logger.Fatalf("Decode scheduleChangeChannels Job response body failed: %s\n", err)
 			}
-			log.Printf("scheduleChangeChannels JobID: %d\n", reply.JobID)
+			logger.Infof("scheduleChangeChannels JobID: %d\n", reply.JobID)
 			var host_info Host_Job_Info
 			host_info.Assigne_Channels_Job.JobID = reply.JobID
 			host_info.Assigne_Channels_Job.JobStatus = "Scheduled"
@@ -264,7 +263,7 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 			}
 
 		} else {
-			log.Printf("System is already on original channels. %s\n", minion.Minion_Name)
+			logger.Infof("System is already on original channels. %s\n", minion.Minion_Name)
 		}
 	}
 	t.Write_Tracking_file()

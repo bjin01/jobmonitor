@@ -32,7 +32,7 @@ func GetConfig(file string) *SUMAConfig {
 	// Read the file
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 	}
 
 	// Create a struct to hold the YAML data
@@ -41,7 +41,7 @@ func GetConfig(file string) *SUMAConfig {
 	// Unmarshal the YAML data into the struct
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
-		fmt.Println(err)
+		logger.Infoln(err)
 
 	}
 
@@ -60,7 +60,7 @@ func Decrypt(key string, cryptoText string) string {
 		panic(err)
 	} */
 	msg := fernet.VerifyAndDecrypt([]byte(cryptoText), 0, k)
-	//fmt.Println(string(msg))
+	//logger.Infoln(string(msg))
 
 	return fmt.Sprintf("%s", msg)
 }

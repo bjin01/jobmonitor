@@ -3,7 +3,6 @@ package saltapi
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -13,7 +12,7 @@ type Btrfs_for_patching_return struct {
 
 func (s *Salt_Data) Run_Disk_Space_Check() []string {
 	if s.Salt_diskspace_grains_key == "" || s.Salt_diskspace_grains_value == "" {
-		log.Printf("Salt disk space check is not configured. Skipping.\n")
+		logger.Infof("Salt disk space check is not configured. Skipping.\n")
 		return nil
 	}
 
@@ -26,9 +25,9 @@ func (s *Salt_Data) Run_Disk_Space_Check() []string {
 	s.Arg = []string{s.Salt_diskspace_grains_key}
 
 	if len(s.Online_Minions) > 0 {
-		fmt.Printf("Run disk space check for Online_Minions: %s\n", s.Online_Minions)
+		logger.Infof("Run disk space check for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		fmt.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return nil
 	}
@@ -52,17 +51,17 @@ func (s *Salt_Data) Run_Disk_Space_Check() []string {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	fmt.Println(string(response))
+	logger.Infoln(string(response))
 	s.Return = response
 
 	var saltResponse Btrfs_for_patching_return
 	if err := json.Unmarshal(response, &saltResponse); err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		logger.Infoln("Error decoding JSON:", err)
 		return nil
 	}
 
@@ -92,9 +91,9 @@ func (s *Salt_Data) Delete_Grains_keys(grains_key string) {
 	s.Arg = []string{grains_key, "force=True"}
 
 	if len(s.Online_Minions) > 0 {
-		log.Printf("Run grains.delkey %s for Online_Minions: %s\n", s.Arg, s.Online_Minions)
+		logger.Infof("Run grains.delkey %s for Online_Minions: %s\n", s.Arg, s.Online_Minions)
 	} else {
-		log.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -118,12 +117,12 @@ func (s *Salt_Data) Delete_Grains_keys(grains_key string) {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 	s.Return = response
 }
 
@@ -134,9 +133,9 @@ func (s *Salt_Data) Run_Refresh_Grains() {
 	s.SaltCmd = "saltutil.refresh_grains"
 
 	if len(s.Online_Minions) > 0 {
-		log.Printf("Run refresh grains for Online_Minions: %s\n", s.Online_Minions)
+		logger.Infof("Run refresh grains for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		log.Printf("Online_Minions is empty\n")
+		logger.Infof("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -160,11 +159,11 @@ func (s *Salt_Data) Run_Refresh_Grains() {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		log.Printf("salt Argument list is empty\n")
+		logger.Infof("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	//fmt.Println(string(response))
+	//logger.Infoln(string(response))
 	s.Return = response
 }

@@ -1,8 +1,6 @@
 package spmigration
 
 import (
-	"log"
-
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/request"
 	gorillaxml "github.com/divan/gorilla-xmlrpc/xml"
@@ -30,15 +28,15 @@ func Add_Note(sessionkey *auth.SumaSessionKey, sid int, subject string, note str
 	}
 	buf, err := gorillaxml.EncodeClientRequest(method, &add_note_object)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
 	if resp.StatusCode != 200 {
-		log.Printf("Add_Note error: %s\n", err)
+		logger.Infof("Add_Note error: %s\n", err)
 	}
 	return nil
 }
@@ -52,15 +50,15 @@ func Delete_Notes(sessionkey *auth.SumaSessionKey, sid int) error {
 
 	buf, err := gorillaxml.EncodeClientRequest(method, &delete_nodes_object)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
-	//fmt.Printf("buffer: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("buffer: %s\n", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		log.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s\n", err)
 	}
 	if resp.StatusCode != 200 {
-		log.Printf("Delete_Notes error: %s\n", err)
+		logger.Infof("Delete_Notes error: %s\n", err)
 	}
 	return nil
 }
