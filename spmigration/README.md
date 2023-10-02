@@ -135,8 +135,8 @@ salt_post_state: orch.postpatch_states
 jobchecker_timeout: 20
 reboot_timeout: 50
 jobchecker_emails:
-- bo.jin@jinbo01.com
-- bo.jin@suseconsulting.ch
+- bo.jin@example.com
+- bo.jin@example.com
 t7user: t7udp
 authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
