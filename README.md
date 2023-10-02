@@ -1,57 +1,70 @@
-# SUSE Manager - jobmonitor
+# SUSE Manager - jobchecker
 
-This is a jobmonitor written in go.
+This is a jobchecker written in go.
 
-The program needs an SUSE Manager configuration file with login and others.
-SUMA Config file:
-```
-/etc/salt/master.d/spacewalk.conf 
-suma_api:
-  suma1.bo2go.home:
-    username: 'admin'
-    password: tAOdyzcvQ==
-    email_to:
-      - my-addr@domain.com
-    healthcheck_interval: 120
-    healthcheck_email:
-      - my-addr@domain.com
-```
-email_to: is used for /delete_system API to send notifications to.
-
-healthcheck_email: is used to notify admins if SUMA is health check failed.
-
-healthcheck_interval: 120 - is provided in seconds. 2 Minutes is a good interval for health check without overwhelming SUMA API.
-
+## Pre-requisites:
+* SUSE Manager / Uyuni v.4.3.6 or higher
+* Salt-master running on SLES 15 or higher
 
 ## Features:
 * api endpoint - monitor SUSE Manager scheduled jobs, upon completion email notification will be sent.
 * api endpoint - one can make HTTPS POST to the api to delete a system from SUSE Manager.
 * health check - the program periodically makes SUSE Manager HTTP GET request to make health check.
-* product migration - is under development.
+* api endpoint - product migration - Upgrade systems within given groups in SUSE Manager to a defined service pack.
+* email notifications - send job results to predefined list of recipients.
+* api endpoint - salt states, grains execution for pre and post tasks
 
 ## systemd service for jobchecker
-Feel free to use the systemd service file provided in this repo. [jobchecker.service](./etc/systemd/system/jobchecker.service)
+Jobchecker runs as a systemd service. [jobchecker.service](./etc/systemd/system/jobchecker.service)
 
-Inside the service file, you need to 
+The suma-jobchecker runs non-stop. Upone received HTTP requests it will processes the requests in sub-routines concurrently.
+If no any job is in the queue then only health check is running every 10 seconds.
+
+
+Inside the service file, you need to
 * change the path to the binary and the path to the config file.
-* change the Enrivonment variable SUMAKEY to your own key. This key is used to authenticate the api calls.
+* change the Enrivonment variable SUMAKEY to your own key. This key is used to decrypt and encrypt the password value in the SUSE Manager configuration file.
 * change the path of templates to your own path. Examples: [templates](./templates)
 * change the interval to your own interval.
 
-```
-[Service]
-Environment="SUMAKEY=R2bfp223Qa="
-Type=simple
-Restart=always
-ExecStart=/usr/local/bin/jobmonitor -config /etc/salt/master.d/spacewalk.conf -interval 60 -templates /srv/jobmonitor
-```
+## Password encryption
+SUSE Manager configuration file:
+The password is encrypted with the key (SUMAKEY) provided in the systemd service file. The key is used to decrypt the password value.
+
+To encrypt the password, you can use the following command:
+https://github.com/bjin01/salt-sap-patching/blob/master/encrypt.py
 
 ```
-cp jobchecker.service /etc/systemd/system/
-systemctl daemon-reload
+python3.6 encrypt.py <YOUR-PASSWD>
+```
+Output:
+```
+Randomly generated key! Keep it safely!: 
+taZk-X-MRuUSB-xYAzPys41Hi0X1iFDf0wBWynLTodw=
+
+Save this encrypted password in your configuration file.
+gAAAAABlGn1RxFaE9rRVJqVRehxTIJ6sPxPSSFuEvW4GGzmEXpT_b39D6yAQx5Us_FLLsthgUInR0UE0TPl79yf5Dsv-MNM0Bw==
+```
+
+With the encrypted password and the key, you can create the configuration file.
+Example:
+
+```
+cat /etc/salt/master.d/suma.conf 
+suma_api:
+  suma1.bo2go.home:
+    username: 'admin'
+    password: gAAAAABj_xzeu23IpzKM-mYOYO
+    email_to:
+      - bo.jin@example.com
+    healthcheck_interval: 10
+    healthcheck_email:
+      - bo.jin@example.com
 ```
 
 ## Delete system from SUMA via jobchecker api
+This is a HTTP POST request to the jobchecker api endpoint. The jobchecker will delete the system from SUSE Manager.
+The authentication_token is the SUMAKEY defined in the systemd service file.
 ```
 curl http://suma1.bo2go.home:12345/delete_system \
 --data '{ \
