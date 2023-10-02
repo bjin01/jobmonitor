@@ -1,17 +1,18 @@
-SLES Service Pack Migration Engine
+SLES Service Pack Migration Engine - jobchecker
 =================================================
 
-This is a service pack migration engine for SUSE Linux Enterprise Server (SLES) Service Pack (SP) migration written in Go. 
+This is a service pack migration engine for [SUSE Linux Enterprise Server (SLES)](https://www.suse.com/products/server/) Service Pack (SP) migration written in Go. 
 
 Systems from given groups could be migrated to the next service pack.
 
 Reason choosing Go over Python is the concurrency capabilities and stabilities I experienced. Additionally Go is a compiled language and the binary is statically linked. This makes it easy to deploy the binary to any Linux systems.
 
 ## Pre-requisites:
-* SUSE Manager / Uyuni v.4.3.6 or higher
-* Salt minions running on SLES 12 SP4 or higher
-* smtp gateway where jobchecker is running must be configured to allow sending emails to the recipients
-* port 12345 for local or remote access should be open on the firewall
+* [SUSE Manager / Uyuni](https://www.suse.com/products/suse-manager/) v.4.3.6 or higher
+* [Salt-master](https://docs.saltproject.io/en/latest/contents.html) running on SLES 15 or higher
+* SMTP (e.g. postfix) where jobchecker is running must be configured to allow sending emails to the recipients
+* Port 12345 for local or remote access should be open on the firewall
+* Jobchecker must run as local root user
 
 ## Concept:
 The one binary **jobchecker** is listening at port ```12345``` for HTTP requests. The program uses xmlrpc api to call SUSE Manager. On the other hand side jobchecker uses salt tornado rest api to execute salt state, runner and execution modules.
@@ -58,8 +59,8 @@ Inside the service file, you need to
 * change the path of templates to your own path. Examples: [templates](./templates)
 * change the interval to your own interval.
 
-## Password encryption
-SUSE Manager configuration file:
+## SUMA Configuration and Password encryption
+
 The password is encrypted with the key (SUMAKEY) provided in the systemd service file. The key is used to decrypt the password value.
 
 To encrypt the password, you can use the following command:
@@ -80,6 +81,7 @@ gAAAAABlGn1RxFaE9rRVJqVRehxTIJ6sPxPSSFuEvW4GGzmEXpT_b39D6yAQx5Us_FLLsthgUInR0UE0
 With the encrypted password and the key, you can create the configuration file.
 Example:
 
+SUSE Manager configuration file:
 ```
 cat /etc/salt/master.d/suma.conf 
 suma_api:
@@ -92,8 +94,11 @@ suma_api:
     healthcheck_email:
       - bo.jin@example.com
 ```
+
 ## Run spmigration
-In order to start the spmigration workflow which in turn is a HTTP POST Request to jobchecker I created a salt runner module that takes a given configuration file as input parameter.
+In order to start the spmigration workflow which in turn is a HTTP POST Request sent to jobchecker a [salt runner module](https://github.com/bjin01/salt-sap-patching/blob/master/srv/salt/_runners/get_spmigration_targets.py) was created. It takes a given configuration file as input parameter.
+
+The runner module needs to be placed runners directory on salt master node. e.g. /srv/salt/_runners/get_spmigration_targets.py
 
 ```
 salt-run start_spmigration.run config=/srv/salt/spmigration/spmigration_config.yaml
