@@ -50,6 +50,7 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 		}
 	}
 	t.Write_Tracking_file()
+	emails.Send_SPmigration_Email()
 	logger.Infof("Execute analyze pending sp migration for %d minions\n", len(analyze_target_minions.Minion_List))
 
 	analyze_target_minions.Reschedule_Pkg_Refresh(sessionkey)
