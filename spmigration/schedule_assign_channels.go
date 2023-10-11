@@ -131,6 +131,33 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 					break
 				} else {
 					parts := strings.Split(strings.TrimSpace(channel.Parent_channel_label), "-")
+					if len(groupsdata.Target_Products) > 0 {
+						for _, v := range groupsdata.Target_Products {
+							if len(v.Product.OptionalChildChannels) > 0 {
+								for _, optchannel := range v.Product.OptionalChildChannels {
+									if strings.Contains(strings.TrimSpace(channel.Label), strings.TrimSpace(optchannel.Old_Channel)) {
+										if strings.TrimSpace(optchannel.New_Channel) != "" {
+											if v.Product.Clm_Project_Label != "" {
+												new_opt_channel_label := fmt.Sprintf("%s-%s-%s",
+													v.Product.Clm_Project_Label,
+													parts[1],
+													strings.TrimSpace(optchannel.New_Channel))
+												t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels,
+													new_opt_channel_label)
+												logger.Infof("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
+											} else {
+												new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
+												t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels,
+													new_opt_channel_label)
+												logger.Infof("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
 					host_already_exist := false
 					if len(parts) > 2 {
 						for _, map_keyval := range t.Minion_Environment_List {
@@ -181,6 +208,23 @@ func (t *Target_Minions) Assign_Channels(sessionkey *auth.SumaSessionKey, groups
 				set_channels_request.ChildLabels = append(set_channels_request.ChildLabels, temp_Child_label)
 
 			} else {
+				if len(groupsdata.Target_Products) > 0 {
+					for _, v := range groupsdata.Target_Products {
+						if len(v.Product.OptionalChildChannels) > 0 {
+							for _, optchannel := range v.Product.OptionalChildChannels {
+								if strings.Contains(strings.TrimSpace(channel.Label), strings.TrimSpace(optchannel.Old_Channel)) {
+									if strings.TrimSpace(optchannel.New_Channel) != "" {
+										new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
+										t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels,
+											new_opt_channel_label)
+										logger.Infof("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
+
+									}
+								}
+							}
+						}
+					}
+				}
 				host_already_exist := false
 				for _, map_keyval := range t.Minion_Environment_List {
 					for host := range map_keyval {

@@ -41,11 +41,16 @@ type Assigne_Channel struct {
 }
 
 type Target_Product struct {
-	Name                  string   `json:"name"`
-	Ident                 string   `json:"ident"`
-	Base_Channel          string   `json:"base_channel_label"`
-	Clm_Project_Label     string   `json:"clm_project_label"`
-	OptionalChildChannels []string `json:"optionalChildChannels"`
+	Name                  string            `json:"name"`
+	Ident                 string            `json:"ident"`
+	Base_Channel          string            `json:"base_channel_label"`
+	Clm_Project_Label     string            `json:"clm_project_label"`
+	OptionalChildChannels []OptionalChannel `json:"optionalChildChannels"`
+}
+
+type OptionalChannel struct {
+	Old_Channel string `xmlrpc:"old_channel"`
+	New_Channel string `xmlrpc:"new_channel"`
 }
 
 type Generic_Job_Response struct {

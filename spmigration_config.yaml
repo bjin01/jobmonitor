@@ -38,12 +38,15 @@ products:
     base_channel_label: sle-product-sles_sap15-sp5-pool-x86_64
     clm_project_label: mysap15sp5
     optionalChildChannels:
-      - rke2-sles15sp5
+      - old_channel: rke2-sles15sp4
+        new_channel: rke2-sles15sp5
 - product:
     ident: '1396,1423,1431,1411,1415,935,1403,1438'
     name: SUSE Linux Enterprise Server 15 SP4 x86_64
     base_channel_label: sle-product-sles15-sp4-pool-x86_64
     clm_project_label:
     optionalChildChannels:
-      - rke2-sles15sp4
-      - rke2-common-15sp4
+      - old_channel: rke2-sles15sp4
+        new_channel: rke2-sles15sp5
+      - old_channel: rke2-common-15sp4
+        new_channel: rke2-common-15sp5

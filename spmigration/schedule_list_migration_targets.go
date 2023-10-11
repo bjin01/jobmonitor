@@ -114,7 +114,7 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 								minion.Host_Job_Info.Channel_Environment, strings.TrimSpace(v.Product.Base_Channel))
 							t.Minion_List[i].Target_base_channel = target_base_channel
 							t.Minion_List[i].Target_Ident = target.Ident
-							if v.Product.OptionalChildChannels != nil {
+							/* if v.Product.OptionalChildChannels != nil {
 								for _, child := range v.Product.OptionalChildChannels {
 									logger.Infof("%s: Add clm optional channel to schedule spmigration: %s\n",
 										minion.Minion_Name, child)
@@ -122,19 +122,19 @@ func (t *Target_Minions) ListMigrationTarget(sessionkey *auth.SumaSessionKey, Us
 										minion.Host_Job_Info.Channel_Environment, strings.TrimSpace(child))
 									t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels, optional_channel)
 								}
-							}
+							} */
 						} else {
 							// if the env is not provided or empty then we use the base channel only.
 							t.Minion_List[i].Target_base_channel = strings.TrimSpace(v.Product.Base_Channel)
 							t.Minion_List[i].Target_Ident = target.Ident
-							if v.Product.OptionalChildChannels != nil {
+							/* if v.Product.OptionalChildChannels != nil {
 								for _, child := range v.Product.OptionalChildChannels {
 									logger.Infof("%s: Add optional channel to schedule spmigration: %s\n",
 										minion.Minion_Name, child)
 									optional_channel := strings.TrimSpace(child)
 									t.Minion_List[i].Target_Optional_Channels = append(t.Minion_List[i].Target_Optional_Channels, optional_channel)
 								}
-							}
+							} */
 						}
 
 					}
