@@ -23,6 +23,7 @@ type Migration_Groups struct {
 	Reboot_timeout                  int      `json:"reboot_timeout"`
 	JobcheckerEmails                []string `json:"jobchecker_emails"`
 	Patch_Level                     string   `json:"patch_level"`
+	Include_Spmigration             bool     `json:"include_spmigration"`
 	T7User                          string   `json:"t7user"`
 	Token                           string   `json:"authentication_token"`
 	Tracking_file_directory         string   `json:"tracking_file_directory"`

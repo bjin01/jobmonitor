@@ -17,6 +17,10 @@ func (m *Target_Minions) Salt_Refresh_Grains(sessionkey *auth.SumaSessionKey, gr
 		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
 	}
 
+	for _, minion := range m.No_Targets_Minions {
+		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
+	}
+
 	if len(saltdata.Online_Minions) > 0 {
 		saltdata.Login()
 		refresh_grains_return := saltdata.Saltutil_Refresh_Grains()

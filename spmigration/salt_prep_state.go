@@ -29,6 +29,10 @@ func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, g
 		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
 	}
 
+	for _, minion := range m.No_Targets_Minions {
+		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
+	}
+
 	url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	method := "POST"
 

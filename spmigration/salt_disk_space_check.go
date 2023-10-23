@@ -27,6 +27,10 @@ func (m *Target_Minions) Salt_Disk_Space_Check(sessionkey *auth.SumaSessionKey, 
 		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
 	}
 
+	for _, minion := range m.No_Targets_Minions {
+		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
+	}
+
 	if len(saltdata.Online_Minions) > 0 {
 		saltdata.Login()
 		//saltdata.Run_Refresh_Grains()

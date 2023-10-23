@@ -28,6 +28,10 @@ func (m *Target_Minions) Salt_No_Upgrade_Exception_Check(sessionkey *auth.SumaSe
 		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
 	}
 
+	for _, minion := range m.No_Targets_Minions {
+		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
+	}
+
 	if len(saltdata.Online_Minions) > 0 {
 		saltdata.Login()
 		//saltdata.Run_Refresh_Grains()

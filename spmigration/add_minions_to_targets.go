@@ -43,15 +43,15 @@ func (m *Target_Minions) Add_Offline_Minions(list []string) {
 	m.Offline_Minions = append(m.Offline_Minions, unique_minions...)
 }
 
-func (m *Target_Minions) Add_No_Target_Minions(list []string) {
+func (m *Target_Minions) Add_No_Target_Minions(list []Minion_Data) {
 	//m.No_Targets_Minions = make([]string, len(list))
-	unique_minions := []string{}
+	unique_minions := []Minion_Data{}
 
 	for _, minion := range list {
 		exists := false
 		// Check if the Minion_ID is already in the map
 		for _, minion2 := range m.No_Targets_Minions {
-			if minion == minion2 {
+			if minion.Minion_ID == minion2.Minion_ID {
 				// If it is, don't add it again
 				exists = true
 			}

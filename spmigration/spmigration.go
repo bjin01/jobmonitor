@@ -23,7 +23,7 @@ type Target_Minions struct {
 	Disk_Check_Disqualified []string            `json:"Disk_Check_Disqualified"`
 	No_Upgrade_Exceptions   []string            `json:"No_Upgrade_Exceptions"`
 	Offline_Minions         []string            `json:"Offline_Minions"`
-	No_Targets_Minions      []string            `json:"No_Targets_Minions"`
+	No_Targets_Minions      []Minion_Data       `json:"No_Targets_Minions"`
 	CSV_Reports             []string            `json:"CSV_Reports"`
 	Jobcheck_Timeout        int                 `json:"Jobcheck_Timeout"`
 	Reboot_Timeout          int                 `json:"Reboot_Timeout"`
@@ -147,7 +147,9 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 	method := "systemgroup.listSystemsMinimal"
 	//active_minion_ids := Get_Active_Minions_in_Group(sessionkey, groupsdata)
 	//logger.Infof("active_minion_ids: %v\n", active_minion_ids)
-
+	all_minions := []Minion_Data{}
+	no_target_minions := []Minion_Data{}
+	valid_target_minions := []Minion_Data{}
 	for _, group := range groupsdata.Groups {
 		get_system_by_group_request := Get_System_by_Group_Request{
 			Sessionkey: sessionkey.Sessionkey,
@@ -182,57 +184,19 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 
 		if len(response.Params.Param.Value.Array.Data.Values) > 0 {
 			all_minions_in_group := make(map[string][]string)
-			no_target_minions := []string{}
-			valid_target_minions := []Minion_Data{}
+
 			for _, valueStruct := range response.Params.Param.Value.Array.Data.Values {
 				var minion_data Minion_Data
 				// Access specific member values by name
 				minion_data.Minion_Name = valueStruct.GetMemberValue("name").(string)
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
+				all_minions = append(all_minions, minion_data)
 				Delete_Notes(sessionkey, minion_data.Minion_ID)
 				all_minions_in_group[group] = append(all_minions_in_group[group], minion_data.Minion_Name)
 				//logger.Infof("name: %s, id: %d\n", minion_data.Minion_Name, minion_data.Minion_ID)
 				//if Contains(active_minion_ids, minion_data.Minion_ID) {
-				if minion_data.Minion_ID != 0 {
-					ident, target_migration_base_channel := Find_MigrationTarget(sessionkey, minion_data.Minion_ID, groupsdata)
-					if ident != "" && target_migration_base_channel != "" {
-						valid_target_minions = append(valid_target_minions, minion_data)
-						logger.Infof("Minion %s has a valid migration target %s\n",
-							minion_data.Minion_Name, target_migration_base_channel)
-					} else {
-						no_target_minions = append(no_target_minions, minion_data.Minion_Name)
-						subject := "no valid migration target"
-						body := "minion does not have a valid migration target."
-						Add_Note(sessionkey, minion_data.Minion_ID, subject, body)
-						logger.Infof("Minion %s has not a valid migration target\n", minion_data.Minion_Name)
-					}
-				} else {
-					logger.Infof("%s is not active in group %s\n", minion_data.Minion_Name, group)
-				}
-			}
-			var salt_minion_list []string
-			for _, minion := range valid_target_minions {
-				salt_minion_list = append(salt_minion_list, minion.Minion_Name)
-			}
-			offline_minions := Get_salt_online_Minions_in_Group(sessionkey, salt_minion_list, groupsdata)
-			var newMinionList []Minion_Data // Assuming Minion is the type of elements in Minion_List
 
-			for _, minion := range valid_target_minions {
-				if !string_array_contains(offline_minions, minion.Minion_Name) {
-					newMinionList = append(newMinionList, minion)
-				} else {
-					logger.Infof("Minion %s is offline\n", minion.Minion_Name)
-					subject := "minion offline"
-					body := "minion is offline"
-					Add_Note(sessionkey, minion.Minion_ID, subject, body)
-				}
 			}
-
-			//logger.Infof("Minions in group %s: %v\n", group, all_minions_in_group[group])
-			m.Add_Online_Minions(newMinionList)
-			m.Add_Offline_Minions(offline_minions)
-			m.Add_No_Target_Minions(no_target_minions)
-
 			// write all minions in group to a yaml file with group name
 			// create tracking file exists
 			if _, err := os.Stat(fmt.Sprintf("%s/%s.yaml", groupsdata.Tracking_file_directory, group)); os.IsNotExist(err) {
@@ -248,12 +212,41 @@ func (m *Target_Minions) Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata
 		}
 
 	}
+	online_minions, offline_minions := m.Detect_Online_Minions(sessionkey, all_minions, groupsdata)
+
+	for _, minion_data := range online_minions {
+		if minion_data.Minion_ID != 0 {
+			ident, target_migration_base_channel := Find_MigrationTarget(sessionkey, minion_data.Minion_ID, groupsdata)
+			if ident != "" && target_migration_base_channel != "" {
+				valid_target_minions = append(valid_target_minions, minion_data)
+				logger.Infof("Minion %s has a valid migration target %s\n",
+					minion_data.Minion_Name, target_migration_base_channel)
+			} else {
+				no_target_minions = append(no_target_minions, minion_data)
+				subject := "no valid migration target"
+				body := "minion does not have a valid migration target."
+				Add_Note(sessionkey, minion_data.Minion_ID, subject, body)
+				logger.Infof("Minion %s has not a valid migration target\n", minion_data.Minion_Name)
+			}
+		}
+	}
+
+	//logger.Infof("Minions in group %s: %v\n", group, all_minions_in_group[group])
+	m.Add_Online_Minions(valid_target_minions)
+	m.Add_Offline_Minions(offline_minions)
+	m.Add_No_Target_Minions(no_target_minions)
 	//m.Show_Minions()
 	return nil
 }
 
 func (s *Target_Minions) Show_Minions() {
+	logger.Infof("Online Minions with targets:\n")
 	for _, minion := range s.Minion_List {
+		logger.Infof("Minion name: %s, Minion ID: %d\n", minion.Minion_Name, minion.Minion_ID)
+	}
+
+	logger.Infof("Online Minions without targets:\n")
+	for _, minion := range s.No_Targets_Minions {
 		logger.Infof("Minion name: %s, Minion ID: %d\n", minion.Minion_Name, minion.Minion_ID)
 	}
 }
@@ -317,7 +310,7 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 		logger.Infof("Qualifying only is set true so we exit here.\n")
 		return
 	}
-
+	target_minions.Show_Minions()
 	target_minions.Write_Tracking_file()
 	target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 	target_minions.Salt_No_Upgrade_Exception_Check(sessionkey, groupsdata)
