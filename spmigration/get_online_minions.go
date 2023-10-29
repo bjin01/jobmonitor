@@ -14,6 +14,7 @@ func (m *Target_Minions) Detect_Online_Minions(sessionkey *auth.SumaSessionKey, 
 		for _, minion2 := range m.Minion_List {
 			if minion.Minion_ID == minion2.Minion_ID {
 				// If it is, don't add it again
+				logger.Infof("Minion %s already exists in Minion_List\n", minion.Minion_Name)
 				exists = true
 			}
 		}

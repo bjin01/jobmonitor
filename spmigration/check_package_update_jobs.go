@@ -70,7 +70,17 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.Minion_List[i].Migration_Stage_Status = "Pending"
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Pending"
+					}
+				}
+			}
 
+			for i, minion := range t.No_Targets_Minions {
+				for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
+					if minion.Minion_ID == inprogress.Server_id {
+						t.No_Targets_Minions[i].Migration_Stage = "Package Update"
+						t.No_Targets_Minions[i].Migration_Stage_Status = "Pending"
+						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
+						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Pending"
 					}
 				}
 			}
@@ -89,7 +99,16 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.Minion_List[i].Migration_Stage_Status = "Completed"
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Completed"
-
+					}
+				}
+			}
+			for i, minion := range t.No_Targets_Minions {
+				for _, completed := range current_ListSystemInJobs_status.ListCompletedSystems.Result {
+					if minion.Minion_ID == completed.Server_id {
+						t.No_Targets_Minions[i].Migration_Stage = "Package Update"
+						t.No_Targets_Minions[i].Migration_Stage_Status = "Completed"
+						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
+						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Completed"
 					}
 				}
 			}
@@ -104,7 +123,17 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.Minion_List[i].Migration_Stage_Status = "Failed"
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Failed"
+					}
+				}
+			}
 
+			for i, minion := range t.No_Targets_Minions {
+				for _, failed := range current_ListSystemInJobs_status.ListFailedSystems.Result {
+					if minion.Minion_ID == failed.Server_id {
+						t.No_Targets_Minions[i].Migration_Stage = "Package Update"
+						t.No_Targets_Minions[i].Migration_Stage_Status = "Failed"
+						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
+						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Failed"
 					}
 				}
 			}

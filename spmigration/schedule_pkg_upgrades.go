@@ -44,15 +44,20 @@ func (t *Target_Minions) Schedule_Package_Updates(sessionkey *auth.SumaSessionKe
 
 	for _, minion := range t.Minion_List {
 		minion_id_list = append(minion_id_list, minion.Minion_ID)
-		//minion.Get_Upgradable_Packages(sessionkey)
-		/* if minion.Migration_Stage_Status == "Completed" && minion.Migration_Stage == "Pkg_Refresh" {
-
-			logger.Infof("Minion %s is ready to schedule package upgrade\n", minion.Minion_Name)
-			minion.Get_Upgradable_Packages(sessionkey)
-		 }*/
 	}
+
+	for _, minion := range t.No_Targets_Minions {
+		minion_id_list = append(minion_id_list, minion.Minion_ID)
+	}
+
 	JobID_Pkg_Update := t.schedulePackageUpdates(sessionkey, minion_id_list)
 	for _, minion := range t.Minion_List {
+		logger.Infof("minion %s is in stage %s with status %s\n", minion.Minion_Name,
+			minion.Migration_Stage, minion.Migration_Stage_Status)
+		logger.Infof("minion %s has job %d with status %s\n", minion.Minion_Name,
+			minion.Host_Job_Info.Update_Pkg_Job.JobID, minion.Host_Job_Info.Update_Pkg_Job.JobStatus)
+	}
+	for _, minion := range t.No_Targets_Minions {
 		logger.Infof("minion %s is in stage %s with status %s\n", minion.Minion_Name,
 			minion.Migration_Stage, minion.Migration_Stage_Status)
 		logger.Infof("minion %s has job %d with status %s\n", minion.Minion_Name,
@@ -113,6 +118,20 @@ func (t *Target_Minions) schedulePackageUpdates(sessionkey *auth.SumaSessionKey,
 					t.Minion_List[i].Host_Job_Info = host_info
 					t.Minion_List[i].Migration_Stage = "Pkg_Update"
 					t.Minion_List[i].Migration_Stage_Status = "Scheduled"
+
+				}
+			}
+		}
+
+		for i, minion := range t.No_Targets_Minions {
+			for _, minion_id := range minion_id_list {
+				if minion.Minion_ID == minion_id {
+					var host_info Host_Job_Info
+					host_info.Update_Pkg_Job.JobID = reply.JobID
+					host_info.Update_Pkg_Job.JobStatus = "Scheduled"
+					t.No_Targets_Minions[i].Host_Job_Info = host_info
+					t.No_Targets_Minions[i].Migration_Stage = "Pkg_Update"
+					t.No_Targets_Minions[i].Migration_Stage_Status = "Scheduled"
 
 				}
 			}

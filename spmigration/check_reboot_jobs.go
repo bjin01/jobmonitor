@@ -26,6 +26,7 @@ func (t *Target_Minions) Check_Reboot_Jobs(sessionkey *auth.SumaSessionKey, heal
 
 		time.Sleep(10 * time.Second)
 		t.Find_Reboot_Jobs(&l)
+		t.Find_Reboot_Jobs_No_Targets(&l)
 
 		if l.Found_Pending_Jobs == false {
 			logger.Infof("No more reboot job. Exit job check.\n")
@@ -42,6 +43,13 @@ func (t *Target_Minions) Check_Reboot_Jobs(sessionkey *auth.SumaSessionKey, heal
 
 			if Minion.Migration_Stage == "Post Migration Reboot" {
 				logger.Infof("Post Migration Reboot Job Status: %s %s %s\n", Minion.Migration_Stage, Minion.Migration_Stage_Status,
+					Minion.Minion_Name)
+			}
+		}
+
+		for _, Minion := range t.No_Targets_Minions {
+			if Minion.Migration_Stage == "Reboot" {
+				logger.Infof("Reboot Job Status: %s %s %s\n", Minion.Migration_Stage, Minion.Migration_Stage_Status,
 					Minion.Minion_Name)
 			}
 		}
@@ -96,6 +104,39 @@ func (t *Target_Minions) Find_Reboot_Jobs(alljobs *schedules.ListJobs) {
 				t.Minion_List[m].Host_Job_Info.Reboot_Post_MigrationJob.JobStatus = "Failed"
 				t.Minion_List[m].Migration_Stage = "Post Migration Reboot"
 				t.Minion_List[m].Migration_Stage_Status = "Failed"
+			}
+		}
+	}
+}
+
+func (t *Target_Minions) Find_Reboot_Jobs_No_Targets(alljobs *schedules.ListJobs) {
+	for m, Minion := range t.No_Targets_Minions {
+		for _, p := range alljobs.Pending.Result {
+
+			if p.Id == Minion.Host_Job_Info.Reboot_Pre_MigrationJob.JobID {
+				alljobs.Found_Pending_Jobs = true
+				//logger.Infof("Reboot Pending ID: %d\n", p.Id)
+				t.No_Targets_Minions[m].Host_Job_Info.Reboot_Pre_MigrationJob.JobStatus = "Pending"
+				t.No_Targets_Minions[m].Migration_Stage = "Reboot"
+				t.No_Targets_Minions[m].Migration_Stage_Status = "Pending"
+			}
+		}
+
+		for _, p := range alljobs.Completed.Result {
+			if p.Id == Minion.Host_Job_Info.Reboot_Pre_MigrationJob.JobID {
+				//logger.Infof("Reboot Completed Job ID: %d\n", p.Id)
+				t.No_Targets_Minions[m].Host_Job_Info.Reboot_Pre_MigrationJob.JobStatus = "Completed"
+				t.No_Targets_Minions[m].Migration_Stage = "Reboot"
+				t.No_Targets_Minions[m].Migration_Stage_Status = "Completed"
+			}
+		}
+
+		for _, p := range alljobs.Failed.Result {
+			if p.Id == Minion.Host_Job_Info.Reboot_Pre_MigrationJob.JobID {
+				//logger.Infof("Reboot Failed Job ID: %d\n", p.Id)
+				t.No_Targets_Minions[m].Host_Job_Info.Reboot_Pre_MigrationJob.JobStatus = "Failed"
+				t.No_Targets_Minions[m].Migration_Stage = "Reboot"
+				t.No_Targets_Minions[m].Migration_Stage_Status = "Failed"
 			}
 		}
 	}

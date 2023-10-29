@@ -36,6 +36,7 @@ func (m *Target_Minions) Salt_No_Upgrade_Exception_Check(sessionkey *auth.SumaSe
 		saltdata.Login()
 		//saltdata.Run_Refresh_Grains()
 		disqualified_minions := saltdata.Run_No_Upgrade_Grains_Check()
+		logger.Infof("------------Salt_No_Upgrade_Exception_Check: %v\n", disqualified_minions)
 		if len(disqualified_minions) > 0 {
 			m.No_Upgrade_Exceptions = disqualified_minions
 			//logger.Infof("Minions disqualified by no_upgrade exception check: %v\n", disqualified_minions)
@@ -44,7 +45,7 @@ func (m *Target_Minions) Salt_No_Upgrade_Exception_Check(sessionkey *auth.SumaSe
 				if !string_array_contains(disqualified_minions, minion.Minion_Name) {
 					*newMinionList = append(*newMinionList, minion)
 				} else {
-					logger.Infof("Minion %s has no_upgrade exception and is isqualified\n", minion.Minion_Name)
+					logger.Infof("Minion %s has no_upgrade exception and is disqualified\n", minion.Minion_Name)
 					subject := "No_upgrade exception"
 					body := fmt.Sprintf("No_upgrade exception for minion found: %s %s", minion.Minion_Name, m.Suma_Group)
 					Add_Note(sessionkey, minion.Minion_ID, subject, body)
@@ -59,7 +60,28 @@ func (m *Target_Minions) Salt_No_Upgrade_Exception_Check(sessionkey *auth.SumaSe
 			if len(*newMinionList) == 0 {
 				logger.Infof("All minions have been disqualified by no_upgrade exception check. Exiting.\n")
 				m.Minion_List = []Minion_Data{}
-				return
+
+			}
+
+			newMinionList_No_Targets := new([]Minion_Data)
+			for _, minion := range m.No_Targets_Minions {
+				if !string_array_contains(disqualified_minions, minion.Minion_Name) {
+					*newMinionList_No_Targets = append(*newMinionList_No_Targets, minion)
+				} else {
+					logger.Infof("Minion %s without Targets has no_upgrade exception and is disqualified\n", minion.Minion_Name)
+					subject := "No_upgrade or no_patch exception"
+					body := fmt.Sprintf("No_upgrade or no_patch exception for minion without Targets found: %s %s", minion.Minion_Name, m.Suma_Group)
+					Add_Note(sessionkey, minion.Minion_ID, subject, body)
+				}
+			}
+			if len(*newMinionList_No_Targets) > 0 {
+				logger.Infof("Minion list with No_Targets after no_upgrade exception check: %v\n", newMinionList_No_Targets)
+				m.No_Targets_Minions = *newMinionList_No_Targets
+			}
+
+			if len(*newMinionList_No_Targets) == 0 {
+				logger.Infof("All minions with No_Targets have been disqualified by no_upgrade exception check. Exiting.\n")
+				m.No_Targets_Minions = []Minion_Data{}
 			}
 
 		} else {

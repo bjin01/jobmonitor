@@ -31,5 +31,4 @@ func (m *Target_Minions) Salt_CSV_Report(sessionkey *auth.SumaSessionKey, groups
 			m.CSV_Reports = append(m.CSV_Reports, csv_file)
 		}
 	}
-
 }

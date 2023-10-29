@@ -61,6 +61,29 @@ func (m *Target_Minions) Salt_Disk_Space_Check(sessionkey *auth.SumaSessionKey, 
 				return
 			}
 
+			newMinionList_No_Targets := new([]Minion_Data)
+			for _, minion := range m.No_Targets_Minions {
+				if !string_array_contains(disqualified_minions, minion.Minion_Name) {
+					*newMinionList_No_Targets = append(*newMinionList_No_Targets, minion)
+				} else {
+					logger.Infof("Minion without Targets: %s is disk space check disqualified\n", minion.Minion_Name)
+					subject := "btrfs disqualified"
+					note := fmt.Sprintf("/ has less than 2GB free space. %s %s", minion.Minion_Name, m.Suma_Group)
+					Add_Note(sessionkey, minion.Minion_ID, subject, note)
+				}
+			}
+			if len(*newMinionList_No_Targets) > 0 {
+				logger.Infof("Minion list without Targets after disk space check: %v\n", newMinionList_No_Targets)
+				m.No_Targets_Minions = *newMinionList_No_Targets
+
+			}
+
+			if len(*newMinionList_No_Targets) == 0 {
+				logger.Infof("All minions without Targets have been disqualified by disk space check. Exiting.\n")
+				m.No_Targets_Minions = []Minion_Data{}
+				return
+			}
+
 		} else {
 			logger.Infof("All minions passed disk space check.\n")
 		}

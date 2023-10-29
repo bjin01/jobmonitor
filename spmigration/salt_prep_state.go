@@ -86,5 +86,4 @@ func (m *Target_Minions) Salt_Run_state_apply(sessionkey *auth.SumaSessionKey, g
 		}
 		time.Sleep(time.Second * 5)
 	}
-
 }

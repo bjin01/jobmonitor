@@ -26,6 +26,10 @@ func (m *Target_Minions) Salt_Set_Patch_Level(sessionkey *auth.SumaSessionKey, g
 		//saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
 	}
 
+	for _, minion := range m.No_Targets_Minions {
+		saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
+	}
+
 	if len(saltdata.Online_Minions) > 0 {
 		saltdata.Login()
 		set_pl_return := saltdata.Run_Set_Patch_Level()

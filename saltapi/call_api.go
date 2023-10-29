@@ -30,7 +30,7 @@ func (s *Salt_Data) Run_Manage_Status() {
 	salt_request.Arg = append(salt_request.Arg, "timeout=7")
 	salt_request.Arg = append(salt_request.Arg, "gather_job_timeout=20")
 
-	logger.Infof("Now calling execute_command\n")
+	logger.Infof("Now calling salt-run manage.status\n")
 	response := salt_request.Execute_Command(url, method, s.Token)
 
 	minion_status := Runner_Manage_Status_Response{}

@@ -57,6 +57,7 @@ func (m *Target_Minions) Add_No_Target_Minions(list []Minion_Data) {
 			}
 		}
 		if !exists {
+			//logger.Infof("Adding no-target Minion to Minion_List: %s\n", minion.Minion_Name)
 			unique_minions = append(unique_minions, minion)
 		}
 
