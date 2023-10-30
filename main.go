@@ -129,7 +129,7 @@ func main() {
 			return
 		}
 
-		c.JSON(http.StatusOK, data.MinionList)
+		c.JSON(http.StatusOK, data)
 	})
 
 	r.POST("/salt", func(c *gin.Context) {

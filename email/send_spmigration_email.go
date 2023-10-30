@@ -48,6 +48,7 @@ func (s *SPMigration_Email_Body) Send_SPmigration_Results() {
 	/* s.SPmigration_Tracking_File = "/var/log/sumapatch/spmigration_t7udp_20230911074532.yaml"
 	s.Template_dir = "/srv/jobmonitor/" */
 	//err := r.ParseTemplate("template.html", result)
+	logger.Infof("Reading JSON file for Email Notification: %s\n", s.SPmigration_Tracking_File)
 	targets, err := readJSONFile(s.SPmigration_Tracking_File)
 	if err != nil {
 		logger.Warningln(err.Error())

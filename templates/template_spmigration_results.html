@@ -59,6 +59,23 @@
 	{{end}}
 </table>
 <br>
+<h1>No Target Minion List</h1>
+<table>
+        <tr>
+                <th>Minion Name</th>
+                <th>Migration Stage</th>
+                <th>Migration Status</th>
+        </tr>
+        {{range .No_Targets_Minions}}
+        <tr>
+                <td>{{.Minion_Name}}</td>
+                <td>{{.Migration_Stage}}</td>
+                <td>{{.Migration_Stage_Status}}</td>
+        </tr>
+        {{end}}
+</table>
+<br>
+
 <h3 style='color:blueviolet;'>Offline Minions:</h3>
 {{with .Offline_Minions}}
     {{range .}}

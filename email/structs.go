@@ -27,7 +27,7 @@ type Target_Minions struct {
 	Disk_Check_Disqualified []string      `json:"Disk_Check_Disqualified"`
 	No_Upgrade_Exceptions   []string      `json:"No_Upgrade_Exceptions"`
 	Offline_Minions         []string      `json:"Offline_Minions"`
-	No_Targets_Minions      []string      `json:"No_Targets_Minions"`
+	No_Targets_Minions      []Minion_Data `json:"No_Targets_Minions"`
 	CSV_Reports             []string      `json:"CSV_Reports"`
 }
 

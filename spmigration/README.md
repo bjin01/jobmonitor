@@ -128,7 +128,7 @@ salt_user: mysalt
 salt_password: mytest
 salt_diskspace_grains_key: btrfs:for_patching
 salt_diskspace_grains_value: ok
-salt_no_upgrade_exception_key: no_upgrade
+salt_no_upgrade_exception_key: no_patch
 salt_no_upgrade_exception_value: 'true'
 salt_prep_state: orch.prepatch_states
 salt_post_state: orch.postpatch_states
@@ -141,6 +141,7 @@ t7user: t7udp
 authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
 patch_level: 2023-Q5
+include_spmigration: true
 assigne_channels:
 - assigne_channel:
     current_base_channel: mytest-prd-sle-product-sles_sap15-sp4-pool-x86_64
@@ -258,6 +259,9 @@ The purpose of this tracking file is to allow admins to follow the status of the
 
 ### patch_level
 This is a customer specific parameter. The value of this parameter will be used in a built-in salt execution module to set the patch level of the system. 
+
+### include_spmigration
+The include_spmigration parameter is a boolean value. If it is set to true then the workflow will run the spmigration workflow. If it is set to false then the workflow will not run the spmigration workflow. This is useful if admins want to run the workflow for update and patching only.
 
 ### assigne_channels
 ```
