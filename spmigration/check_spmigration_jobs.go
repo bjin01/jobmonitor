@@ -151,8 +151,8 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 				if dryrun == true {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_DryRun_Job.JobStatus = "Failed"
 					t.Minion_List[m].Migration_Stage = "Product Migration DryRun"
-					email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
-					email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+					email_job.Job_Response.Server_name = Minion.Minion_Name
+					email_job.Job_Response.Server_id = Minion.Minion_ID
 					email_job.Job_Response.Job_ID = p.Id
 					email_job.Job_Response.Job_Status = "Product Migration DryRun failed"
 					email_job.Job_Response.T7user = email_job.T7user
@@ -160,8 +160,8 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 				} else {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_Job.JobStatus = "Failed"
 					t.Minion_List[m].Migration_Stage = "Product Migration"
-					email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
-					email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+					email_job.Job_Response.Server_name = Minion.Minion_Name
+					email_job.Job_Response.Server_id = Minion.Minion_ID
 					email_job.Job_Response.Job_ID = p.Id
 					email_job.Job_Response.Job_Status = "Product Migration failed"
 					email_job.Job_Response.T7user = email_job.T7user

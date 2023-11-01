@@ -89,12 +89,12 @@ func (t *Target_Minions) Find_Pkg_Refresh_Jobs(alljobs *schedules.ListJobs, emai
 				t.Minion_List[m].Migration_Stage = "Pkg_Refresh"
 				t.Minion_List[m].Migration_Stage_Status = "Failed"
 
-				email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
-				email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+				/* email_job.Job_Response.Server_name = Minion.Minion_Name
+				email_job.Job_Response.Server_id = Minion.Minion_ID
 				email_job.Job_Response.Job_ID = p.Id
 				email_job.Job_Response.Job_Status = "pkg refresh failed"
 				email_job.Job_Response.T7user = email_job.T7user
-				jobinfo.Send_Job_Response_Email(*email_job)
+				jobinfo.Send_Job_Response_Email(*email_job) */
 
 			}
 		}
@@ -129,12 +129,12 @@ func (t *Target_Minions) Find_Pkg_Refresh_Jobs_No_Targets(alljobs *schedules.Lis
 				t.No_Targets_Minions[m].Host_Job_Info.Pkg_Refresh_Job.JobStatus = "Failed"
 				t.No_Targets_Minions[m].Migration_Stage = "Pkg_Refresh"
 				t.No_Targets_Minions[m].Migration_Stage_Status = "Failed"
-				email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
-				email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+				/* email_job.Job_Response.Server_name = Minion.Minion_Name
+				email_job.Job_Response.Server_id = Minion.Minion_ID
 				email_job.Job_Response.Job_ID = p.Id
 				email_job.Job_Response.Job_Status = "pkg refresh failed"
 				email_job.Job_Response.T7user = email_job.T7user
-				jobinfo.Send_Job_Response_Email(*email_job)
+				jobinfo.Send_Job_Response_Email(*email_job) */
 			}
 		}
 	}

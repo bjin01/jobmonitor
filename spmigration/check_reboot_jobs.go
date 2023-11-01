@@ -178,8 +178,8 @@ func (t *Target_Minions) Find_Reboot_Jobs_No_Targets(alljobs *schedules.ListJobs
 				t.No_Targets_Minions[m].Host_Job_Info.Reboot_Pre_MigrationJob.JobStatus = "Failed"
 				t.No_Targets_Minions[m].Migration_Stage = "Reboot"
 				t.No_Targets_Minions[m].Migration_Stage_Status = "Failed"
-				email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
-				email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+				email_job.Job_Response.Server_name = Minion.Minion_Name
+				email_job.Job_Response.Server_id = Minion.Minion_ID
 				email_job.Job_Response.Job_ID = p.Id
 				email_job.Job_Response.Job_Status = "Reboot failed"
 				email_job.Job_Response.T7user = email_job.T7user
