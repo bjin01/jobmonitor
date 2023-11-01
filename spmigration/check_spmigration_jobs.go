@@ -5,10 +5,11 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dryrun bool, health *bool) {
+func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dryrun bool, email_job email.Job_Email_Body, jobinfo Email_job_info, health *bool) {
 	deadline := time.Now().Add(time.Duration(t.Jobcheck_Timeout) * time.Minute)
 	if dryrun == true {
 		logger.Infof("Dryrun mode. SP Migration DryRun Jobs will be monitored.\n")
@@ -35,7 +36,7 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 		l.GetFailedJobs(sessionkey)
 
 		time.Sleep(10 * time.Second)
-		t.Find_SPMigration_Jobs(&l, dryrun)
+		t.Find_SPMigration_Jobs(&l, dryrun, &email_job, &jobinfo)
 
 		if l.Found_Pending_Jobs == false {
 			if dryrun == true {
@@ -76,7 +77,7 @@ func (t *Target_Minions) Check_SP_Migration(sessionkey *auth.SumaSessionKey, dry
 	return
 }
 
-func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryrun bool) {
+func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryrun bool, email_job *email.Job_Email_Body, jobinfo *Email_job_info) {
 	for m, Minion := range t.Minion_List {
 		for _, p := range alljobs.Pending.Result {
 			jobid := new(int)
@@ -125,6 +126,12 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 				} else {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_Job.JobStatus = "Completed"
 					t.Minion_List[m].Migration_Stage = "Product Migration"
+					/* email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
+					email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+					email_job.Job_Response.Job_ID = p.Id
+					email_job.Job_Response.Job_Status = "Product Migration Completed"
+					email_job.Job_Response.T7user = email_job.T7user
+					jobinfo.Send_Job_Response_Email(*email_job) */
 				}
 				t.Minion_List[m].Migration_Stage_Status = "Completed"
 			}
@@ -144,9 +151,21 @@ func (t *Target_Minions) Find_SPMigration_Jobs(alljobs *schedules.ListJobs, dryr
 				if dryrun == true {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_DryRun_Job.JobStatus = "Failed"
 					t.Minion_List[m].Migration_Stage = "Product Migration DryRun"
+					email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
+					email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+					email_job.Job_Response.Job_ID = p.Id
+					email_job.Job_Response.Job_Status = "Product Migration DryRun failed"
+					email_job.Job_Response.T7user = email_job.T7user
+					jobinfo.Send_Job_Response_Email(*email_job)
 				} else {
 					t.Minion_List[m].Host_Job_Info.SP_Migration_Job.JobStatus = "Failed"
 					t.Minion_List[m].Migration_Stage = "Product Migration"
+					email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
+					email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+					email_job.Job_Response.Job_ID = p.Id
+					email_job.Job_Response.Job_Status = "Product Migration failed"
+					email_job.Job_Response.T7user = email_job.T7user
+					jobinfo.Send_Job_Response_Email(*email_job)
 				}
 				t.Minion_List[m].Migration_Stage_Status = "Failed"
 			}

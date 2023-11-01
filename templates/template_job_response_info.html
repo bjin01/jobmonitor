@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        h1 {
+            text-align: left;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px green;
+        }
+        h3 {
+            padding-left: 5%;
+            font-weight: bold;
+        }
+        p {
+            padding-left: 7%;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 0.7;
+        }
+        div {
+            border: 2px solid black;
+            outline: #4CAF50 solid 10px;
+            margin: auto;
+        }
+        table, td, th {  
+          border: 1px solid #ddd;
+          text-align: left;
+        }
+
+        table {
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        th, td {
+          padding: 15px;
+        }
+    </style>
+</head>
+<title>SUSE Manager - Job Response</title>
+</head>
+<body>
+
+<h1 style="text-align: center;">SUSE Manager - Job Response</h1>
+<p>Reported by Jobchecker.</p><br><br>
+<br>
+<h3 style='color:blueviolet;'>Job {{ .Job_ID }}:</h3>
+<p>System: {{ .Server_name }}</p>
+<p>t7user: {{ .T7user }}</p>
+<p>Server_ID: {{ .Server_id }}</p>
+<p>Job Status: {{ .Job_Status }}</p>
+
+</body>
+</html>

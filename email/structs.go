@@ -1,5 +1,7 @@
 package email
 
+import "time"
+
 type Templates_Dir struct {
 	Dir string
 }
@@ -18,6 +20,26 @@ type SPMigration_Email_Body struct {
 	Template_dir              string
 	SPmigration_Tracking_File string
 	Recipients                []string
+}
+
+type Job_Email_Body struct {
+	Host         string
+	Port         int
+	T7user       string
+	Template_dir string
+	Recipients   []string
+	Job_Response Job_Response
+}
+
+type Job_Response struct {
+	Server_name  string
+	Base_channel string
+	Server_id    int
+	T7user       string
+	Timestamp    time.Time
+	//Message      string
+	Job_ID     int
+	Job_Status string
 }
 
 type Target_Minions struct {

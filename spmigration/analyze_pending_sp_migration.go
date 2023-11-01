@@ -13,6 +13,13 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	var analyze_target_minions Target_Minions
 	emails := new(email.SPMigration_Email_Body)
 	emails.Recipients = groupsdata.JobcheckerEmails
+	email_job := new(email.Job_Email_Body)
+	email_job.Recipients = groupsdata.JobcheckerEmails
+	email_job.Template_dir = email_template_dir
+	email_job.T7user = groupsdata.T7User
+
+	jobinfo := new(Email_job_info)
+
 	analyze_target_minions.Tracking_file_name = fmt.Sprintf("%s.analyse", t.Tracking_file_name)
 	emails.SPmigration_Tracking_File = analyze_target_minions.Tracking_file_name
 	emails.Template_dir = email_template_dir
@@ -57,7 +64,7 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
-	analyze_target_minions.Check_Pkg_Refresh_Jobs(sessionkey, health)
+	analyze_target_minions.Check_Pkg_Refresh_Jobs(sessionkey, *email_job, *jobinfo, health)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
@@ -65,14 +72,14 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
-	analyze_target_minions.Check_Package_Updates_Jobs(sessionkey, jobid, health)
+	analyze_target_minions.Check_Package_Updates_Jobs(sessionkey, jobid, *email_job, *jobinfo, health)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
 	analyze_target_minions.Schedule_Reboot(sessionkey)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
-	analyze_target_minions.Check_Reboot_Jobs(sessionkey, health)
+	analyze_target_minions.Check_Reboot_Jobs(sessionkey, *email_job, *jobinfo, health)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
@@ -83,14 +90,14 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	analyze_target_minions.Schedule_Migration(sessionkey, groupsdata, true)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
-	analyze_target_minions.Check_SP_Migration(sessionkey, true, health)
+	analyze_target_minions.Check_SP_Migration(sessionkey, true, *email_job, *jobinfo, health)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
 	analyze_target_minions.Schedule_Migration(sessionkey, groupsdata, false)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
-	analyze_target_minions.Check_SP_Migration(sessionkey, false, health)
+	analyze_target_minions.Check_SP_Migration(sessionkey, false, *email_job, *jobinfo, health)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 
@@ -100,7 +107,7 @@ func (t *Target_Minions) Analyze_Pending_SPMigration(sessionkey *auth.SumaSessio
 	analyze_target_minions.Schedule_Reboot(sessionkey)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
-	analyze_target_minions.Check_Reboot_Jobs(sessionkey, health)
+	analyze_target_minions.Check_Reboot_Jobs(sessionkey, *email_job, *jobinfo, health)
 	t.Update_Target_Minion_Status(&analyze_target_minions)
 	t.Write_Tracking_file()
 }

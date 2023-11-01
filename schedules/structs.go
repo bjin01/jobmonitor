@@ -53,6 +53,7 @@ type Job struct {
 	ServerID   int    `json:"serverid,omitempty"`
 	JobID      int    `json:"jobid,omitempty"`
 	Masterplan string `json:"masterplan,omitempty"`
+	//Message    string `json:"message,omitempty"`
 }
 
 type Full_Update_Jobs struct {
@@ -131,6 +132,7 @@ type ListSystemInJobs_Response struct {
 		Base_channel string
 		Server_id    int
 		Timestamp    time.Time
+		Message      string
 	}
 }
 

@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/schedules"
 )
 
-func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey, health *bool) {
+func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey, email_job email.Job_Email_Body, jobinfo Email_job_info, health *bool) {
 
 	deadline := time.Now().Add(time.Duration(15) * time.Minute)
 	extended_deadline_counter := 0
@@ -26,8 +27,8 @@ func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey,
 		l.GetFailedJobs(sessionkey)
 
 		time.Sleep(10 * time.Second)
-		t.Find_Pkg_Refresh_Jobs(&l)
-		t.Find_Pkg_Refresh_Jobs_No_Targets(&l)
+		t.Find_Pkg_Refresh_Jobs(&l, &email_job, &jobinfo)
+		t.Find_Pkg_Refresh_Jobs_No_Targets(&l, &email_job, &jobinfo)
 
 		if l.Found_Pending_Jobs == false {
 			logger.Infof("No more pending pkg refresh job. Exit job check.\n")
@@ -59,7 +60,7 @@ func (t *Target_Minions) Check_Pkg_Refresh_Jobs(sessionkey *auth.SumaSessionKey,
 	return
 }
 
-func (t *Target_Minions) Find_Pkg_Refresh_Jobs(alljobs *schedules.ListJobs) {
+func (t *Target_Minions) Find_Pkg_Refresh_Jobs(alljobs *schedules.ListJobs, email_job *email.Job_Email_Body, jobinfo *Email_job_info) {
 	for m, Minion := range t.Minion_List {
 		for _, p := range alljobs.Pending.Result {
 			if p.Id == Minion.Host_Job_Info.Pkg_Refresh_Job.JobID {
@@ -87,12 +88,20 @@ func (t *Target_Minions) Find_Pkg_Refresh_Jobs(alljobs *schedules.ListJobs) {
 				t.Minion_List[m].Host_Job_Info.Pkg_Refresh_Job.JobStatus = "Failed"
 				t.Minion_List[m].Migration_Stage = "Pkg_Refresh"
 				t.Minion_List[m].Migration_Stage_Status = "Failed"
+
+				email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
+				email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+				email_job.Job_Response.Job_ID = p.Id
+				email_job.Job_Response.Job_Status = "pkg refresh failed"
+				email_job.Job_Response.T7user = email_job.T7user
+				jobinfo.Send_Job_Response_Email(*email_job)
+
 			}
 		}
 	}
 }
 
-func (t *Target_Minions) Find_Pkg_Refresh_Jobs_No_Targets(alljobs *schedules.ListJobs) {
+func (t *Target_Minions) Find_Pkg_Refresh_Jobs_No_Targets(alljobs *schedules.ListJobs, email_job *email.Job_Email_Body, jobinfo *Email_job_info) {
 	for m, Minion := range t.No_Targets_Minions {
 		for _, p := range alljobs.Pending.Result {
 			if p.Id == Minion.Host_Job_Info.Pkg_Refresh_Job.JobID {
@@ -120,6 +129,12 @@ func (t *Target_Minions) Find_Pkg_Refresh_Jobs_No_Targets(alljobs *schedules.Lis
 				t.No_Targets_Minions[m].Host_Job_Info.Pkg_Refresh_Job.JobStatus = "Failed"
 				t.No_Targets_Minions[m].Migration_Stage = "Pkg_Refresh"
 				t.No_Targets_Minions[m].Migration_Stage_Status = "Failed"
+				email_job.Job_Response.Server_name = t.Minion_List[m].Minion_Name
+				email_job.Job_Response.Server_id = t.Minion_List[m].Minion_ID
+				email_job.Job_Response.Job_ID = p.Id
+				email_job.Job_Response.Job_Status = "pkg refresh failed"
+				email_job.Job_Response.T7user = email_job.T7user
+				jobinfo.Send_Job_Response_Email(*email_job)
 			}
 		}
 	}

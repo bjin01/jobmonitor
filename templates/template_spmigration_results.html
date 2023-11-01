@@ -109,18 +109,6 @@
     {{end}}
 {{end}}
 
-<h3 style='color:blueviolet;'>Minions without valid targets:</h3>
-{{with .No_Targets_Minions}}
-    {{range .}}
-    {{ if ne . "" }}
-    <p>- {{ . }}</p>
-    {{else}}
-    <p></p>
-    {{end}}
-    {{end}}
-{{end}}
-
-
 <h3 style='color:blueviolet;'>CSV Reports:</h3>
 {{with .CSV_Reports}}
     {{range .}}

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
+	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/request"
 	gorillaxml "github.com/divan/gorilla-xmlrpc/xml"
 )
@@ -29,6 +30,7 @@ type ListSystemInJobs_Response struct {
 		Base_channel string
 		Server_id    int
 		Timestamp    time.Time
+		//Message      string
 	}
 }
 
@@ -37,7 +39,8 @@ type ListSystemInJobs_Request struct {
 	ActionId   int    `xmlrpc:"actionId"`
 }
 
-func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, health *bool) {
+func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
+	email_job email.Job_Email_Body, jobinfo Email_job_info, health *bool) {
 	if jobid_pkg_update == 0 {
 		logger.Infof("No package update job scheduled. Exit check.\n")
 		return
@@ -48,6 +51,7 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 	deadline := time.Now().Add(time.Duration(t.Jobcheck_Timeout) * time.Minute)
 
 	for time.Now().Before(deadline) {
+
 		if *health == false {
 			logger.Infof("SPMigration can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
 			time.Sleep(125 * time.Second)
@@ -99,6 +103,16 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.Minion_List[i].Migration_Stage_Status = "Completed"
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Completed"
+
+						/* email_job.Job_Response.Base_channel = completed.Base_channel
+						email_job.Job_Response.Server_name = completed.Server_name
+						email_job.Job_Response.Timestamp = completed.Timestamp
+						email_job.Job_Response.Server_id = completed.Server_id
+						email_job.Job_Response.Job_ID = jobid_pkg_update
+						email_job.Job_Response.Job_Status = "pkg update Completed"
+						email_job.Job_Response.T7user = email_job.T7user
+						jobinfo.Send_Job_Response_Email(email_job)
+						*/
 					}
 				}
 			}
@@ -109,6 +123,16 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.No_Targets_Minions[i].Migration_Stage_Status = "Completed"
 						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Completed"
+
+						/* 						email_job.Job_Response.Base_channel = completed.Base_channel
+						   						email_job.Job_Response.Server_name = completed.Server_name
+						   						email_job.Job_Response.Timestamp = completed.Timestamp
+						   						email_job.Job_Response.Server_id = completed.Server_id
+						   						email_job.Job_Response.Job_ID = jobid_pkg_update
+						   						email_job.Job_Response.Job_Status = "pkg update Completed"
+						   						email_job.Job_Response.T7user = email_job.T7user
+						   						jobinfo.Send_Job_Response_Email(email_job)
+						*/
 					}
 				}
 			}
@@ -123,6 +147,16 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.Minion_List[i].Migration_Stage_Status = "Failed"
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.Minion_List[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Failed"
+
+						email_job.Job_Response.Base_channel = failed.Base_channel
+						email_job.Job_Response.Server_name = failed.Server_name
+						email_job.Job_Response.Timestamp = failed.Timestamp
+						email_job.Job_Response.Server_id = failed.Server_id
+						email_job.Job_Response.Job_ID = jobid_pkg_update
+						email_job.Job_Response.Job_Status = "pkg update failed"
+						email_job.Job_Response.T7user = email_job.T7user
+						jobinfo.Send_Job_Response_Email(email_job)
+
 					}
 				}
 			}
@@ -134,6 +168,15 @@ func (t *Target_Minions) Check_Package_Updates_Jobs(sessionkey *auth.SumaSession
 						t.No_Targets_Minions[i].Migration_Stage_Status = "Failed"
 						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobID = jobid_pkg_update
 						t.No_Targets_Minions[i].Host_Job_Info.Update_Pkg_Job.JobStatus = "Failed"
+
+						email_job.Job_Response.Base_channel = failed.Base_channel
+						email_job.Job_Response.Server_name = failed.Server_name
+						email_job.Job_Response.Timestamp = failed.Timestamp
+						email_job.Job_Response.Server_id = failed.Server_id
+						email_job.Job_Response.Job_ID = jobid_pkg_update
+						email_job.Job_Response.Job_Status = "pkg update failed"
+						email_job.Job_Response.T7user = email_job.T7user
+						jobinfo.Send_Job_Response_Email(email_job)
 					}
 				}
 			}

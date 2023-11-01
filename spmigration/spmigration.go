@@ -41,6 +41,10 @@ type Minion_Data struct {
 	Target_Optional_Channels []string      `json:"Target_Optional_Channels"`
 }
 
+type Email_job_info struct {
+	Jobinfo []map[int]string
+}
+
 func (c *CustomTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
 
@@ -273,6 +277,12 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	target_minions.Minion_Environment_List = make([]map[string]string, 0)
 	emails := new(email.SPMigration_Email_Body)
 	emails.Recipients = groupsdata.JobcheckerEmails
+	email_job := new(email.Job_Email_Body)
+	email_job.Recipients = groupsdata.JobcheckerEmails
+	email_job.Template_dir = email_template_dir
+	email_job.T7user = groupsdata.T7User
+
+	jobinfo := new(Email_job_info)
 
 	if groupsdata.JobcheckerTimeout != 0 && groupsdata.JobcheckerTimeout > 50 {
 		target_minions.Jobcheck_Timeout = groupsdata.JobcheckerTimeout
@@ -350,22 +360,22 @@ func Orchestrate(sessionkey *auth.SumaSessionKey, groupsdata *Migration_Groups, 
 	//target_minions.Schedule_Pkg_refresh(sessionkey)        // pkg refresh
 	//target_minions.Check_Pkg_Refresh_Jobs(sessionkey)      // deadline 15min
 	JobID_Pkg_Update := target_minions.Schedule_Package_Updates(sessionkey)
-	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update, health)
+	target_minions.Check_Package_Updates_Jobs(sessionkey, JobID_Pkg_Update, *email_job, *jobinfo, health)
 	target_minions.Schedule_Reboot(sessionkey)
-	target_minions.Check_Reboot_Jobs(sessionkey, health)
-	target_minions.Schedule_Pkg_refresh(sessionkey)           // pkg refresh
-	target_minions.Check_Pkg_Refresh_Jobs(sessionkey, health) // deadline 15min
+	target_minions.Check_Reboot_Jobs(sessionkey, *email_job, *jobinfo, health)
+	target_minions.Schedule_Pkg_refresh(sessionkey)                                 // pkg refresh
+	target_minions.Check_Pkg_Refresh_Jobs(sessionkey, *email_job, *jobinfo, health) // deadline 15min
 
 	if groupsdata.Include_Spmigration {
 		target_minions.ListMigrationTarget(sessionkey, groupsdata)
 		target_minions.Schedule_Migration(sessionkey, groupsdata, true)
-		target_minions.Check_SP_Migration(sessionkey, true, health)
+		target_minions.Check_SP_Migration(sessionkey, true, *email_job, *jobinfo, health)
 		target_minions.Schedule_Migration(sessionkey, groupsdata, false)
-		target_minions.Check_SP_Migration(sessionkey, false, health)
+		target_minions.Check_SP_Migration(sessionkey, false, *email_job, *jobinfo, health)
 		target_minions.Salt_Set_Patch_Level(sessionkey, groupsdata)
 		target_minions.Salt_Refresh_Grains(sessionkey, groupsdata)
 		target_minions.Schedule_Reboot(sessionkey)
-		target_minions.Check_Reboot_Jobs(sessionkey, health)
+		target_minions.Check_Reboot_Jobs(sessionkey, *email_job, *jobinfo, health)
 		target_minions.Analyze_Pending_SPMigration(sessionkey, groupsdata, email_template_dir, health)
 	} else {
 		target_minions.Salt_Set_Patch_Level(sessionkey, groupsdata)
