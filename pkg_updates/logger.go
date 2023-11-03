@@ -1,4 +1,4 @@
-package main
+package pkg_updates
 
 import (
 	"io"
@@ -15,7 +15,7 @@ var logger *log.Logger
 
 func init() {
 	logdir := "/var/log/sumapatch"
-	logfile := filepath.Join(logdir, "jobchecker.log")
+	logfile := filepath.Join(logdir, "spmigration.log")
 
 	if err := os.MkdirAll(logdir, 0755); err != nil {
 		log.Fatalf("Failed to create log directory: %v", err)
@@ -38,5 +38,4 @@ func init() {
 	/* mw := io.MultiWriter(os.Stdout, errorlog)
 	log.SetOutput(mw)
 	log.Printf("Logging to: %s\n", logfile) */
-
 }

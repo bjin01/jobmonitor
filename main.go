@@ -13,6 +13,7 @@ import (
 
 	"github.com/bjin01/jobmonitor/delete_systems"
 	"github.com/bjin01/jobmonitor/email"
+	"github.com/bjin01/jobmonitor/pkg_updates"
 	"github.com/bjin01/jobmonitor/saltapi"
 	"github.com/bjin01/jobmonitor/schedules"
 	"github.com/bjin01/jobmonitor/spmigration"
@@ -163,6 +164,32 @@ func main() {
 		} else {
 			c.JSON(http.StatusOK, gin.H{"error": "Authentication failed"})
 		}
+
+	})
+
+	r.POST("/pkg_update", func(c *gin.Context) {
+		var pkg_update_request_obj pkg_updates.Update_Groups
+
+		if *health == false {
+			c.String(200, "Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
+			logger.Infof("Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
+			return
+		}
+		if err := c.ShouldBindJSON(&pkg_update_request_obj); err != nil {
+
+			c.AbortWithError(http.StatusBadRequest, err)
+		}
+
+		if !isValidAuthToken(pkg_update_request_obj.Token) {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		//logger.Fatalf("pkg_update_request_obj %+v\n", pkg_update_request_obj)
+
+		go Pkg_update_groups_lookup(SUMAConfig, &pkg_update_request_obj, templates, health)
+		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
+		//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
 
 	})
 
