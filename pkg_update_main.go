@@ -133,6 +133,12 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 	pkg_updates.Salt_Refresh_Grains_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_No_Upgrade_Exception_Check_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_Disk_Space_Check_New(SessionKey, groupsdata, db)
+	pkg_updates.Salt_Run_state_apply(SessionKey, groupsdata, "pre", db)
+	pkg_updates.Send_Email(groupsdata, email_template_dir, db)
+	if groupsdata.Include_Spmigration {
+		pkg_updates.Assign_Channels(SessionKey, groupsdata, db)
+		//Check_Assigne_Channels_Jobs(sessionkey, health) // deadline 10min
+	}
 
 	all_minions, err := GetAll_Minions_From_DB(db)
 	if err != nil {
@@ -143,6 +149,7 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 		logger.Infof("Minion in DB: %d - %s - Minion Status %s\n", g.Minion_ID, g.Minion_Name, g.Minion_Status)
 		logger.Infof("Minion in DB: Ident: %s - Base Channel %s\n", g.Target_Ident, g.Target_base_channel)
 		logger.Infof("Minion in DB: Remarks: %s\n", g.Minion_Remarks)
+		logger.Infof("Minion in DB: Optional Channels: %v\n", g.Target_Optional_Channels)
 	}
 
 }

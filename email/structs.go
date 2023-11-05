@@ -1,6 +1,10 @@
 package email
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Templates_Dir struct {
 	Dir string
@@ -53,7 +57,7 @@ type Target_Minions struct {
 	CSV_Reports             []string      `json:"CSV_Reports"`
 }
 
-type Minion_Data struct {
+type Minion_Data_SPMigration struct {
 	Minion_ID              int           `json:"Minion_ID"`
 	Minion_Name            string        `json:"Minion_Name"`
 	Host_Job_Info          Host_Job_Info `json:"Host_Job_Info"`
@@ -61,6 +65,46 @@ type Minion_Data struct {
 	Migration_Stage_Status string        `json:"Migration_Stage_Status"`
 	Target_base_channel    string        `json:"Target_base_channel"`
 	Target_Ident           string        `json:"Target_Ident"`
+}
+
+//DB columns: ID, Minion_ID, Minion_Name, Minion_Status, Workflow_Step, JobID, JobStatus, Migration_Stage, Migration_Stage_Status, Target_base_channel, Target_Ident, Target_Optional_Channels, Minion_Groups
+type Minion_Data struct {
+	gorm.Model
+	Minion_ID                int                `json:"Minion_ID"`
+	Minion_Name              string             `json:"Minion_Name"`
+	Minion_Status            string             `json:"Minion_Status"`
+	Minion_Remarks           string             `json:"Minion_Remarks"`
+	Clm_Stage                string             `json:"Clm_Stage"`
+	Workflow_Step            string             `json:"Workflow_Step"`
+	JobID                    int                `json:"JobID"`
+	JobStatus                string             `json:"JobStatus"`
+	Migration_Stage          string             `json:"Migration_Stage"`
+	Migration_Stage_Status   string             `json:"Migration_Stage_Status"`
+	Target_base_channel      string             `json:"Target_base_channel"`
+	Target_Ident             string             `json:"Target_Ident"`
+	Target_Optional_Channels []OptionalChannels `json:"Target_Optional_Channels" gorm:"many2many:Minion_Data_OptionalChannels;"`
+	Minion_Groups            []Group            `json:"Minion_Groups" gorm:"many2many:Minion_Data_Groups;"`
+}
+
+//DB columns: ID, Group_Name, T7User, Email
+type Group struct {
+	gorm.Model
+	Group_Name string             `json:"group_name"`
+	T7User     string             `json:"t7user"`
+	Email      []Jobchecker_Email `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+}
+
+//DB columns: ID, Email, GroupID
+type Jobchecker_Email struct {
+	gorm.Model
+	Email   string `json:"email"`
+	GroupID uint   `json:"group_id"`
+}
+
+//DB columns: ID, Channel_Label
+type OptionalChannels struct {
+	gorm.Model
+	Channel_Label string `json:"channel_label"`
 }
 
 type Host_Job_Info struct {

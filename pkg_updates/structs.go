@@ -57,6 +57,7 @@ type Minion_Data struct {
 	Minion_Name              string             `json:"Minion_Name"`
 	Minion_Status            string             `json:"Minion_Status"`
 	Minion_Remarks           string             `json:"Minion_Remarks"`
+	Clm_Stage                string             `json:"Clm_Stage"`
 	Workflow_Step            string             `json:"Workflow_Step"`
 	JobID                    int                `json:"JobID"`
 	JobStatus                string             `json:"JobStatus"`
