@@ -83,15 +83,16 @@ type Change_Channels_Request struct {
 	EarliestOccurrence time.Time `xmlrpc:"earliestOccurrence"`
 }
 
-func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db *gorm.DB) {
+func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db *gorm.DB, wf []Workflow_Step, minion_list []Minion_Data, stage string) {
 	method := "system.listSubscribedChildChannels"
-	minion_list, err := GetAll_Minions_From_DB(db)
-	if err != nil {
-		logger.Errorf("failed to connect database")
-		return
-	}
 
 	for i, minion := range minion_list {
+		if stage != Find_Next_Stage(wf, minion) {
+			continue
+		} else {
+			logger.Infof("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
+		}
+
 		params := Get_Channels_Request{
 			Sessionkey: sessionkey.Sessionkey,
 			Sid:        minion.Minion_ID,
@@ -130,7 +131,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 			var temp_base_channel_label string
 			var temp_Child_label string
 			update_channel_prefix := new(string)
-			logger.Infoln("Channel: ", channel.Label)
+			//logger.Infoln("Channel: ", channel.Label)
 			if strings.TrimSpace(channel.Clone_original) != "" {
 
 				if strings.TrimSpace(channel.Parent_channel_label) == "" {
@@ -276,13 +277,15 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 			if reply.JobID > 0 {
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", "Assigne_Channels")
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Scheduled")
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_base_channel", set_channels_request.BaseChannelLabel)
 			}
 
 		} else {
 			logger.Infof("System is already on original channels. %s\n", minion.Minion_Name)
+			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
 		}
 	}
 

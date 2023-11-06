@@ -80,10 +80,40 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 	}
 
 	// Create the DB schema
+	db.AutoMigrate(&pkg_updates.Workflow_Step{})
 	db.AutoMigrate(&pkg_updates.Jobchecker_Email{})
 	db.AutoMigrate(&pkg_updates.Group{})
 	db.AutoMigrate(&pkg_updates.OptionalChannels{})
 	db.AutoMigrate(&pkg_updates.Minion_Data{})
+
+	var workflow_steps []pkg_updates.Workflow_Step
+	for _, g := range groupsdata.Workflow {
+		new_workflow := new(pkg_updates.Workflow_Step)
+		for name, step := range g {
+			new_workflow.Name = name
+			new_workflow.Order = step
+
+			workflow_steps = append(workflow_steps, *new_workflow)
+			//fmt.Printf("-----------new_workflow: %+v\n", new_workflow)
+			result := db.FirstOrCreate(&new_workflow, new_workflow)
+			if result.RowsAffected > 0 {
+				logger.Infof("Created workflow step %s - %d\n", name, result.RowsAffected)
+			} else {
+				db.Model(&new_workflow).Where("Name = ?", name).Update("Order", step)
+				logger.Infof("Workflow Step %s already exists\n", name)
+			}
+		}
+	}
+
+	/* wf, err := pkg_updates.Get_Workflow_From_DB(db)
+	if err != nil {
+		logger.Errorf("failed to get workflow from DB.")
+		return
+	}
+
+	for _, w := range wf {
+		logger.Infof("Workflow Step: %s - %d\n", w.Name, w.Order)
+	} */
 
 	for _, g := range groupsdata.Groups {
 
@@ -135,12 +165,11 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 	pkg_updates.Salt_Disk_Space_Check_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_Run_state_apply(SessionKey, groupsdata, "pre", db)
 	pkg_updates.Send_Email(groupsdata, email_template_dir, db)
-	if groupsdata.Include_Spmigration {
-		pkg_updates.Assign_Channels(SessionKey, groupsdata, db)
-		//Check_Assigne_Channels_Jobs(sessionkey, health) // deadline 10min
-	}
 
-	all_minions, err := GetAll_Minions_From_DB(db)
+	go pkg_updates.Check_Jobs(SessionKey, health, db) // deadline 10min
+	go pkg_updates.Start_Workflow(SessionKey, groupsdata, db, health)
+
+	/* all_minions, err := GetAll_Minions_From_DB(db)
 	if err != nil {
 		logger.Errorf("failed to connect database")
 		return
@@ -151,5 +180,5 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 		logger.Infof("Minion in DB: Remarks: %s\n", g.Minion_Remarks)
 		logger.Infof("Minion in DB: Optional Channels: %v\n", g.Target_Optional_Channels)
 	}
-
+	*/
 }

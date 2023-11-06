@@ -11,3 +11,10 @@ func GetAll_Minions_From_DB(db *gorm.DB) ([]Minion_Data, error) {
 	//err := db.Model(&grp).Preload("Posts").Find(&grp).Error
 	return minion_data, err
 }
+
+func Get_Workflow_From_DB(db *gorm.DB) ([]Workflow_Step, error) {
+	var workflow_step []Workflow_Step
+	err := db.Preload(clause.Associations).Find(&workflow_step).Error
+	//err := db.Model(&grp).Preload("Posts").Find(&grp).Error
+	return workflow_step, err
+}

@@ -77,31 +77,32 @@ type OptionalChannels struct {
 
 type Update_Groups struct {
 	gorm.Model
-	Groups                          []string `json:"groups"`
-	Sqlite_db                       string   `json:"sqlite_db"`
-	Qualifying_only                 bool     `json:"qualifying_only"`
-	Delay                           int      `json:"delay"`
-	Timeout                         int      `json:"timeout"`
-	GatherJobTimeout                int      `json:"gather_job_timeout"`
-	Logfile                         string   `json:"logfile"`
-	SaltMaster_Address              string   `json:"salt_master_address"`
-	SaltApi_Port                    int      `json:"salt_api_port"`
-	SaltUser                        string   `json:"salt_user"`
-	SaltPassword                    string   `json:"salt_password"`
-	Salt_diskspace_grains_key       string   `json:"salt_diskspace_grains_key"`
-	Salt_diskspace_grains_value     string   `json:"salt_diskspace_grains_value"`
-	Salt_no_upgrade_exception_key   string   `json:"salt_no_upgrade_exception_key"`
-	Salt_no_upgrade_exception_value string   `json:"salt_no_upgrade_exception_value"`
-	Salt_Prep_State                 string   `json:"salt_prep_state"`
-	Salt_Post_State                 string   `json:"salt_post_state"`
-	JobcheckerTimeout               int      `json:"jobchecker_timeout"`
-	Reboot_timeout                  int      `json:"reboot_timeout"`
-	JobcheckerEmails                []string `json:"jobchecker_emails"`
-	Patch_Level                     string   `json:"patch_level"`
-	Include_Spmigration             bool     `json:"include_spmigration"`
-	T7User                          string   `json:"t7user"`
-	Token                           string   `json:"authentication_token"`
-	Tracking_file_directory         string   `json:"tracking_file_directory"`
+	Groups                          []string         `json:"groups"`
+	Sqlite_db                       string           `json:"sqlite_db"`
+	Qualifying_only                 bool             `json:"qualifying_only"`
+	Delay                           int              `json:"delay"`
+	Timeout                         int              `json:"timeout"`
+	GatherJobTimeout                int              `json:"gather_job_timeout"`
+	Logfile                         string           `json:"logfile"`
+	SaltMaster_Address              string           `json:"salt_master_address"`
+	SaltApi_Port                    int              `json:"salt_api_port"`
+	SaltUser                        string           `json:"salt_user"`
+	SaltPassword                    string           `json:"salt_password"`
+	Salt_diskspace_grains_key       string           `json:"salt_diskspace_grains_key"`
+	Salt_diskspace_grains_value     string           `json:"salt_diskspace_grains_value"`
+	Salt_no_upgrade_exception_key   string           `json:"salt_no_upgrade_exception_key"`
+	Salt_no_upgrade_exception_value string           `json:"salt_no_upgrade_exception_value"`
+	Salt_Prep_State                 string           `json:"salt_prep_state"`
+	Salt_Post_State                 string           `json:"salt_post_state"`
+	JobcheckerTimeout               int              `json:"jobchecker_timeout"`
+	Reboot_timeout                  int              `json:"reboot_timeout"`
+	JobcheckerEmails                []string         `json:"jobchecker_emails"`
+	Patch_Level                     string           `json:"patch_level"`
+	Include_Spmigration             bool             `json:"include_spmigration"`
+	T7User                          string           `json:"t7user"`
+	Token                           string           `json:"authentication_token"`
+	Tracking_file_directory         string           `json:"tracking_file_directory"`
+	Workflow                        []map[string]int `json:"workflow"`
 	Assigne_channels                []struct {
 		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
 	} `json:"assigne_channels"`
@@ -109,6 +110,12 @@ type Update_Groups struct {
 	Target_Products []struct {
 		Product Target_Product `json:"product"`
 	} `json:"products"`
+}
+
+type Workflow_Step struct {
+	gorm.Model
+	Order int    `json:"order"`
+	Name  string `json:"name"`
 }
 
 type Assigne_Channel struct {
