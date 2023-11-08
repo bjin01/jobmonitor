@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px green;
+        }
+        h3 {
+            padding-left: 5%;
+            font-weight: bold;
+        }
+        table {
+          border-collapse: separate;
+          border-spacing: 0 2px;
+        }
+
+        th,
+        td {
+          width: auto;
+          text-align: left;
+          padding: 2px;
+        }
+
+    </style>
+</head>
+<title>SUSE Manager - Package Updates</title>
+</head>
+<body>
+
+<h1 style="text-align: center;">SUSE Manager - Package Updates</h1>
+<p>Reported by Jobchecker.</p><br><br>
+<br>
+<div>
+<h1>Minion List</h1>
+<table>
+        <tr>
+                <th>Minion Name   </th>
+                <th>Status</th>
+                <th>Remarks</th>
+                <th>Workflow Stage</th>
+                <th>Workflow Stage Status</th>
+        </tr>
+        {{range . }}
+        <tr>
+                <td>{{.Minion_Name}}</td>
+                <td>{{.Minion_Status}}</td>
+                <td>{{.Minion_Remarks}}</td>
+                <td>{{.Migration_Stage}}</td>
+                <td>{{.Migration_Stage_Status}}</td>
+        </tr>
+        {{end}}
+</table>
+<br>
+<p>The csv report can be created as you need:</p>
+<p>You have to replace the file name:</p>
+<p>salt-run post_patching.report file=/var/log/sumapatch/all_a_group1_minions.yaml presence_check=True</p>
+<br>
+<p>To get a dump of the DB and minion states run. The db file path can be found in spmigration_config.yaml file.</p>
+<p>You have to replace db file with the correct path:</p>
+<p>curl http://<SUSE-Manager-Hostname>:12345/pkg_update?filename=/srv/sumapatch/08112023_testgrp_t7udp.db</p>
+</div>
+</body>
+</html>
