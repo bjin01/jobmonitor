@@ -23,7 +23,7 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 	if len(s.Online_Minions) > 0 {
 		logger.Infof("Run set patch level for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		logger.Infof("Online_Minions is empty\n")
+		logger.Debugf("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return fmt.Sprintln("Online_Minions is empty")
 	}
@@ -47,7 +47,7 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		logger.Infof("salt Argument list is empty\n")
+		logger.Debugf("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)

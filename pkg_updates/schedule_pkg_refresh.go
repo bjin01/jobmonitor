@@ -31,16 +31,16 @@ func Refresh_Packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflo
 		}
 
 		//fmt.Printf("-----------Query DB Pkg Refresh %d\n", result.RowsAffected)
-		logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
+		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 
 		if stage == Find_Next_Stage(wf, minion) {
-			if minion.JobID == 0 && minion.Migration_Stage == stage {
+			/* if minion.JobID == 0 && minion.Migration_Stage == stage {
 				logger.Infof("Minion %s: set reboot stage as completed due to manual intervention.\n", minion.Minion_Name)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				continue
-			}
-			logger.Infof("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
+			} */
+			logger.Debugf("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
 
 			schedule_pkg_refresh_request := Schedule_Pkg_Refresh_Request{
 				Sessionkey:         sessionkey.Sessionkey,
@@ -80,7 +80,7 @@ func Refresh_Packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflo
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
-				logger.Infof("Minion %s has been scheduled to package refresh.\n", minion.Minion_Name)
+				logger.Infof("Minion %s has been scheduled to %s.\n", minion.Minion_Name, stage)
 			}
 		}
 	} // end of for loop

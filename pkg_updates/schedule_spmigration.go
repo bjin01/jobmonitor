@@ -40,23 +40,25 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 			logger.Errorf("failed to get minion %s from database\n", minion.Minion_Name)
 			return
 		}
-		logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
+		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 
 		if stage == Find_Next_Stage(wf, minion) {
 			if minion.JobID == 0 && minion.Migration_Stage == stage {
-				logger.Infof("Minion %s: set reboot stage as completed due to manual intervention.\n", minion.Minion_Name)
+				logger.Debugf("Minion %s: set %s as completed due to manual intervention.\n", minion.Minion_Name, stage)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				continue
 			}
 
-			logger.Infof("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
+			logger.Debugf("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
 
 			if minion.Target_Ident == "" {
 				log.Default().Printf("Target Ident is empty for minion %s\n", minion.Minion_Name)
-				subject := "Target Ident is empty"
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				/* subject := "Target Ident is empty"
 				note := fmt.Sprintf("No valid migration target found. %s", minion.Minion_Name)
-				Add_Note(sessionkey, minion.Minion_ID, subject, note)
+				Add_Note(sessionkey, minion.Minion_ID, subject, note) */
 				continue
 			}
 
@@ -83,7 +85,7 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 			if dryrun == true {
 				schedule_spmigration_request.DryRun = true
 			} else {
-				logger.Infof("Schedule Product Migration for %s now!\n", minion.Minion_Name)
+				logger.Debugf("Schedule Product Migration for %s now!\n", minion.Minion_Name)
 				schedule_spmigration_request.DryRun = false
 			}
 

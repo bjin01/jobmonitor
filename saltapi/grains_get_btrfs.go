@@ -27,7 +27,7 @@ func (s *Salt_Data) Run_Disk_Space_Check() []string {
 	if len(s.Online_Minions) > 0 {
 		logger.Infof("Run disk space check for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		logger.Infof("Online_Minions is empty\n")
+		logger.Debugf("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return nil
 	}
@@ -51,7 +51,7 @@ func (s *Salt_Data) Run_Disk_Space_Check() []string {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		logger.Infof("salt Argument list is empty\n")
+		logger.Debugf("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
@@ -91,9 +91,9 @@ func (s *Salt_Data) Delete_Grains_keys(grains_key string) {
 	s.Arg = []string{grains_key, "force=True"}
 
 	if len(s.Online_Minions) > 0 {
-		logger.Infof("Run grains.delkey %s for Online_Minions: %s\n", s.Arg, s.Online_Minions)
+		logger.Debugf("Run grains.delkey %s for Online_Minions: %s\n", s.Arg, s.Online_Minions)
 	} else {
-		logger.Infof("Online_Minions is empty\n")
+		logger.Debugf("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -117,7 +117,7 @@ func (s *Salt_Data) Delete_Grains_keys(grains_key string) {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		logger.Infof("salt Argument list is empty\n")
+		logger.Debugf("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
@@ -135,7 +135,7 @@ func (s *Salt_Data) Run_Refresh_Grains() {
 	if len(s.Online_Minions) > 0 {
 		logger.Infof("Run refresh grains for Online_Minions: %s\n", s.Online_Minions)
 	} else {
-		logger.Infof("Online_Minions is empty\n")
+		logger.Debugf("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -159,7 +159,7 @@ func (s *Salt_Data) Run_Refresh_Grains() {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		logger.Infof("salt Argument list is empty\n")
+		logger.Debugf("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)

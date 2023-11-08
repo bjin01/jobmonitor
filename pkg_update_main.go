@@ -2,11 +2,13 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
 	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/pkg_updates"
 	"github.com/bjin01/jobmonitor/request"
+	"github.com/bjin01/jobmonitor/saltapi"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -45,6 +47,14 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 			return
 		}
 	}
+
+	//change pkg_updates logger log level to info
+	pkg_updates.Setup_Logger(groupsdata.Logfile)
+	pkg_updates.SetLoggerLevel(groupsdata.Log_Level)
+	saltapi.Setup_Logger(groupsdata.Logfile)
+	saltapi.SetLoggerLevel(groupsdata.Log_Level)
+	email.Setup_Logger(groupsdata.Logfile)
+	email.SetLoggerLevel(groupsdata.Log_Level)
 
 	//logger.Info("SP Migration input data %v\n", groupsdata)
 	var sumaconf Sumaconf
@@ -163,11 +173,18 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 	pkg_updates.Salt_Refresh_Grains_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_No_Upgrade_Exception_Check_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_Disk_Space_Check_New(SessionKey, groupsdata, db)
-	pkg_updates.Salt_Run_state_apply(SessionKey, groupsdata, "pre", db)
-	pkg_updates.Send_Email(groupsdata, email_template_dir, db)
+	pkg_updates.Salt_Run_state_apply(groupsdata, "pre", db)
 
-	go pkg_updates.Check_Jobs(SessionKey, health, db) // deadline 10min
-	go pkg_updates.Start_Workflow(SessionKey, groupsdata, db, health)
+	deadline := new(time.Time)
+	if groupsdata.JobcheckerTimeout == 0 {
+		*deadline = time.Now().Add(time.Duration(60) * time.Minute)
+	} else {
+		*deadline = time.Now().Add(time.Duration(groupsdata.JobcheckerTimeout) * time.Minute)
+	}
+
+	go pkg_updates.Check_Jobs(SessionKey, health, db, deadline) // deadline 10min
+	go pkg_updates.Start_Workflow(SessionKey, groupsdata, db, health, deadline)
+	go pkg_updates.Send_Email(groupsdata, email_template_dir, db, health, deadline)
 
 	/* all_minions, err := GetAll_Minions_From_DB(db)
 	if err != nil {

@@ -84,6 +84,7 @@ type Update_Groups struct {
 	Timeout                         int              `json:"timeout"`
 	GatherJobTimeout                int              `json:"gather_job_timeout"`
 	Logfile                         string           `json:"logfile"`
+	Log_Level                       string           `json:"log_level"`
 	SaltMaster_Address              string           `json:"salt_master_address"`
 	SaltApi_Port                    int              `json:"salt_api_port"`
 	SaltUser                        string           `json:"salt_user"`

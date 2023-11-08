@@ -13,9 +13,9 @@ func (s *Salt_Data) Run_Manage_Status() {
 	method := "POST"
 
 	if len(s.Target_List) > 0 {
-		logger.Infof("Target_List: %s\n", s.Target_List)
+		logger.Debugf("Target_List: %s\n", s.Target_List)
 	} else {
-		logger.Infof("Target_List is empty\n")
+		logger.Debugf("Target_List is empty\n")
 		return
 	}
 
@@ -53,9 +53,9 @@ func (s *Salt_Data) Run() {
 	method := "POST"
 
 	if len(s.Online_Minions) > 0 {
-		logger.Infof("Online_Minions: %s\n", s.Target_List)
+		logger.Debugf("Online_Minions: %s\n", s.Target_List)
 	} else {
-		logger.Infof("Online_Minions is empty\n")
+		logger.Debugf("Online_Minions is empty\n")
 		s.Return = []byte("Online_Minions is empty")
 		return
 	}
@@ -78,7 +78,7 @@ func (s *Salt_Data) Run() {
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
 	} else {
-		logger.Infof("salt Argument list is empty\n")
+		logger.Debugf("salt Argument list is empty\n")
 	}
 
 	url = fmt.Sprintf("http://%s:%d/minions", s.SaltMaster, s.SaltApi_Port)

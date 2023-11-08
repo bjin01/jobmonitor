@@ -151,11 +151,11 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 													parts[1],
 													strings.TrimSpace(optchannel.New_Channel))
 												db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&OptionalChannels{Channel_Label: new_opt_channel_label})
-												logger.Infof("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
+												logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
 											} else {
 												new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
 												db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&OptionalChannels{Channel_Label: new_opt_channel_label})
-												logger.Infof("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
+												logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
 											}
 										}
 									}
@@ -166,7 +166,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 
 					if len(parts) > 2 {
 						db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", parts[1])
-						logger.Infof("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
+						//logger.Infof("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
 
 					} else {
 						logger.Infof("%s: Channel %s could not be parsed.\n", minion.Minion_Name, channel.Label)
@@ -203,7 +203,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 										new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
 										db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(new_opt_channel_label)
 										db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", "")
-										logger.Infof("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
+										logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
 
 									}
 								}
@@ -241,13 +241,13 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 
 		if strings.TrimSpace(set_channels_request.BaseChannelLabel) != "" {
 			if old_base_channel_label == set_channels_request.BaseChannelLabel {
-				logger.Infof("Existing %s is already assigned on %s\n", set_channels_request.BaseChannelLabel,
+				logger.Debugf("Existing %s is already assigned on %s\n", set_channels_request.BaseChannelLabel,
 					minion.Minion_Name)
 				continue
 			}
 
-			logger.Infof("Assigne %s including child channels for: %s\n",
-				set_channels_request.BaseChannelLabel, minion.Minion_Name)
+			//logger.Infof("Assigne %s including child channels for: %s\n",
+			//	set_channels_request.BaseChannelLabel, minion.Minion_Name)
 			buf, err := gorillaxml.EncodeClientRequest("system.scheduleChangeChannels", &set_channels_request)
 			if err != nil {
 				logger.Fatalf("Encoding error: %s\n", err)
@@ -269,7 +269,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 			if err != nil {
 				logger.Fatalf("Decode scheduleChangeChannels Job response body failed: %s\n", err)
 			}
-			logger.Infof("scheduleChangeChannels JobID: %d\n", reply.JobID)
+			logger.Debugf("scheduleChangeChannels JobID: %d\n", reply.JobID)
 			var host_info Host_Job_Info
 			host_info.Assigne_Channels_Job.JobID = reply.JobID
 			host_info.Assigne_Channels_Job.JobStatus = "Scheduled"
@@ -283,7 +283,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 			}
 
 		} else {
-			logger.Infof("System is already on original channels. %s\n", minion.Minion_Name)
+			logger.Debugf("System is already on original channels. %s\n", minion.Minion_Name)
 			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
 		}

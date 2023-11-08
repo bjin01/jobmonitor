@@ -2,7 +2,6 @@ package pkg_updates
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,7 +24,7 @@ func ListMigrationTarget(sessionkey *auth.SumaSessionKey, UserData *Update_Group
 			return
 		}
 
-		logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
+		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 
 		if stage == Find_Next_Stage(wf, minion) {
 			logger.Infof("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
@@ -123,10 +122,10 @@ func ListMigrationTarget(sessionkey *auth.SumaSessionKey, UserData *Update_Group
 						}
 					}
 				} else {
-					log.Default().Printf("%s\n", minion.Minion_Name)
-					log.Default().Println("No target products provided.")
-					log.Default().Printf("Possible target ident: %s.", target.Ident)
-					log.Default().Printf("Possible target base: %s.", split_result["base"])
+					logger.Debugf("%s\n", minion.Minion_Name)
+					logger.Debugln("No target products provided.")
+					logger.Debugf("Possible target ident: %s.", target.Ident)
+					logger.Debugf("Possible target base: %s.", split_result["base"])
 				}
 			}
 		}

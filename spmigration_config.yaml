@@ -1,6 +1,8 @@
 groups:
 - testgrp
+sqlite_db: "/srv/sumapatch/07112023_testgrp_t7udp.db"
 qualifying_only: true
+log_level: info
 delay: 1
 timeout: 3
 gather_job_timeout: 15
@@ -11,7 +13,7 @@ salt_user: mysalt
 salt_password: mytest
 salt_diskspace_grains_key: btrfs:for_patching
 salt_diskspace_grains_value: ok
-salt_no_upgrade_exception_key: no_upgrade
+salt_no_upgrade_exception_key: no_patch
 salt_no_upgrade_exception_value: 'true'
 salt_prep_state: orch.prepatch_states
 salt_post_state: orch.postpatch_states
@@ -25,6 +27,17 @@ authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
 patch_level: 2023-Q5
 include_spmigration: true
+workflow:
+- assigne_channels: 1
+- package_updates: 2
+- package_update_reboot: 3
+- package_refresh: 4
+- waiting: 5
+- spmigration_dryrun: 6
+- spmigration_run: 7
+- spmigration_reboot: 8
+- package_refresh: 9
+- post_migration: 10
 assigne_channels:
 - assigne_channel:
     current_base_channel: mytest-prd-sle-product-sles_sap15-sp4-pool-x86_64

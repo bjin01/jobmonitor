@@ -31,17 +31,27 @@ func Reboot(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Step, mi
 		}
 
 		//fmt.Printf("-----------Query DB Reboot %d\n", result.RowsAffected)
-		logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
+		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 
 		if stage == Find_Next_Stage(wf, minion) {
 			if minion.JobID == 0 && minion.Migration_Stage == stage {
-				logger.Infof("Minion %s: set reboot stage as completed due to manual intervention.\n", minion.Minion_Name)
+				logger.Debugf("Minion %s: set %s as completed due to manual intervention.\n", minion.Minion_Name, stage)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				continue
 			}
 
-			logger.Infof("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
+			if minion.Target_Ident == "" && (minion.Migration_Stage == "spmigration_run" || minion.Migration_Stage == "spmigration_dryrun") {
+				logger.Debugf("Target Ident is empty for minion %s\n", minion.Minion_Name)
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				/* subject := "Target Ident is empty"
+				note := fmt.Sprintf("No valid migration target found. %s", minion.Minion_Name)
+				Add_Note(sessionkey, minion.Minion_ID, subject, note) */
+				continue
+			}
+
+			logger.Debugf("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
 
 			schedule_reboot_request := Schedule_Reboot_Request{
 				Sessionkey:         sessionkey.Sessionkey,

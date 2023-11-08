@@ -101,17 +101,17 @@ func (s *Salt_Data) Query_Jid() error {
 			if len(job.Target) == len(job.Result) {
 				for hostname, result := range job.Result {
 
-					logger.Infoln("Hostname:", hostname)
+					logger.Debugln("Hostname:", hostname)
 					value_result := seek_interface_keyval(result, "success", false)
-					logger.Infof("value_result: %v\n", value_result)
+					logger.Debugf("value_result: %v\n", value_result)
 					//parse_interface(value_result)
 				}
 				logger.Infoln("All minions returned")
 			} else {
 				for hostname, result := range job.Result {
-					logger.Infoln("Hostname:", hostname)
+					logger.Debugln("Hostname:", hostname)
 					value_result := seek_interface_keyval(result, "success", false)
-					logger.Infof("value_result: %v\n", value_result)
+					logger.Debugf("value_result: %v\n", value_result)
 
 				}
 				logger.Infoln("Still waiting for other minions to return.")
@@ -125,9 +125,9 @@ func (s *Salt_Data) Query_Jid() error {
 			continue
 		}
 
-		logger.Infoln("job returns:", job.Result)
+		logger.Debugln("job returns:", job.Result)
 		for hostname, result := range job.Result {
-			logger.Infoln("Hostname:", hostname)
+			logger.Debugln("Hostname:", hostname)
 			parse_interface(result)
 			/* logger.Infoln("Minion Overall Result:", result.Success) // This will print the raw JSON for each hostname's result
 
@@ -151,11 +151,11 @@ func (s *Salt_Data) Query_Jid() error {
 func parse_interface(data interface{}) {
 	switch v := data.(type) {
 	case string:
-		logger.Infof("%v\n", v)
+		logger.Debugf("%v\n", v)
 	case float64:
-		logger.Infof("%v\n", v)
+		logger.Debugf("%v\n", v)
 	case bool:
-		logger.Infof("%v\n", v)
+		logger.Debugf("%v\n", v)
 	case []interface{}:
 		//logger.Infoln("is an array:")
 		for _, u := range v {
@@ -170,7 +170,7 @@ func parse_interface(data interface{}) {
 			parse_interface(u)
 		}
 	default:
-		logger.Infoln("unknown type!")
+		logger.Debugln("unknown type!")
 	}
 }
 
@@ -213,7 +213,7 @@ func seek_interface_keyval(data interface{}, key string, found bool) interface{}
 			}
 		}
 	default:
-		logger.Infoln("unknown type!")
+		logger.Debugln("unknown type!")
 		return nil
 	}
 	return nil

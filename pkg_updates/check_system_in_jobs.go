@@ -51,7 +51,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 	current_ListSystemInJobs_status.List_Completed_Systems(sessionkey, jobid_pkg_update)
 
 	if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) > 0 {
-		logger.Infof("Lookup job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
+		logger.Debugf("Lookup job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
 			current_ListSystemInJobs_status.ListInProgressSystems)
 
 		for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
@@ -62,7 +62,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 	}
 
 	if len(current_ListSystemInJobs_status.ListCompletedSystems.Result) > 0 {
-		logger.Infof("Lookup job ID: %d: ListCompletedSystems: %v\n", jobid_pkg_update,
+		logger.Debugf("Lookup job ID: %d: ListCompletedSystems: %v\n", jobid_pkg_update,
 			current_ListSystemInJobs_status.ListCompletedSystems)
 		for _, completed := range current_ListSystemInJobs_status.ListCompletedSystems.Result {
 			if minion.Minion_ID == completed.Server_id {
@@ -72,7 +72,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 	}
 
 	if len(current_ListSystemInJobs_status.ListFailedSystems.Result) > 0 {
-		logger.Infof("Lookup job ID: %d: ListFailedSystems: %v\n", jobid_pkg_update,
+		logger.Debugf("Lookup job ID: %d: ListFailedSystems: %v\n", jobid_pkg_update,
 			current_ListSystemInJobs_status.ListFailedSystems)
 
 		for _, failed := range current_ListSystemInJobs_status.ListFailedSystems.Result {

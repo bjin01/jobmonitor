@@ -6,45 +6,32 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/saltapi"
-	"gorm.io/gorm"
 )
 
-func Salt_Run_state_apply(groupsdata *Update_Groups, stage string, db *gorm.DB) {
+func Salt_Run_Post_State(groupsdata *Update_Groups, post_minion_list []string) {
 	saltdata := new(saltapi.Salt_Data)
 	saltdata.SaltMaster = groupsdata.SaltMaster_Address
 	saltdata.SaltApi_Port = groupsdata.SaltApi_Port
 	saltdata.Username = groupsdata.SaltUser
 	saltdata.Password = groupsdata.SaltPassword
 	saltdata.SaltCmd = "state.apply"
-	if stage == "pre" {
-		saltdata.Arg = []string{groupsdata.Salt_Prep_State}
-	} else if stage == "post" {
+	if groupsdata.Salt_Post_State != "" {
 		saltdata.Arg = []string{groupsdata.Salt_Post_State}
 	} else {
-		logger.Infof("Salt_Run_state_apply stage is not pre or post. Exiting.\n")
+		logger.Infof("Salt_Run_Post_State in config yaml is not provided. Exiting.\n")
 		return
 	}
 
-	all_minions, err := GetAll_Minions_From_DB(db)
-	if err != nil {
-		logger.Errorf("failed to connect database")
-		return
-	}
-
-	for _, minion := range all_minions {
-		if minion.Minion_Status == "Online" {
-			saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
-		}
-	}
+	saltdata.Online_Minions = post_minion_list
 
 	url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	method := "POST"
 
 	if len(saltdata.Online_Minions) > 0 {
-		logger.Infof("Salt_Run_state_apply Online_Minions: %s\n", saltdata.Online_Minions)
+		logger.Infof("Salt_Run_Post_State Minions: %s\n", saltdata.Online_Minions)
 	} else {
-		logger.Infof("Salt_Run_state_apply Online_Minions is empty\n")
-		saltdata.Return = []byte("Salt_Run_state_apply Online_Minions is empty")
+		logger.Infof("Salt_Run_Post_State Minions is empty\n")
+		saltdata.Return = []byte("Salt_Run_Post_State Minions is empty")
 		return
 	}
 

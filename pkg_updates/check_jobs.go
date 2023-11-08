@@ -19,11 +19,11 @@ type Job_Data struct {
 	Earliest          time.Time
 }
 
-func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB) {
+func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, deadline *time.Time) {
 
-	deadline := time.Now().Add(time.Duration(60) * time.Minute)
+	//deadline := time.Now().Add(time.Duration(60) * time.Minute)
 
-	for time.Now().Before(deadline) {
+	for time.Now().Before(*deadline) {
 		if *health == false {
 			logger.Infof("Check_Jobs can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
 			time.Sleep(125 * time.Second)
@@ -46,7 +46,7 @@ func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB) {
 		} */
 
 		for _, minion := range all_minions {
-			if minion.JobID == 3 {
+			if minion.JobID == 3 && minion.Migration_Stage == "waiting" {
 				result := db.Where(&Minion_Data{Minion_Name: minion.Minion_Name}).First(&minion)
 				if result.Error != nil {
 					logger.Errorf("failed to get minion %s from database\n", minion.Minion_Name)
@@ -64,7 +64,7 @@ func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB) {
 					return
 				}
 				if status == "pending" {
-					logger.Infof("Minion %s Job %s is still in pending state.\n", minion.Minion_Name, minion.Migration_Stage)
+					logger.Debugf("Minion %s Job %s is still in pending state.\n", minion.Minion_Name, minion.Migration_Stage)
 					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
 					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "pending")
 					continue
@@ -98,15 +98,15 @@ func Match_Job(sessionkey *auth.SumaSessionKey, minion Minion_Data) (string, err
 		return "", err
 	}
 	if status == "pending" {
-		logger.Infof("Minion %s is still in pending state.\n", minion.Minion_Name)
+		logger.Debugf("Minion %s is still in pending state.\n", minion.Minion_Name)
 		return "pending", nil
 	}
 	if status == "completed" {
-		logger.Infof("Minion %s is completed.\n", minion.Minion_Name)
+		logger.Debugf("Minion %s is completed.\n", minion.Minion_Name)
 		return "completed", nil
 	}
 	if status == "failed" {
-		logger.Infof("Minion %s is failed.\n", minion.Minion_Name)
+		logger.Debugf("Minion %s is failed.\n", minion.Minion_Name)
 		return "failed", nil
 	}
 

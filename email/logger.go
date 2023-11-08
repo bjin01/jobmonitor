@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"os"
-	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -13,15 +12,9 @@ var errorlog *os.File
 
 var logger *log.Logger
 
-func init() {
-	logdir := "/var/log/sumapatch"
-	logfile := filepath.Join(logdir, "jobchecker.log")
+func Setup_Logger(log_file string) {
 
-	if err := os.MkdirAll(logdir, 0755); err != nil {
-		log.Fatalf("Failed to create log directory: %v", err)
-	}
-
-	errorlog, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	errorlog, err := os.OpenFile(log_file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
@@ -34,8 +27,23 @@ func init() {
 	}
 
 	logger.SetFormatter(formatter)
-	logger.Infof("Logging to: %v", logfile)
+	logger.Infof("Logging to: %v", log_file)
 	/* mw := io.MultiWriter(os.Stdout, errorlog)
 	log.SetOutput(mw)
 	log.Printf("Logging to: %s\n", logfile) */
+}
+
+func SetLoggerLevel(level string) {
+	switch level {
+	case "info":
+		logger.SetLevel(log.InfoLevel)
+	case "debug":
+		logger.SetLevel(log.DebugLevel)
+	case "error":
+		logger.SetLevel(log.ErrorLevel)
+	case "warn":
+		logger.SetLevel(log.WarnLevel)
+	default:
+		logger.SetLevel(log.InfoLevel)
+	}
 }

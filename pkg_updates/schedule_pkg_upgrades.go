@@ -51,9 +51,9 @@ func Update_packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow
 			return
 		}
 		//fmt.Printf("-----------Query DB package update %d\n", result.RowsAffected)
-		logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
+		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 		if stage == Find_Next_Stage(wf, minion) {
-			logger.Infof("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
+			logger.Debugf("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
 			minion_id_list = append(minion_id_list, minion.Minion_ID)
 
 		}
@@ -77,7 +77,7 @@ func Update_packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow
 
 func SchedulePackageUpdates(sessionkey *auth.SumaSessionKey, minion_id_list []int) int {
 	if len(minion_id_list) == 0 {
-		logger.Infof("No minions to schedule package update\n")
+		logger.Debugf("No minions to schedule package update\n")
 		return 0
 	}
 

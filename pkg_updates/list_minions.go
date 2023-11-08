@@ -25,6 +25,7 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 	//no_target_minions := []Minion_Data{}
 	//valid_target_minions := []Minion_Data{}
 	for _, group := range groupsdata.Groups {
+		all_minions_in_group := make(map[string][]string)
 		get_system_by_group_request := Get_System_by_Group_Request{
 			Sessionkey: sessionkey.Sessionkey,
 			GroupName:  group,
@@ -65,6 +66,7 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 				minion_data.Minion_Name = valueStruct.GetMemberValue("name").(string)
 				minion_data.Minion_ID = valueStruct.GetMemberValue("id").(int)
 				minion_data.Minion_Groups = append(minion_data.Minion_Groups, minion_group)
+				Delete_Notes(sessionkey, minion_data.Minion_ID)
 				result := db.FirstOrCreate(&minion_data, minion_data)
 				if result.RowsAffected > 0 {
 					logger.Infof("Created minion %s - %d\n", minion_data.Minion_Name, result.RowsAffected)
@@ -72,6 +74,7 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 					logger.Infof("Minion %s already exists\n", minion_data.Minion_Name)
 				}
 				all_minions = append(all_minions, minion_data)
+				all_minions_in_group[group] = append(all_minions_in_group[group], minion_data.Minion_Name)
 
 			}
 			// write all minions in group to a yaml file with group name
@@ -83,6 +86,7 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 				}
 				defer file.Close()
 			}
+			writeMapToYAML(fmt.Sprintf("%s/all_%s_minions.yaml", groupsdata.Tracking_file_directory, group), all_minions_in_group)
 
 		}
 
@@ -94,7 +98,7 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 	//logger.Infof("online_minions: %v\n", online_minions)
 	for _, minion_data := range returned_minions {
 		if minion_data.Minion_ID != 0 && minion_data.Minion_Status == "Online" {
-			if groupsdata.Include_Spmigration {
+			/* if groupsdata.Include_Spmigration {
 				ident, target_migration_base_channel := Find_MigrationTarget_New(sessionkey, minion_data.Minion_ID, groupsdata)
 				if ident != "" && target_migration_base_channel != "" {
 					minion_data.Target_Ident = ident
@@ -104,7 +108,6 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 					logger.Infof("Minion %s has a valid migration target %s\n",
 						minion_data.Minion_Name, target_migration_base_channel)
 				} else {
-
 					subject := "no valid migration target"
 					body := "minion does not have a valid migration target."
 					Add_Note(sessionkey, minion_data.Minion_ID, subject, body)
@@ -114,7 +117,8 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 			} else {
 				db.Save(&minion_data)
 
-			}
+			} */
+			db.Save(&minion_data)
 		}
 
 		if minion_data.Minion_ID != 0 && minion_data.Minion_Status == "Offline" {

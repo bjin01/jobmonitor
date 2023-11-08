@@ -44,7 +44,7 @@ func Find_MigrationTarget_New(sessionkey *auth.SumaSessionKey, minionid int, Use
 				//logger.Infof("target ident: %s vs. defined ident: %s\n", target.Ident, v.Product.Ident)
 				//logger.Infof("target product: %s vs. defined product: %s\n", split_result["base"], v.Product.Name)
 				if strings.Contains(target.Ident, v.Product.Ident) {
-					logger.Infof("Ident Match found %s\n", target.Ident)
+					logger.Debugf("Ident Match found %s\n", target.Ident)
 					ident = target.Ident
 					migrate_base_channel = v.Product.Base_Channel
 				}
