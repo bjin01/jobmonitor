@@ -188,9 +188,20 @@ func main() {
 		//logger.Fatalf("pkg_update_request_obj %+v\n", pkg_update_request_obj)
 
 		go Pkg_update_groups_lookup(SUMAConfig, &pkg_update_request_obj, templates, health)
-		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
+		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
 		//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
 
+	})
+
+	r.GET("/pkg_update", func(c *gin.Context) {
+		filename := c.Query("filename")
+		if filename == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing 'filename' parameter"})
+			return
+		}
+
+		result := Pkg_update_groups_lookup_from_file(filename)
+		c.JSON(http.StatusOK, result)
 	})
 
 	r.POST("/spmigration", func(c *gin.Context) {

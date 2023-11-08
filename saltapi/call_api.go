@@ -27,8 +27,7 @@ func (s *Salt_Data) Run_Manage_Status() {
 		Arg:      []string{},
 	}
 
-	salt_request.Arg = append(salt_request.Arg, "timeout=7")
-	salt_request.Arg = append(salt_request.Arg, "gather_job_timeout=20")
+	salt_request.Arg = s.Arg
 
 	logger.Infof("Now calling salt-run manage.status\n")
 	response := salt_request.Execute_Command(url, method, s.Token)
@@ -125,8 +124,9 @@ func (u *Salt_Request) Execute_Command(url string, method string, token string) 
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
+	//logger.Debugf("---------------set patch level response body: %v\n", string(body))
 	if err != nil {
-		logger.Infoln(err)
+		logger.Errorln(err)
 		return nil
 	}
 	return body

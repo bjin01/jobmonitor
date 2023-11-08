@@ -18,7 +18,7 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 	method := "POST"
 
 	s.SaltCmd = "postpatching.set_patchlevel"
-	s.Arg = []string{s.Patch_Level}
+	s.Arg = append(s.Arg, s.Patch_Level)
 
 	if len(s.Online_Minions) > 0 {
 		logger.Infof("Run set patch level for Online_Minions: %s\n", s.Online_Minions)
@@ -46,6 +46,7 @@ func (s *Salt_Data) Run_Set_Patch_Level() string {
 
 	if len(s.Arg) > 0 {
 		salt_request.Arg = s.Arg
+		//logger.Debugf("---------set patch level salt_request.Arg: %v\n", salt_request.Arg)
 	} else {
 		logger.Debugf("salt Argument list is empty\n")
 	}

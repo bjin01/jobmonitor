@@ -47,7 +47,7 @@ func (s *Salt_Data) Saltutil_Refresh_Grains() string {
 
 	url = fmt.Sprintf("http://%s:%d/", s.SaltMaster, s.SaltApi_Port)
 	response := salt_request.Execute_Command(url, method, s.Token)
-	//logger.Infoln(string(response))
+	logger.Infoln(string(response))
 	s.Return = response
 	return fmt.Sprintln(string(response))
 

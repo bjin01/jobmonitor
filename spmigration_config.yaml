@@ -3,7 +3,6 @@ groups:
 sqlite_db: "/srv/sumapatch/07112023_testgrp_t7udp.db"
 qualifying_only: true
 log_level: info
-delay: 1
 timeout: 3
 gather_job_timeout: 15
 logfile: "/var/log/patching/sumapatching.log"
@@ -25,8 +24,7 @@ jobchecker_emails:
 t7user: t7udp
 authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
-patch_level: 2023-Q5
-include_spmigration: true
+patch_level: 2023-Q4
 workflow:
 - assigne_channels: 1
 - package_updates: 2

@@ -13,6 +13,8 @@ This is a jobchecker written in go.
 * api endpoint - product migration - Upgrade systems within given groups in SUSE Manager to a defined service pack.
 * email notifications - send job results to predefined list of recipients.
 * api endpoint - salt states, grains execution for pre and post tasks
+* api endpoint - trigger package updates including service pack migration for groups in SUSE Manager/Uyuni.
+
 
 ## systemd service for jobchecker
 Jobchecker runs as a systemd service. [jobchecker.service](./etc/systemd/system/jobchecker.service)
@@ -62,7 +64,7 @@ suma_api:
       - bo.jin@example.com
 ```
 
-## Delete system from SUMA via jobchecker api
+## Delete a system from SUMA via jobchecker api
 This is a HTTP POST request to the jobchecker api endpoint. The jobchecker will delete the system from SUSE Manager.
 The authentication_token is the SUMAKEY defined in the systemd service file.
 ```

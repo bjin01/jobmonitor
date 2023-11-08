@@ -171,8 +171,35 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 
 	pkg_updates.Get_Minions(SessionKey, groupsdata, db)
 	pkg_updates.Salt_Refresh_Grains_New(SessionKey, groupsdata, db)
+
+	// --------debugging start
+	/* all_minions, err := GetAll_Minions_From_DB(db)
+	if err != nil {
+		logger.Errorf("failed to connect database")
+		return
+	}
+
+	post_minion_list := []pkg_updates.Minion_Data{}
+	for _, g := range all_minions {
+		if g.Minion_Status == "Online" {
+			post_minion_list = append(post_minion_list, g)
+		}
+	}
+	pkg_updates.Post_Migration_Debug(db, groupsdata, post_minion_list, "post_migration")
+	return //for testing */
+	// -----------debugging end
+
 	pkg_updates.Salt_No_Upgrade_Exception_Check_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_Disk_Space_Check_New(SessionKey, groupsdata, db)
+
+	if groupsdata.Qualifying_only {
+		//set deadline to 60 seconds to allow one email sent to admins
+		deadline_qualifying := time.Now().Add(time.Duration(60) * time.Second)
+		go pkg_updates.Send_Email(groupsdata, email_template_dir, db, health, &deadline_qualifying)
+		logger.Infof("Qualifying only is set to true. Stop the workflow here.\n")
+		return
+	}
+
 	pkg_updates.Salt_Run_state_apply(groupsdata, "pre", db)
 
 	deadline := new(time.Time)
@@ -198,4 +225,28 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 		logger.Infof("Minion in DB: Optional Channels: %v\n", g.Target_Optional_Channels)
 	}
 	*/
+}
+
+func Pkg_update_groups_lookup_from_file(filename string) []pkg_updates.Minion_Data {
+	//get db data from filename
+	logger.Infof("Use sqlite database: %s\n", filename)
+	db, err := gorm.Open(gorm.Dialector(&sqlite.Dialector{DSN: filename}),
+		&gorm.Config{})
+	if err != nil {
+		logger.Errorf("failed to initiate database connection.")
+		return nil
+	}
+
+	all_minions, err := GetAll_Minions_From_DB(db)
+	if err != nil {
+		logger.Errorf("failed to connect database in GetAll_Minions_From_DB.")
+		return nil
+	}
+
+	/* jsonData, err := json.Marshal(all_minions)
+	if err != nil {
+		logger.Errorf("failed to marshal data")
+		return nil
+	} */
+	return all_minions
 }

@@ -70,7 +70,7 @@ func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, dead
 					continue
 				}
 				if status == "completed" {
-					logger.Infof("Minion %s Job %s is completed.\n", minion.Minion_Name, minion.Migration_Stage)
+					logger.Debugf("Minion %s Job %s is completed.\n", minion.Minion_Name, minion.Migration_Stage)
 					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "completed")
 					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
 					continue
@@ -111,6 +111,10 @@ func Match_Job(sessionkey *auth.SumaSessionKey, minion Minion_Data) (string, err
 	}
 
 	if status == "not found" {
+		if minion.JobID == 3 {
+			//logger.Infof("Minion %s is not in any job. Maybe job is deleted. Set minion stage to completed.\n", minion.Minion_Name)
+			return "completed", nil
+		}
 		logger.Infof("Minion %s is not in any job. Maybe job is deleted. Set minion stage to completed.\n", minion.Minion_Name)
 		return "completed", nil
 	}
