@@ -191,11 +191,13 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 
 	pkg_updates.Salt_No_Upgrade_Exception_Check_New(SessionKey, groupsdata, db)
 	pkg_updates.Salt_Disk_Space_Check_New(SessionKey, groupsdata, db)
+	//logger.Debugf("---- out of if email templates dir is: %s\n", email_template_dir.Dir)
 
 	if groupsdata.Qualifying_only {
 		//set deadline to 60 seconds to allow one email sent to admins
 		deadline_qualifying := time.Now().Add(time.Duration(60) * time.Second)
-		go pkg_updates.Send_Email(groupsdata, email_template_dir, db, health, &deadline_qualifying)
+		//logger.Debugf("----email templates dir is: %s\n", email_template_dir.Dir)
+		pkg_updates.Send_Email(groupsdata, email_template_dir, db, health, &deadline_qualifying)
 		logger.Infof("Qualifying only is set to true. Stop the workflow here.\n")
 		return
 	}

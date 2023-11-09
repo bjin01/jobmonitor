@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (s *SPMigration_Email_Body) Send_Pkg_Updates_Email(db *gorm.DB) {
+func (s *Job_Email_Body) Send_Pkg_Updates_Email(db *gorm.DB) {
 	auth = smtp.PlainAuth("", "", "", "127.0.0.1")
 
 	r := NewRequest(s.Recipients, "Package Updates Notification - Info", "")
@@ -42,7 +42,7 @@ func (s *SPMigration_Email_Body) Send_Pkg_Updates_Email(db *gorm.DB) {
 
 }
 
-func (s *SPMigration_Email_Body) Send_Pkg_Updates_Results(db *gorm.DB) {
+func (s *Job_Email_Body) Send_Pkg_Updates_Results(db *gorm.DB) {
 	auth = smtp.PlainAuth("", "", "", "127.0.0.1")
 
 	r := NewRequest(s.Recipients, "Package Updates Notification - Result", "")
