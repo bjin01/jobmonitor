@@ -243,6 +243,8 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 			if old_base_channel_label == set_channels_request.BaseChannelLabel {
 				logger.Debugf("Existing %s is already assigned on %s\n", set_channels_request.BaseChannelLabel,
 					minion.Minion_Name)
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
 				continue
 			}
 
