@@ -92,6 +92,11 @@ func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, dead
 
 func Match_Job(sessionkey *auth.SumaSessionKey, minion Minion_Data) (string, error) {
 
+	if minion.JobID == 3 {
+		//logger.Infof("Minion %s is not in any job. Maybe job is deleted. Set minion stage to completed.\n", minion.Minion_Name)
+		return "completed", nil
+	}
+
 	status, err := Check_System_In_Jobs(sessionkey, minion.JobID, minion)
 	if err != nil {
 		logger.Errorf("failed to get job status in Check_System_In_Jobs.")
