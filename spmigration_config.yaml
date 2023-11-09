@@ -16,8 +16,7 @@ salt_no_upgrade_exception_key: no_patch
 salt_no_upgrade_exception_value: 'true'
 salt_prep_state: orch.prepatch_states
 salt_post_state: orch.postpatch_states
-jobchecker_timeout: 20
-reboot_timeout: 50
+jobchecker_timeout: 90
 jobchecker_emails:
 - bo.jin@jinbo01.com
 - bo.jin@suseconsulting.ch
@@ -34,7 +33,7 @@ workflow:
 - spmigration_dryrun: 6
 - spmigration_run: 7
 - spmigration_reboot: 8
-- package_refresh: 9
+- spmigration_package_refresh: 9
 - post_migration: 10
 assigne_channels:
 - assigne_channel:

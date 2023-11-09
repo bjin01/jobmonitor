@@ -145,7 +145,7 @@ workflow:
 - spmigration_dryrun: 6
 - spmigration_run: 7
 - spmigration_reboot: 8
-- package_refresh: 9
+- spmigration_package_refresh: 9
 - post_migration: 10
 assigne_channels:
 - assigne_channel:
