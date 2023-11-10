@@ -118,13 +118,13 @@ func Get_Minions(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db 
 				db.Save(&minion_data)
 
 			} */
-			db.Save(&minion_data)
+			db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Status", "Online")
 		}
 
 		if minion_data.Minion_ID != 0 && minion_data.Minion_Status == "Offline" {
-			db.Save(&minion_data)
+			minion_data.Minion_Remarks = "Offline"
+			db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Status", "Offline")
 		}
 	}
-
 	return nil
 }

@@ -79,6 +79,7 @@ type OptionalChannels struct {
 type Update_Groups struct {
 	gorm.Model
 	Groups          []string `json:"groups"`
+	Minions_to_add  []string `json:"minions_to_add"`
 	Sqlite_db       string   `json:"sqlite_db"`
 	Qualifying_only bool     `json:"qualifying_only"`
 	//Delay                           int              `json:"delay"`

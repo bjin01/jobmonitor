@@ -245,10 +245,5 @@ func Pkg_update_groups_lookup_from_file(filename string) []pkg_updates.Minion_Da
 		return nil
 	}
 
-	/* jsonData, err := json.Marshal(all_minions)
-	if err != nil {
-		logger.Errorf("failed to marshal data")
-		return nil
-	} */
 	return all_minions
 }
