@@ -24,7 +24,7 @@ func Salt_Refresh_Grains_New(sessionkey *auth.SumaSessionKey, groupsdata *Update
 	for _, minion := range all_minions {
 		if minion.Minion_Status == "Online" {
 			saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
-			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
+			db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
 		}
 	}
 
@@ -51,7 +51,7 @@ func Salt_Refresh_Grains_New_by_List(sessionkey *auth.SumaSessionKey, groupsdata
 		if minion.Minion_Status == "Online" {
 			fmt.Printf("add %s to grains refresh.\n", minion.Minion_Name)
 			saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
-			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
+			db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
 		}
 	}
 

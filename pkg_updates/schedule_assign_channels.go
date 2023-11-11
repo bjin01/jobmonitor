@@ -165,12 +165,12 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 					}
 
 					if len(parts) > 2 {
-						db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", parts[1])
+						db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", parts[1])
 						//logger.Infof("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
 
 					} else {
 						logger.Infof("%s: Channel %s could not be parsed.\n", minion.Minion_Name, channel.Label)
-						db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", "")
+						db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", "")
 					}
 				}
 

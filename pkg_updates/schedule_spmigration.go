@@ -45,8 +45,8 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 		if stage == Find_Next_Stage(wf, minion) {
 			if minion.JobID == 0 && minion.Migration_Stage == stage {
 				logger.Debugf("Minion %s: set %s as completed due to manual intervention.\n", minion.Minion_Name, stage)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				continue
 			}
 
@@ -54,8 +54,8 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 
 			if minion.Target_Ident == "" {
 				log.Default().Printf("Target Ident is empty for minion %s\n", minion.Minion_Name)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				/* subject := "Target Ident is empty"
 				note := fmt.Sprintf("No valid migration target found. %s", minion.Minion_Name)
 				Add_Note(sessionkey, minion.Minion_ID, subject, note) */
@@ -111,18 +111,18 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 			}
 
 			if dryrun == true && reply.JobID > 0 {
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				logger.Infof("Minion %s has been scheduled for spmigration dryrun.\n", minion.Minion_Name)
 			}
 
 			if dryrun == false && reply.JobID > 0 {
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				logger.Infof("Minion %s has been scheduled for spmigration.\n", minion.Minion_Name)
 			}
 		}

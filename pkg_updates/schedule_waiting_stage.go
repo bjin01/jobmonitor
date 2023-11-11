@@ -17,10 +17,10 @@ func Waiting_Stage(db *gorm.DB, wf []Workflow_Step, minion_list []Minion_Data, s
 		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 
 		if stage == Find_Next_Stage(wf, minion) {
-			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", 3)
-			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
-			db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+			db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", 3)
+			db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
+			db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
+			db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 			logger.Debugf("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
 		}
 	}

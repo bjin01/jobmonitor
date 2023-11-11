@@ -75,8 +75,8 @@ func ListMigrationTarget(sessionkey *auth.SumaSessionKey, UserData *Update_Group
 
 							if minion.Clm_Stage != "" && v.Product.Clm_Project_Label != "" && v.Product.Base_Channel != "" {
 								target_base_channel := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(v.Product.Clm_Project_Label), minion.Clm_Stage, strings.TrimSpace(v.Product.Base_Channel))
-								db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_Ident", target.Ident)
-								db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_base_channel", target_base_channel)
+								db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_Ident", target.Ident)
+								db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_base_channel", target_base_channel)
 
 								/* if v.Product.OptionalChildChannels != nil {
 									new_spmigration_optional_channels := []string{}
@@ -99,8 +99,8 @@ func ListMigrationTarget(sessionkey *auth.SumaSessionKey, UserData *Update_Group
 								} */
 							} else {
 								// if the env is not provided or empty then we use the base channel only.
-								db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_Ident", target.Ident)
-								db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_base_channel", v.Product.Base_Channel)
+								db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_Ident", target.Ident)
+								db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Target_base_channel", v.Product.Base_Channel)
 
 								/* if v.Product.OptionalChildChannels != nil {
 									new_spmigration_optional_channels := []string{}

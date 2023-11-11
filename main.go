@@ -24,6 +24,9 @@ func init() {
 
 }
 
+var time_counter_pkg_update_by_list int
+var time_counter_pkg_update int
+
 func main() {
 	sumafile_path := flag.String("config", "/etc/salt/master.d/spacewalk.conf", "provide config file with SUMA login")
 	api_interval := flag.Int("interval", 60, "SUMA API polling interval, default 60 seconds, no need to write s.")
@@ -175,22 +178,37 @@ func main() {
 			logger.Infof("Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
 		}
-		if err := c.ShouldBindJSON(&pkg_update_request_obj); err != nil {
 
-			c.AbortWithError(http.StatusBadRequest, err)
+		request_received := new(time.Time)
+		*request_received = time.Now()
+		if time_counter_pkg_update == 0 {
+			if err := c.ShouldBindJSON(&pkg_update_request_obj); err != nil {
+
+				c.AbortWithError(http.StatusBadRequest, err)
+			}
+
+			if !isValidAuthToken(pkg_update_request_obj.Token) {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+
+			go Pkg_update_groups_lookup(SUMAConfig, &pkg_update_request_obj, templates, health)
+			c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
+			//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
+		} else {
+			c.String(http.StatusOK, fmt.Sprintf("Package Updates & SP Migration POST request repeated too soon. Please wait for 20 seconds."))
+			logger.Infof("Package Updates & SP Migrationrequest repeated too soon. Please wait for 20 seconds.")
 		}
 
-		if !isValidAuthToken(pkg_update_request_obj.Token) {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
+		go func() {
 
-		//logger.Fatalf("pkg_update_request_obj %+v\n", pkg_update_request_obj)
-
-		go Pkg_update_groups_lookup(SUMAConfig, &pkg_update_request_obj, templates, health)
-		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
-		//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
-
+			protect_time_window := request_received.Add(time.Duration(20) * time.Second)
+			for time.Now().Before(protect_time_window) {
+				time_counter_pkg_update += 1
+				time.Sleep(time.Second * 1)
+			}
+			time_counter_pkg_update = 0
+		}()
 	})
 
 	r.POST("/pkg_update_by_list", func(c *gin.Context) {
@@ -201,8 +219,11 @@ func main() {
 			logger.Infof("Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
 		}
-		if err := c.ShouldBindJSON(&pkg_update_request_obj); err != nil {
 
+		request_received := new(time.Time)
+		*request_received = time.Now()
+
+		if err := c.ShouldBindJSON(&pkg_update_request_obj); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		}
 
@@ -213,9 +234,26 @@ func main() {
 
 		//logger.Fatalf("pkg_update_request_obj %+v\n", pkg_update_request_obj)
 
-		go Pkg_update_by_list(SUMAConfig, &pkg_update_request_obj, templates, health)
-		c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Minions_to_add))
-		//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
+		/* go Pkg_update_by_list(SUMAConfig, &pkg_update_request_obj, templates, health) */
+
+		if time_counter_pkg_update_by_list == 0 {
+			go Pkg_update_by_list(SUMAConfig, &pkg_update_request_obj, templates, health)
+			c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Minions_to_add))
+			logger.Infof("request data for Package Update through SUSE Manager received.\n")
+		} else {
+			c.String(http.StatusOK, fmt.Sprintf("Pkg Update POST request repeated too soon. Please wait for 20 seconds."))
+			logger.Infof("Pkg Update POST request repeated too soon. Please wait for 20 seconds.")
+		}
+
+		go func() {
+
+			protect_time_window := request_received.Add(time.Duration(20) * time.Second)
+			for time.Now().Before(protect_time_window) {
+				time_counter_pkg_update_by_list += 1
+				time.Sleep(time.Second * 1)
+			}
+			time_counter_pkg_update_by_list = 0
+		}()
 
 	})
 

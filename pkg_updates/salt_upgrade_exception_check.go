@@ -48,7 +48,7 @@ func Salt_No_Upgrade_Exception_Check_New(sessionkey *auth.SumaSessionKey, groups
 				subject := "No_upgrade exception"
 				body := fmt.Sprintf("No_upgrade exception for minion found: %s", minion.Minion_Name)
 				Add_Note(sessionkey, minion.Minion_ID, subject, body)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "No_Upgrade_Exception is true")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "No_Upgrade_Exception is true")
 			} /* else {
 				logger.Infof("Minion %s passed no_upgrade exception check\n", minion.Minion_Name)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
@@ -93,7 +93,7 @@ func Salt_No_Upgrade_Exception_Check_New_by_List(sessionkey *auth.SumaSessionKey
 				subject := "No_upgrade exception"
 				body := fmt.Sprintf("No_upgrade exception for minion found: %s", minion.Minion_Name)
 				Add_Note(sessionkey, minion.Minion_ID, subject, body)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "No_Upgrade_Exception is true")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "No_Upgrade_Exception is true")
 			}
 		}
 	}

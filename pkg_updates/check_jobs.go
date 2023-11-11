@@ -52,8 +52,8 @@ func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, dead
 					logger.Errorf("failed to get minion %s from database\n", minion.Minion_Name)
 					return
 				}
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "completed")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "completed")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
 				continue
 			}
 
@@ -65,21 +65,21 @@ func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, dead
 				}
 				if status == "pending" {
 					logger.Debugf("Minion %s Job %s is still in pending state.\n", minion.Minion_Name, minion.Migration_Stage)
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "pending")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "pending")
 					continue
 				}
 				if status == "completed" {
 					logger.Debugf("Minion %s Job %s is completed.\n", minion.Minion_Name, minion.Migration_Stage)
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "completed")
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "completed")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "completed")
 					continue
 				}
 
 				if status == "failed" {
 					logger.Infof("Minion %s Job %s is failed.\n", minion.Minion_Name, minion.Migration_Stage)
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "failed")
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "failed")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "failed")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "failed")
 					continue
 				}
 			}

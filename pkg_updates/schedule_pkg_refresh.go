@@ -36,8 +36,8 @@ func Refresh_Packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflo
 		if stage == Find_Next_Stage(wf, minion) {
 			/* if minion.JobID == 0 && minion.Migration_Stage == stage {
 				logger.Infof("Minion %s: set reboot stage as completed due to manual intervention.\n", minion.Minion_Name)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "Completed")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				continue
 			} */
 			logger.Debugf("Minion %s starts %s stage.\n", minion.Minion_Name, stage)
@@ -76,10 +76,10 @@ func Refresh_Packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflo
 			host_info.Pkg_Refresh_Job.JobStatus = "Scheduled"
 
 			if reply.JobID > 0 {
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				logger.Infof("Minion %s has been scheduled to %s.\n", minion.Minion_Name, stage)
 			}
 		}

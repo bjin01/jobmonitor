@@ -64,10 +64,10 @@ func Update_packages(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow
 		for _, minion := range minion_list {
 			for _, m := range minion_id_list {
 				if minion.Minion_ID == m {
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", JobID_Pkg_Update)
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
-					db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", JobID_Pkg_Update)
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 					logger.Infof("Minion %s has been scheduled to update packages\n", minion.Minion_Name)
 				}
 			}

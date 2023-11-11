@@ -64,7 +64,7 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 	}
 
 	// Create the DB schema
-	db.AutoMigrate(&pkg_updates.Workflow_Step{})
+	/* db.AutoMigrate(&pkg_updates.Workflow_Step{})
 	db.AutoMigrate(&pkg_updates.Jobchecker_Email{})
 	db.AutoMigrate(&pkg_updates.Group{})
 	db.AutoMigrate(&pkg_updates.OptionalChannels{})
@@ -87,7 +87,7 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 				logger.Infof("Workflow Step %s already exists\n", name)
 			}
 		}
-	}
+	} */
 
 	/* wf, err := pkg_updates.Get_Workflow_From_DB(db)
 	if err != nil {
@@ -116,14 +116,14 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 	}
 
 	if len(minion_list) > 0 {
-		for _, minion := range minion_list {
+		/* for _, minion := range minion_list {
 			result := db.FirstOrCreate(&minion, minion)
 			if result.RowsAffected > 0 {
 				logger.Infof("Created minion %s - %d\n", minion.Minion_Name, result.RowsAffected)
 			} else {
 				logger.Infof("Minion %s already exists\n", minion.Minion_Name)
 			}
-		}
+		} */
 
 		returned_minions := pkg_updates.Detect_Online_Minions(SessionKey, minion_list, groupsdata)
 
