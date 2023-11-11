@@ -3,6 +3,7 @@ package pkg_updates
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -35,11 +36,12 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 	//fmt.Printf("-----------Query DB Reboot %d\n", result.RowsAffected)
 
 	for _, minion := range minion_list {
-		result := db.Where(&Minion_Data{Minion_Name: minion.Minion_Name}).First(&minion)
+		db.Preload("Target_Optional_Channels").Preload("Minion_Groups").Where("Minion_Name = ?", minion.Minion_Name).Find(&minion)
+		/* result := db.Where(&Minion_Data{Minion_Name: minion.Minion_Name}).First(&minion)
 		if result.Error != nil {
 			logger.Errorf("failed to get minion %s from database\n", minion.Minion_Name)
 			return
-		}
+		} */
 		//logger.Infof("Minion %s stage is %s\n", minion.Minion_Name, minion.Migration_Stage)
 
 		if stage == Find_Next_Stage(wf, minion) {
@@ -65,7 +67,11 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 			var optional_channels []string
 			for _, t := range minion.Target_Optional_Channels {
 				if t.Channel_Label != "" {
-					optional_channels = append(optional_channels, t.Channel_Label)
+					if strings.Contains(t.Channel_Label, minion.Clm_Stage) || strings.Contains(t.Channel_Label, minion.Target_base_channel) {
+						if !Contains(optional_channels, t.Channel_Label) {
+							optional_channels = append(optional_channels, t.Channel_Label)
+						}
+					}
 				}
 			}
 
@@ -128,4 +134,13 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 		}
 	}
 
+}
+
+func Contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

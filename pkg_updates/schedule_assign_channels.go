@@ -142,6 +142,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 					if len(groupsdata.Target_Products) > 0 {
 						for _, v := range groupsdata.Target_Products {
 							if len(v.Product.OptionalChildChannels) > 0 {
+								var opt_channel OptionalChannels
 								for _, optchannel := range v.Product.OptionalChildChannels {
 									if strings.Contains(strings.TrimSpace(channel.Label), strings.TrimSpace(optchannel.Old_Channel)) {
 										if strings.TrimSpace(optchannel.New_Channel) != "" {
@@ -150,13 +151,15 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 													v.Product.Clm_Project_Label,
 													parts[1],
 													strings.TrimSpace(optchannel.New_Channel))
-												db.FirstOrCreate(&OptionalChannels{Channel_Label: new_opt_channel_label})
-												db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&OptionalChannels{Channel_Label: new_opt_channel_label})
+
+												opt_channel.Channel_Label = new_opt_channel_label
+												db.FirstOrCreate(&opt_channel)
+												db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&opt_channel)
 												logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
 											} else {
 												new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
 												db.FirstOrCreate(&OptionalChannels{Channel_Label: new_opt_channel_label})
-												db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&OptionalChannels{Channel_Label: new_opt_channel_label})
+												db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&opt_channel)
 												logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
 											}
 										}
@@ -199,12 +202,14 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 				if len(groupsdata.Target_Products) > 0 {
 					for _, v := range groupsdata.Target_Products {
 						if len(v.Product.OptionalChildChannels) > 0 {
+							var opt_channel OptionalChannels
 							for _, optchannel := range v.Product.OptionalChildChannels {
 								if strings.Contains(strings.TrimSpace(channel.Label), strings.TrimSpace(optchannel.Old_Channel)) {
 									if strings.TrimSpace(optchannel.New_Channel) != "" {
 										new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
-										db.FirstOrCreate(&OptionalChannels{Channel_Label: new_opt_channel_label})
-										db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(new_opt_channel_label)
+										opt_channel.Channel_Label = new_opt_channel_label
+										db.FirstOrCreate(&opt_channel)
+										db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(opt_channel)
 										db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", "")
 										logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
 

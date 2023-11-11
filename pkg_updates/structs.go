@@ -107,8 +107,8 @@ type Update_Groups struct {
 	Tracking_file_directory string           `json:"tracking_file_directory"`
 	Workflow                []map[string]int `json:"workflow"`
 	Assigne_channels        []struct {
-		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
-	} `json:"assigne_channels"`
+		Assigne_Channel Assigne_Channel `json:"assign_channel"`
+	} `json:"assign_channels"`
 
 	Target_Products []struct {
 		Product Target_Product `json:"product"`

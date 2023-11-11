@@ -28,8 +28,8 @@ type Migration_Groups struct {
 	Token                           string   `json:"authentication_token"`
 	Tracking_file_directory         string   `json:"tracking_file_directory"`
 	Assigne_channels                []struct {
-		Assigne_Channel Assigne_Channel `json:"assigne_channel"`
-	} `json:"assigne_channels"`
+		Assigne_Channel Assigne_Channel `json:"assign_channel"`
+	} `json:"assign_channels"`
 
 	Target_Products []struct {
 		Product Target_Product `json:"product"`

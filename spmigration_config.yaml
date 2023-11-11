@@ -3,7 +3,7 @@ groups:
 minions_to_add:
 - mars
 - saturn
-sqlite_db: "/srv/sumapatch/07112023_testgrp_t7udp.db"
+sqlite_db: "/run/11112023_testgrp_t7udp.db"
 qualifying_only: true
 log_level: info
 timeout: 3
@@ -38,11 +38,11 @@ workflow:
 - spmigration_reboot: 8
 - spmigration_package_refresh: 9
 - post_migration: 10
-assigne_channels:
-- assigne_channel:
+assign_channels:
+- assign_channel:
     current_base_channel: mytest-prd-sle-product-sles_sap15-sp4-pool-x86_64
     new_base_prefix: mytest-test-
-- assigne_channel:
+- assign_channel:
     current_base_channel: mysle15sp3-prd-sle-product-sles15-sp3-pool-x86_64
     new_base_prefix: ''
 products:

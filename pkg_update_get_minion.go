@@ -19,5 +19,15 @@ func Pkg_update_get_minion_from_db(filename string, minion_name string) (pkg_upd
 	minion.Minion_Name = minion_name
 	db.Preload("Target_Optional_Channels").Preload("Minion_Groups").Where("Minion_Name = ?", minion_name).Find(&minion)
 
+	//Below code can be enabled to list all optional channels
+	/* var optchannels []pkg_updates.OptionalChannels
+	result := db.Find(&optchannels)
+	if result.RowsAffected > 0 {
+		logger.Infof("Found %d optional channels\n", result.RowsAffected)
+		for _, oc := range optchannels {
+			logger.Debugf("Optional channel: %s ID: %d\n", oc.Channel_Label, oc.ID)
+		}
+	} */
+
 	return minion, nil
 }
