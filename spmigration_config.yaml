@@ -1,5 +1,8 @@
 groups:
 - testgrp
+minions_to_add:
+- mars
+- saturn
 sqlite_db: "/srv/sumapatch/07112023_testgrp_t7udp.db"
 qualifying_only: true
 log_level: info

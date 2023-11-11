@@ -57,7 +57,7 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 
 	logger.Infof("Use sqlite database: %s\n", groupsdata.Sqlite_db)
 	db, err := gorm.Open(gorm.Dialector(&sqlite.Dialector{DSN: groupsdata.Sqlite_db}),
-		&gorm.Config{})
+		&gorm.Config{SkipDefaultTransaction: true})
 	if err != nil {
 		logger.Errorf("failed to connect database")
 		return
@@ -130,11 +130,25 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 		for _, minion_data := range returned_minions {
 			//logger.Infof("------- Online check returned %s - %s\n", minion_data.Minion_Name, minion_data.Minion_Status)
 			if minion_data.Minion_ID != 0 && minion_data.Minion_Status == "Online" {
-				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Status", "Online")
+				//db.Model(&minion_data).Select("Minion_Name").Updates(map[string]interface{}{"Minion_Status": minion_data.Minion_Remarks, "Minion_Remarks": "",
+				//	"JobID": 0, "JobStatus": "", "Migration_Stage": "", "Migration_Stage_Status": ""})
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("JobStatus", minion_data.JobStatus)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("JobID", minion_data.JobID)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Migration_Stage", minion_data.Migration_Stage)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Remarks", minion_data.Minion_Remarks)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Migration_Stage_Status", minion_data.Migration_Stage_Status)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Status", minion_data.Minion_Status)
 			}
 			if minion_data.Minion_ID != 0 && minion_data.Minion_Status == "Offline" {
 				minion_data.Minion_Remarks = "Offline"
-				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Status", "Offline")
+				//db.Model(&minion_data).Select("Minion_Name").Updates(map[string]interface{}{"Minion_Status": minion_data.Minion_Remarks, "Minion_Remarks": "",
+				//	"JobID": 0, "JobStatus": "", "Migration_Stage": "", "Migration_Stage_Status": ""})
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("JobStatus", minion_data.JobStatus)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("JobID", minion_data.JobID)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Migration_Stage", minion_data.Migration_Stage)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Remarks", minion_data.Minion_Remarks)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Migration_Stage_Status", minion_data.Migration_Stage_Status)
+				db.Model(&minion_data).Where("Minion_Name = ?", minion_data.Minion_Name).Update("Minion_Status", minion_data.Minion_Status)
 			}
 		}
 

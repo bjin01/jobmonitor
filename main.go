@@ -264,8 +264,20 @@ func main() {
 			return
 		}
 
-		result := Pkg_update_groups_lookup_from_file(filename)
-		c.JSON(http.StatusOK, result)
+		minion_name := c.Query("minion_name")
+		if minion_name != "" {
+			result, err := Pkg_update_get_minion_from_db(filename, minion_name)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, result)
+			return
+		} else {
+			result := Pkg_update_groups_lookup_from_file(filename)
+			c.JSON(http.StatusOK, result)
+		}
+
 	})
 
 	r.POST("/spmigration", func(c *gin.Context) {

@@ -38,7 +38,7 @@ type ListAllChannels_Response struct {
 //DB columns: ID, Group_Name, T7User, Email
 type Group struct {
 	gorm.Model
-	Group_Name string             `json:"group_name"`
+	Group_Name string             `json:"group_name" gorm:"primaryKey"`
 	T7User     string             `json:"t7user"`
 	Email      []Jobchecker_Email `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
@@ -65,14 +65,14 @@ type Minion_Data struct {
 	Migration_Stage_Status   string             `json:"Migration_Stage_Status"`
 	Target_base_channel      string             `json:"Target_base_channel"`
 	Target_Ident             string             `json:"Target_Ident"`
-	Target_Optional_Channels []OptionalChannels `json:"Target_Optional_Channels" gorm:"foreignKey:Minion_DataRefer"`
+	Target_Optional_Channels []OptionalChannels `json:"Target_Optional_Channels" gorm:"many2many:Minion_Data_OptionalChannels;"`
 	Minion_Groups            []Group            `json:"Minion_Groups" gorm:"many2many:Minion_Data_Groups;"`
 }
 
 //DB columns: ID, Channel_Label
 type OptionalChannels struct {
 	gorm.Model
-	Channel_Label    string `json:"channel_label"`
+	Channel_Label    string `json:"channel_label" gorm:"primaryKey"`
 	Minion_DataRefer uint   `json:"minion_data_refer"`
 }
 
