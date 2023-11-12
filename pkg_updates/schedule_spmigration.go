@@ -109,6 +109,9 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 			reply := new(ScheduleSPMigrationDryRun_Response)
 			err = gorillaxml.DecodeClientResponse(resp.Body, reply)
 			if err != nil {
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", err.Error())
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "failed")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
 				if dryrun == true {
 					logger.Infof("Decode scheduleProductMigration_DryRun Job response body failed: %s %s\n", err, minion.Minion_Name)
 				} else {

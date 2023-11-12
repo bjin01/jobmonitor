@@ -210,7 +210,6 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 										new_opt_channel_label := strings.TrimSpace(optchannel.New_Channel)
 										opt_channel.Channel_Label = new_opt_channel_label
 										db.FirstOrCreate(&opt_channel)
-										fmt.Printf("-----------optional channel in %s: %s\n", minion.Minion_Name, opt_channel.Channel_Label)
 										db.Model(&minion_list[i]).Association("Target_Optional_Channels").Append(&opt_channel)
 										db.Model(&minion_list[i]).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", "")
 										logger.Debugf("Optional channel %s is assigned to %s\n", new_opt_channel_label, minion.Minion_Name)
