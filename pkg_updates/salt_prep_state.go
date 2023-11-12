@@ -32,7 +32,7 @@ func Salt_Run_state_apply(groupsdata *Update_Groups, stage string, db *gorm.DB) 
 	}
 
 	for _, minion := range all_minions {
-		if minion.Minion_Status == "Online" {
+		if minion.Minion_Status == "Online" && minion.Minion_Remarks == "" {
 			saltdata.Online_Minions = append(saltdata.Online_Minions, minion.Minion_Name)
 		}
 	}
