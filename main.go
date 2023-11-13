@@ -271,11 +271,12 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			c.JSON(http.StatusOK, result)
+
+			c.IndentedJSON(http.StatusOK, result)
 			return
 		} else {
 			result := Pkg_update_groups_lookup_from_file(filename)
-			c.JSON(http.StatusOK, result)
+			c.IndentedJSON(http.StatusOK, result)
 		}
 
 	})
