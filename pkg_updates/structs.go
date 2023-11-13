@@ -85,6 +85,7 @@ type Update_Groups struct {
 	//Delay                           int              `json:"delay"`
 	Timeout                         int    `json:"timeout"`
 	GatherJobTimeout                int    `json:"gather_job_timeout"`
+	Email_Interval                  int    `json:"email_interval"`
 	Logfile                         string `json:"logfile"`
 	Log_Level                       string `json:"log_level"`
 	SaltMaster_Address              string `json:"salt_master_address"`

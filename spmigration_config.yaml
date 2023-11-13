@@ -8,6 +8,7 @@ qualifying_only: true
 log_level: info
 timeout: 3
 gather_job_timeout: 15
+email_interval: 8
 logfile: "/var/log/patching/sumapatching.log"
 salt_master_address: 192.168.122.23
 salt_api_port: 8000
@@ -28,7 +29,7 @@ authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
 patch_level: 2023-Q4
 workflow:
-- assigne_channels: 1
+- assign_channels: 1
 - package_updates: 2
 - package_update_reboot: 3
 - package_refresh: 4

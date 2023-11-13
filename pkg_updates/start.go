@@ -42,9 +42,9 @@ func Start_Workflow(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, 
 		if len(wf) != 0 {
 			for _, w := range wf {
 
-				if w.Name == "assigne_channels" {
+				if w.Name == "assign_channels" {
 					logger.Debugf("Workflow %s\n", w.Name)
-					Assign_Channels(sessionkey, groupsdata, db, wf, *qualified_minions, "assigne_channels")
+					Assign_Channels(sessionkey, groupsdata, db, wf, *qualified_minions, "assign_channels")
 				}
 				time.Sleep(sleep_between_steps)
 

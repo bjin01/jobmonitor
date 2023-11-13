@@ -23,6 +23,11 @@ func Send_Email(groupsdata *Update_Groups, email_template_dir *email.Templates_D
 		if len(groupsdata.JobcheckerEmails) != 0 {
 			email_job.Send_Pkg_Updates_Email(db)
 		}
-		time.Sleep(600 * time.Second)
+
+		if groupsdata.Email_Interval != 0 {
+			time.Sleep(time.Duration(groupsdata.Email_Interval) * time.Minute)
+		} else {
+			time.Sleep(10 * time.Minute)
+		}
 	}
 }
