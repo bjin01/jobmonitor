@@ -1,10 +1,10 @@
 # SUSE Manager - jobchecker
 
-This is a jobchecker written in go.
+This is a jobchecker for Uyuni / SUSE Manager written in go.
 
 ## Pre-requisites:
 * SUSE Manager / Uyuni v.4.3.6 or higher
-* Salt-master running on SLES 15 or higher
+* Salt-master running on SLES 15SP4 or higher
 
 ## Features:
 * api endpoint - monitor SUSE Manager scheduled jobs, upon completion email notification will be sent.
@@ -14,6 +14,10 @@ This is a jobchecker written in go.
 * email notifications - send job results to predefined list of recipients.
 * api endpoint - salt states, grains execution for pre and post tasks
 * api endpoint - trigger package updates including service pack migration for groups in SUSE Manager/Uyuni.
+
+## Package Updates and Service Pack Migration
+The jobchecker can trigger package updates including service pack migration for given groups in SUSE Manager/Uyuni.
+Read here for [more details](./pkg_updates/README.md)
 
 
 ## systemd service for jobchecker
