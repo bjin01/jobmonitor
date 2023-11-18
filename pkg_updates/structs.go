@@ -40,6 +40,7 @@ type Group struct {
 	gorm.Model
 	Group_Name string             `json:"group_name" gorm:"primaryKey"`
 	T7User     string             `json:"t7user"`
+	Ctx_ID     string             `json:"context_id"`
 	Email      []Jobchecker_Email `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
@@ -106,6 +107,7 @@ type Update_Groups struct {
 	T7User                  string           `json:"t7user"`
 	Token                   string           `json:"authentication_token"`
 	Tracking_file_directory string           `json:"tracking_file_directory"`
+	Ctx_ID                  string           `json:"context_id"`
 	Workflow                []map[string]int `json:"workflow"`
 	Assigne_channels        []struct {
 		Assigne_Channel Assigne_Channel `json:"assign_channel"`

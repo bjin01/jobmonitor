@@ -52,6 +52,14 @@
         </tr>
         {{end}}
 </table>
+{{ $id := "" }}
+{{range $n := .}}
+{{ $id = (index $n.Minion_Groups 0).Ctx_ID }} 
+{{end}}
+<br>
+<p>You can use below curl command to cancell the workflow within jobchecker.Context ID</p> 
+<p>The subprocesses will be stopped upon internal intervals and can take up to 2 minutes to stop.</p> 
+<p>curl http://localhost:12345/cancell_pkg_update?ctx_id={{ $id }}</p>
 <br>
 <p>The csv report can be created as you need:</p>
 <p>You have to replace the file name:</p>

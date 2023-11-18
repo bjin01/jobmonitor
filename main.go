@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"reflect"
@@ -24,6 +25,11 @@ func init() {
 
 }
 
+type my_context struct {
+	ctx      context.Context
+	cancells context.CancelFunc
+}
+
 var time_counter_pkg_update_by_list int
 var time_counter_pkg_update int
 
@@ -33,6 +39,7 @@ func main() {
 	templates_dir := flag.String("templates", "/srv/jobmonitor", "provide directory name where the template files are stored.")
 	flag.Parse()
 
+	var my_contexts []my_context
 	SUMAConfig := GetConfig(*sumafile_path)
 	logger.Infof("interval is: %v\n", *api_interval)
 
@@ -192,7 +199,18 @@ func main() {
 				return
 			}
 
-			go Pkg_update_groups_lookup(SUMAConfig, &pkg_update_request_obj, templates, health)
+			ctx, cancel := context.WithCancel(context.Background())
+
+			ctx_timestemp := fmt.Sprintf("%s_%d", pkg_update_request_obj.T7User, time.Now().Nanosecond())
+
+			ctx = context.WithValue(ctx, "ctx_timestemp", ctx_timestemp)
+			context_temp := my_context{ctx, cancel}
+			my_contexts = append(my_contexts, context_temp)
+			context_value := ctx.Value("ctx_timestemp")
+			pkg_update_request_obj.Ctx_ID = ctx_timestemp
+			logger.Infof("------------------context value: %v\n", context_value.(string))
+			logger.Infoln("Length of context: ", len(my_contexts))
+			go Pkg_update_groups_lookup(ctx, SUMAConfig, &pkg_update_request_obj, templates, health)
 			c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
 			//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
 		} else {
@@ -255,6 +273,27 @@ func main() {
 			time_counter_pkg_update_by_list = 0
 		}()
 
+	})
+
+	r.GET("/cancell_pkg_update", func(c *gin.Context) {
+		ctx_id := c.Query("ctx_id")
+		if ctx_id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing 'ctx_id' parameter"})
+			return
+		}
+
+		for i, ctx := range my_contexts {
+			context_value := ctx.ctx.Value("ctx_timestemp")
+			logger.Infof("------------------context value: %v\n", context_value.(string))
+			if context_value.(string) == ctx_id {
+				logger.Infof("context value found: %v\n", context_value.(string))
+				ctx.cancells()
+				my_contexts = append(my_contexts[:i], my_contexts[i+1:]...)
+				logger.Infof("Length of context: %v\n", len(my_contexts))
+				c.String(http.StatusOK, fmt.Sprintf("Context %s is cancelled.", ctx_id))
+				return
+			}
+		}
 	})
 
 	r.GET("/pkg_update", func(c *gin.Context) {

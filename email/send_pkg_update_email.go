@@ -24,6 +24,18 @@ func (s *Job_Email_Body) Send_Pkg_Updates_Email(db *gorm.DB) {
 		logger.Errorf("failed to connect database")
 	}
 
+	var groups []Group
+	err = db.Preload(clause.Associations).Find(&groups).Error
+	if err != nil {
+		logger.Errorf("failed to connect database")
+		return
+	}
+
+	for i, minion := range minions_list {
+		minions_list[i].Minion_Groups[0].Ctx_ID = groups[0].Ctx_ID
+		logger.Debugf("Minion in Send_Pkg_Updates_Email: %s - %s\n", minion.Minion_Name, minions_list[i].Minion_Groups[0].Ctx_ID)
+	}
+
 	if s.Template_dir == "" {
 		s.Template_dir = "/srv/jobmonitor/"
 	}
@@ -62,6 +74,7 @@ func (s *Job_Email_Body) Send_Pkg_Updates_Results(db *gorm.DB) {
 	if err != nil {
 		logger.Errorf("failed to connect database")
 	}
+
 	template_file := fmt.Sprintf("%s/template_pkg_updates_results.html", s.Template_dir)
 	if err := r.ParseTemplate(template_file, minions_list); err == nil {
 		ok, err1 := r.SendEmail()

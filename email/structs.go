@@ -91,6 +91,7 @@ type Group struct {
 	gorm.Model
 	Group_Name string             `json:"group_name"`
 	T7User     string             `json:"t7user"`
+	Ctx_ID     string             `json:"context_id"`
 	Email      []Jobchecker_Email `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 

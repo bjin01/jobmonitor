@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"time"
 
@@ -38,7 +39,7 @@ func GetAll_Minions_From_DB(db *gorm.DB) ([]pkg_updates.Minion_Data, error) {
 	return minion_data, err
 }
 
-func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_Groups,
+func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_Groups,
 	email_template_dir *email.Templates_Dir, health *bool) {
 
 	if health != nil {
@@ -130,6 +131,8 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 		new_group := new(pkg_updates.Group)
 		new_group.Group_Name = g
 		new_group.T7User = groupsdata.T7User
+		new_group.Ctx_ID = groupsdata.Ctx_ID
+		logger.Infoln("Group Ctx_ID: ", groupsdata.Ctx_ID)
 
 		for _, email := range groupsdata.JobcheckerEmails {
 			var jobchecker_email pkg_updates.Jobchecker_Email
@@ -144,11 +147,14 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 			logger.Infof("Created group %s - %d\n", g, result.RowsAffected)
 		} else {
 			logger.Infof("Group %s already exists\n", g)
+			db.Model(&new_group).Where("Group_Name = ?", g).Update("T7User", groupsdata.T7User)
+			db.Model(&new_group).Where("Group_Name = ?", g).Update("Ctx_ID", groupsdata.Ctx_ID)
 		}
 
 		db.Model(&new_group).Association("Email").Replace(&new_group.Email)
 
 	}
+
 	//db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&new_group)
 
 	// Read
@@ -197,7 +203,7 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 		//set deadline to 60 seconds to allow one email sent to admins
 		deadline_qualifying := time.Now().Add(time.Duration(60) * time.Second)
 		//logger.Debugf("----email templates dir is: %s\n", email_template_dir.Dir)
-		pkg_updates.Send_Email(groupsdata, email_template_dir, db, health, &deadline_qualifying)
+		pkg_updates.Send_Email(ctx, groupsdata, email_template_dir, db, health, &deadline_qualifying)
 		logger.Infof("Qualifying only is set to true. Stop the workflow here.\n")
 		return
 	}
@@ -211,9 +217,9 @@ func Pkg_update_groups_lookup(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Up
 		*deadline = time.Now().Add(time.Duration(groupsdata.JobcheckerTimeout) * time.Minute)
 	}
 
-	go pkg_updates.Check_Jobs(SessionKey, health, db, deadline) // deadline 10min
-	go pkg_updates.Start_Workflow(SessionKey, groupsdata, db, health, deadline)
-	go pkg_updates.Send_Email(groupsdata, email_template_dir, db, health, deadline)
+	go pkg_updates.Check_Jobs(ctx, groupsdata, SessionKey, health, db, deadline) // deadline 10min
+	go pkg_updates.Start_Workflow(ctx, SessionKey, groupsdata, db, health, deadline)
+	go pkg_updates.Send_Email(ctx, groupsdata, email_template_dir, db, health, deadline)
 
 	/* all_minions, err := GetAll_Minions_From_DB(db)
 	if err != nil {

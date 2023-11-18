@@ -1,6 +1,7 @@
 package pkg_updates
 
 import (
+	"context"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -19,15 +20,28 @@ type Job_Data struct {
 	Earliest          time.Time
 }
 
-func Check_Jobs(sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, deadline *time.Time) {
+func Check_Jobs(ctx context.Context, groupsdata *Update_Groups, sessionkey *auth.SumaSessionKey, health *bool, db *gorm.DB, deadline *time.Time) {
 
 	//deadline := time.Now().Add(time.Duration(60) * time.Minute)
+	gr := getGoroutineID()
+	logger.Infof("Check_Jobs: Goroutine ID %d\n", gr)
 
 	for time.Now().Before(*deadline) {
 		if *health == false {
 			logger.Infof("Check_Jobs can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
 			time.Sleep(125 * time.Second)
 			continue
+		}
+
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				logger.Debugf("Check_Jobs err: %s %s\n", err, groupsdata.Ctx_ID)
+			}
+			logger.Infof("Check_Jobs: finished %s\n", groupsdata.Ctx_ID)
+			return
+		default:
+			logger.Infof("Check_Jobs: running %s\n", groupsdata.Ctx_ID)
 		}
 
 		all_minions, err := GetAll_Minions_From_DB(db)
