@@ -2,6 +2,8 @@
 
 This is a jobchecker for Uyuni / SUSE Manager written in go.
 
+![jobchecker architecture](./jobchecker.svg)
+
 ## Pre-requisites:
 * SUSE Manager / Uyuni v.4.3.6 or higher
 * Salt-master running on SLES 15SP4 or higher
