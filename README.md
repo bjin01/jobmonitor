@@ -1,6 +1,6 @@
 # SUSE Manager - jobchecker
 
-This is a jobchecker with automated Updates and Service Pack Migration capabilities for Uyuni / SUSE Manager written in go.
+This is a jobchecker with automated Updates and Service Pack Migration capabilities for Uyuni / SUSE Manager written in [GO](https://go.dev/).
 
 ![jobchecker architecture](./jobchecker1.svg)
 
