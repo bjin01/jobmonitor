@@ -1,11 +1,11 @@
 # SUSE Manager - jobchecker
 
-This is a jobchecker for Uyuni / SUSE Manager written in go.
+This is a jobchecker with automated Updates and Service Pack Migration capabilities for Uyuni / SUSE Manager written in go.
 
 ![jobchecker architecture](./jobchecker1.svg)
 
 ## Pre-requisites:
-* SUSE Manager / Uyuni v.4.3.6 or higher
+* SUSE Manager / Uyuni v.4.3.7 or higher
 * Salt-master running on SLES 15SP4 or higher
 
 ## Features:
