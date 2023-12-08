@@ -10,6 +10,7 @@ import (
 	"github.com/bjin01/jobmonitor/pkg_updates"
 	"github.com/bjin01/jobmonitor/request"
 	"github.com/bjin01/jobmonitor/saltapi"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -44,7 +45,10 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 
 	if health != nil {
 		if *health == false {
-			logger.Infof("Health check failed. Skipping groups lookup.")
+			logger.WithFields(logrus.Fields{
+				"goroutine": ctx.Value("goroutine"),
+				"username":  groupsdata.T7User,
+			}).Infof("Health check failed. Skipping groups lookup.")
 			return
 		}
 	}
@@ -82,11 +86,17 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 	}
 	//email_template_directory_string := fmt.Sprintf("%s", email_template_dir.Dir)
 
-	logger.Infof("Use sqlite database: %s\n", groupsdata.Sqlite_db)
+	logger.WithFields(logrus.Fields{
+		"goroutine": ctx.Value("goroutine"),
+		"username":  groupsdata.T7User,
+	}).Infof("Use sqlite database: %s\n", groupsdata.Sqlite_db)
 	db, err := gorm.Open(gorm.Dialector(&sqlite.Dialector{DSN: groupsdata.Sqlite_db}),
 		&gorm.Config{})
 	if err != nil {
-		logger.Errorf("failed to connect database")
+		logger.WithFields(logrus.Fields{
+			"goroutine": ctx.Value("goroutine"),
+			"username":  groupsdata.T7User,
+		}).Errorf("failed to connect database")
 		return
 	}
 
@@ -108,10 +118,16 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 			//fmt.Printf("-----------new_workflow: %+v\n", new_workflow)
 			result := db.FirstOrCreate(&new_workflow, new_workflow)
 			if result.RowsAffected > 0 {
-				logger.Infof("Created workflow step %s - %d\n", name, result.RowsAffected)
+				logger.WithFields(logrus.Fields{
+					"goroutine": ctx.Value("goroutine"),
+					"username":  groupsdata.T7User,
+				}).Infof("Created workflow step %s - %d\n", name, result.RowsAffected)
 			} else {
 				db.Model(&new_workflow).Where("Name = ?", name).Update("Order", step)
-				logger.Infof("Workflow Step %s already exists\n", name)
+				logger.WithFields(logrus.Fields{
+					"goroutine": ctx.Value("goroutine"),
+					"username":  groupsdata.T7User,
+				}).Infof("Workflow Step %s already exists\n", name)
 			}
 		}
 	}
@@ -132,7 +148,6 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 		new_group.Group_Name = g
 		new_group.T7User = groupsdata.T7User
 		new_group.Ctx_ID = groupsdata.Ctx_ID
-		logger.Infoln("Group Ctx_ID: ", groupsdata.Ctx_ID)
 
 		for _, email := range groupsdata.JobcheckerEmails {
 			var jobchecker_email pkg_updates.Jobchecker_Email
@@ -144,9 +159,15 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 		//fmt.Printf("-----------new_group: %+v\n", new_group)
 		result := db.FirstOrCreate(&new_group, new_group)
 		if result.RowsAffected > 0 {
-			logger.Infof("Created group %s - %d\n", g, result.RowsAffected)
+			logger.WithFields(logrus.Fields{
+				"goroutine": ctx.Value("goroutine"),
+				"username":  groupsdata.T7User,
+			}).Infof("Created group %s - %d\n", g, result.RowsAffected)
 		} else {
-			logger.Infof("Group %s already exists\n", g)
+			logger.WithFields(logrus.Fields{
+				"goroutine": ctx.Value("goroutine"),
+				"username":  groupsdata.T7User,
+			}).Infof("Group %s already exists\n", g)
 			db.Model(&new_group).Where("Group_Name = ?", g).Update("T7User", groupsdata.T7User)
 			db.Model(&new_group).Where("Group_Name = ?", g).Update("Ctx_ID", groupsdata.Ctx_ID)
 		}
@@ -204,7 +225,10 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 		deadline_qualifying := time.Now().Add(time.Duration(60) * time.Second)
 		//logger.Debugf("----email templates dir is: %s\n", email_template_dir.Dir)
 		pkg_updates.Send_Email(ctx, groupsdata, email_template_dir, db, health, &deadline_qualifying)
-		logger.Infof("Qualifying only is set to true. Stop the workflow here.\n")
+		logger.WithFields(logrus.Fields{
+			"goroutine": ctx.Value("goroutine"),
+			"username":  groupsdata.T7User,
+		}).Infof("Qualifying only is set to true. Stop the workflow here.\n")
 		return
 	}
 

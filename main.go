@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"reflect"
@@ -108,6 +109,213 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+
+	r.LoadHTMLGlob(fmt.Sprintf("%s/*", *templates_dir))
+
+	r.GET("/web", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "web.html", nil)
+	})
+
+	r.POST("/viewdb", func(c *gin.Context) {
+		dbfile := c.PostForm("dbfile")
+
+		// Store dbfile path in a cookie
+		c.SetCookie("dbfile", dbfile, 3600, "/", "", false, true)
+
+		db, err := sql.Open("sqlite3", dbfile)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to open database: %v", err)
+			return
+		}
+		defer db.Close()
+
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to query database: %v", err)
+			return
+		}
+		defer rows.Close()
+
+		//var tables []string
+		html := `<!DOCTYPE html>
+		<html>
+		<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<body>`
+		html += fmt.Sprintf("<p class=\"fs-1\">Tables from %s</p>", dbfile)
+		html += `<div class="list-group">`
+		for rows.Next() {
+			var table string
+			if err := rows.Scan(&table); err != nil {
+				c.String(http.StatusInternalServerError, "Failed to scan row: %v", err)
+				return
+			}
+			html += fmt.Sprintf("<a href=\"/table?name=%s\" class=\"list-group-item list-group-item-action\">%s</a>", table, table)
+		}
+
+		html += `</div>
+		<a class="btn btn-primary" href="/web" role="button">Enter DB file</a>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+		</body></html>`
+
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+	})
+
+	r.GET("/viewdb", func(c *gin.Context) {
+		// Retrieve dbfile path from cookie
+		dbfile, err := c.Cookie("dbfile")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to get database file path: %v", err)
+			return
+		}
+
+		db, err := sql.Open("sqlite3", dbfile)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to open database: %v", err)
+			return
+		}
+		defer db.Close()
+
+		rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to query database: %v", err)
+			return
+		}
+		defer rows.Close()
+
+		html := `<!DOCTYPE html>
+		<html>
+		<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<body>`
+		html += fmt.Sprintf("<p class=\"fs-1\">Tables from %s</p>", dbfile)
+		html += `<div class="list-group">`
+
+		//var tables []string
+		for rows.Next() {
+			var table string
+			if err := rows.Scan(&table); err != nil {
+				c.String(http.StatusInternalServerError, "Failed to scan row: %v", err)
+				return
+			}
+			html += fmt.Sprintf("<a href=\"/table?name=%s\" class=\"list-group-item list-group-item-action\">%s</a>", table, table)
+		}
+
+		html += `</div>
+		<a class="btn btn-primary" href="/web" role="button">Enter DB file</a>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+		</body></html>`
+
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+		//c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(fmt.Sprintf("Tables: %s", strings.Join(tables, ", "))))
+	})
+
+	r.GET("/table", func(c *gin.Context) {
+		tableName := c.Query("name")
+
+		dbfile, err := c.Cookie("dbfile")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to get database file path: %v", err)
+			return
+		}
+		db, err := sql.Open("sqlite3", dbfile)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to open database: %v", err)
+			return
+		}
+		defer db.Close()
+
+		logger.Debugln("Query table: ", tableName)
+
+		query := fmt.Sprintf("SELECT * FROM %s", tableName)
+		if tableName == "minion_data" {
+			query = fmt.Sprintf("SELECT minion_name, minion_status, minion_remarks, migration_stage, migration_stage_status FROM %s ORDER BY Minion_Name", tableName)
+		}
+
+		rows, err := db.Query(query)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to query table: %v", err)
+			return
+		}
+		defer rows.Close()
+
+		columns, err := rows.Columns()
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to get columns: %v", err)
+			return
+		}
+
+		var tableContent []map[string]interface{}
+		values := make([]interface{}, len(columns))
+		valuePtrs := make([]interface{}, len(columns))
+		for rows.Next() {
+			for i := range columns {
+				valuePtrs[i] = &values[i]
+			}
+			rows.Scan(valuePtrs...)
+			row := make(map[string]interface{})
+			for i, colName := range columns {
+				var v interface{}
+				val := values[i]
+				b, ok := val.([]byte)
+				if ok {
+					v = string(b)
+				} else {
+					v = val
+				}
+				row[colName] = v
+			}
+			tableContent = append(tableContent, row)
+		}
+
+		// Start the HTML table
+		tableHTML := "<table class='table table-hover'><thead><tr>"
+
+		// Add table headers
+		for _, colName := range columns {
+			tableHTML += fmt.Sprintf("<th scope=col>%s</th>", colName)
+		}
+
+		// End table headers row
+		tableHTML += "</tr></thead><tbody>"
+
+		// Add table rows
+		for _, row := range tableContent {
+			tableHTML += "<tr>"
+			for _, colName := range columns {
+				tableHTML += fmt.Sprintf("<td>%v</td>", row[colName])
+			}
+			tableHTML += "</tr>"
+		}
+
+		// End the HTML table
+		tableHTML += "</tbody></table>"
+
+		html := `<!DOCTYPE html>
+		<html>
+		<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<body>`
+		// Add the HTML table to the HTML document
+		html += fmt.Sprintf("<p class=\"fs-1\">Table %s from %s</p>", tableName, dbfile)
+		html += tableHTML
+
+		// Add the "Go Back" link to the HTML document
+		html += `<a class="btn btn-primary" href="/viewdb" role="button">Back to table list</a>`
+
+		// End the HTML document
+		html += `
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+		</body></html>`
+
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+	})
 
 	r.POST("/delete_system", func(c *gin.Context) {
 		/* minionName := c.PostForm("minion_name")

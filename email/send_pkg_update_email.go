@@ -31,9 +31,9 @@ func (s *Job_Email_Body) Send_Pkg_Updates_Email(db *gorm.DB) {
 		return
 	}
 
-	for i, minion := range minions_list {
+	for i := range minions_list {
 		minions_list[i].Minion_Groups[0].Ctx_ID = groups[0].Ctx_ID
-		logger.Debugf("Minion in Send_Pkg_Updates_Email: %s - %s\n", minion.Minion_Name, minions_list[i].Minion_Groups[0].Ctx_ID)
+		//logger.Debugf("Minion in Send_Pkg_Updates_Email: %s - %s\n", minion.Minion_Name, minions_list[i].Minion_Groups[0].Ctx_ID)
 	}
 
 	if s.Template_dir == "" {

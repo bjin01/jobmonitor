@@ -40,7 +40,7 @@ func Salt_No_Upgrade_Exception_Check_New(sessionkey *auth.SumaSessionKey, groups
 		saltdata.Login()
 		//saltdata.Run_Refresh_Grains()
 		disqualified_minions := saltdata.Run_No_Upgrade_Grains_Check()
-		logger.Infof("^Salt_No_Upgrade_Exception_Check: %v\n", disqualified_minions)
+		logger.Infof("Salt_No_Upgrade_Exception_Check: %v\n", disqualified_minions)
 
 		for _, minion := range all_minions {
 			if string_array_contains(disqualified_minions, minion.Minion_Name) {

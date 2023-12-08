@@ -30,7 +30,7 @@ type ListSystemInJobs_Response struct {
 		Base_channel string
 		Server_id    int
 		Timestamp    time.Time
-		//Message      string
+		Message      string
 	}
 }
 
@@ -41,7 +41,7 @@ type ListSystemInJobs_Request struct {
 
 func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, minion Minion_Data) (string, error) {
 	if jobid_pkg_update == 0 {
-		logger.Infof("No Job ID provided. Exit check.\n")
+		logger.Infof("No Job ID provided. Exit check.")
 		return "", fmt.Errorf("No Job ID provided. Exit check.")
 	}
 
@@ -51,7 +51,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 	current_ListSystemInJobs_status.List_Completed_Systems(sessionkey, jobid_pkg_update)
 
 	if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) > 0 {
-		logger.Debugf("Lookup job ID: %d: ListInProgressSystems: %v\n", jobid_pkg_update,
+		logger.Debugf("Lookup job ID: %d: ListInProgressSystems: %v", jobid_pkg_update,
 			current_ListSystemInJobs_status.ListInProgressSystems)
 
 		for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
@@ -62,7 +62,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 	}
 
 	if len(current_ListSystemInJobs_status.ListCompletedSystems.Result) > 0 {
-		logger.Debugf("Lookup job ID: %d: ListCompletedSystems: %v\n", jobid_pkg_update,
+		logger.Debugf("Lookup job ID: %d: ListCompletedSystems: %v", jobid_pkg_update,
 			current_ListSystemInJobs_status.ListCompletedSystems)
 		for _, completed := range current_ListSystemInJobs_status.ListCompletedSystems.Result {
 			if minion.Minion_ID == completed.Server_id {
@@ -72,7 +72,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 	}
 
 	if len(current_ListSystemInJobs_status.ListFailedSystems.Result) > 0 {
-		logger.Debugf("Lookup job ID: %d: ListFailedSystems: %v\n", jobid_pkg_update,
+		logger.Debugf("Lookup job ID: %d: ListFailedSystems: %v", jobid_pkg_update,
 			current_ListSystemInJobs_status.ListFailedSystems)
 
 		for _, failed := range current_ListSystemInJobs_status.ListFailedSystems.Result {
@@ -93,24 +93,24 @@ func (c *ListSystemInJobs) List_InProgress_Systems(sessionkey *auth.SumaSessionK
 	method := "schedule.listInProgressSystems"
 	buf, err := gorillaxml.EncodeClientRequest(method, request_obj)
 	if err != nil {
-		logger.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s", err)
 	}
-	//logger.Infof("request body: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("request body: %s", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		logger.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s", err)
 	}
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s", err)
 	}
-	logger.Infof("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s", responseBody) */
 
 	response_obj := new(ListSystemInJobs_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, response_obj)
 	if err != nil {
-		logger.Fatalf("Decode ListSystemInJobs_Response Reponse body failed: %s\n", err)
+		logger.Fatalf("Decode ListSystemInJobs_Response Reponse body failed: %s", err)
 	}
 
 	c.ListInProgressSystems = *response_obj
@@ -125,24 +125,24 @@ func (c *ListSystemInJobs) List_Failed_Systems(sessionkey *auth.SumaSessionKey, 
 	method := "schedule.listFailedSystems"
 	buf, err := gorillaxml.EncodeClientRequest(method, request_obj)
 	if err != nil {
-		logger.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s", err)
 	}
-	//logger.Infof("request body: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("request body: %s", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		logger.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s", err)
 	}
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s", err)
 	}
-	logger.Infof("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s", responseBody) */
 
 	response_obj := new(ListSystemInJobs_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, response_obj)
 	if err != nil {
-		logger.Fatalf("Decode listFailedSystems Reponse body failed: %s\n", err)
+		logger.Fatalf("Decode listFailedSystems Reponse body failed: %s", err)
 	}
 
 	c.ListFailedSystems = *response_obj
@@ -157,24 +157,24 @@ func (c *ListSystemInJobs) List_Completed_Systems(sessionkey *auth.SumaSessionKe
 	method := "schedule.listCompletedSystems"
 	buf, err := gorillaxml.EncodeClientRequest(method, request_obj)
 	if err != nil {
-		logger.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s", err)
 	}
-	//logger.Infof("request body: %s\n", fmt.Sprintf(string(buf)))
+	//logger.Infof("request body: %s", fmt.Sprintf(string(buf)))
 	resp, err := request.MakeRequest(buf)
 	if err != nil {
-		logger.Fatalf("Encoding error: %s\n", err)
+		logger.Fatalf("Encoding error: %s", err)
 	}
 
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Fatalf("ReadAll error: %s\n", err)
+		logger.Fatalf("ReadAll error: %s", err)
 	}
-	logger.Infof("responseBody: %s\n", responseBody) */
+	logger.Infof("responseBody: %s", responseBody) */
 
 	response_obj := new(ListSystemInJobs_Response)
 	err = gorillaxml.DecodeClientResponse(resp.Body, response_obj)
 	if err != nil {
-		logger.Fatalf("Decode listCompletedSystems Reponse body failed: %s\n", err)
+		logger.Fatalf("Decode listCompletedSystems Reponse body failed: %s", err)
 	}
 
 	c.ListCompletedSystems = *response_obj

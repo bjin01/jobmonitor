@@ -33,7 +33,7 @@
 <p>Reported by Jobchecker.</p><br><br>
 <br>
 <div>
-<h1>Minion List</h1>
+  <h1>Minion List - failed</h1>
 <table>
         <tr>
                 <th>Minion Name   </th>
@@ -43,6 +43,7 @@
                 <th>Workflow Stage Status</th>
         </tr>
         {{range . }}
+        {{ if eq .Migration_Stage_Status "failed" }}
         <tr>
                 <td>{{.Minion_Name}}</td>
                 <td>{{.Minion_Status}}</td>
@@ -50,6 +51,29 @@
                 <td>{{.Migration_Stage}}</td>
                 <td>{{.Migration_Stage_Status}}</td>
         </tr>
+        {{end}}
+        {{end}}
+</table>
+<br>
+<h1>Minion List - pending or completed</h1>
+<table>
+        <tr>
+                <th>Minion Name   </th>
+                <th>Status</th>
+                <th>Remarks</th>
+                <th>Workflow Stage</th>
+                <th>Workflow Stage Status</th>
+        </tr>
+        {{range . }}
+        {{ if or (eq .Migration_Stage_Status "pending") (eq .Migration_Stage_Status "completed") (eq .Migration_Stage_Status "") }}
+        <tr>
+                <td>{{.Minion_Name}}</td>
+                <td>{{.Minion_Status}}</td>
+                <td>{{.Minion_Remarks}}</td>
+                <td>{{.Migration_Stage}}</td>
+                <td>{{.Migration_Stage_Status}}</td>
+        </tr>
+        {{end}}
         {{end}}
 </table>
 {{ $id := "" }}

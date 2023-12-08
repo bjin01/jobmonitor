@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var errorlog *os.File
@@ -27,13 +28,20 @@ func init() {
 	}
 
 	logger = log.New()
+	myformatter := &prefixed.TextFormatter{
+		FullTimestamp:   false,
+		ForceColors:     true,
+		TimestampFormat: "2006/01/02 15:04:05",
+	}
+	logger.SetFormatter(myformatter)
+
 	logger.SetOutput(io.MultiWriter(os.Stdout, errorlog))
-	formatter := &log.JSONFormatter{
+	/* formatter := &log.JSONFormatter{
 		TimestampFormat: "2006/01/02 15:04:05",
 		//FullTimestamp:   true,
 	}
 
-	logger.SetFormatter(formatter)
+	logger.SetFormatter(formatter) */
 	logger.Infof("Logging to: %v", logfile)
 	/* mw := io.MultiWriter(os.Stdout, errorlog)
 	log.SetOutput(mw)
