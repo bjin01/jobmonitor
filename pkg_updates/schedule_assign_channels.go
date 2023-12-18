@@ -86,6 +86,13 @@ type Change_Channels_Request struct {
 func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups, db *gorm.DB, wf []Workflow_Step, minion_list []Minion_Data, stage string) {
 	method := "system.listSubscribedChildChannels"
 
+	// get Clm from db
+	clm := new([]ContentLifecycleManagement)
+	clm_result := db.Find(&clm)
+	if clm_result.RowsAffected == 0 {
+		logger.Errorf("failed to get ContentLifecycleManagement from database\n")
+	}
+
 	for i, minion := range minion_list {
 		if stage != Find_Next_Stage(wf, minion) {
 			continue
@@ -126,6 +133,9 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 		set_channels_request.EarliestOccurrence = time.Now()
 
 		var old_base_channel_label string
+		proj_label := ""
+		env_label := ""
+		original_base_channel_label := ""
 		for _, channel := range reply.Result {
 			//logger.Infof("Channel: %v\n", channel)
 			var temp_base_channel_label string
@@ -138,7 +148,15 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 					logger.Infof("Channel %s has no parent channel label\n", channel.Label)
 					break
 				} else {
-					parts := strings.Split(strings.TrimSpace(channel.Parent_channel_label), "-")
+					if original_base_channel_label == "" {
+						proj_label, env_label, original_base_channel_label = Match_Project_Environment_Label(*clm, strings.TrimSpace(channel.Parent_channel_label))
+					}
+					logger.Debugf("matched project label: %s env label: %s, original base channel label %s\n", proj_label, env_label, original_base_channel_label)
+					if proj_label == "" || env_label == "" {
+						logger.Infof("Channel %s has no matching project label or environment label\n", channel.Label)
+						break
+					}
+					//parts := strings.Split(strings.TrimSpace(channel.Parent_channel_label), "-")
 					if len(groupsdata.Target_Products) > 0 {
 						for _, v := range groupsdata.Target_Products {
 							if len(v.Product.OptionalChildChannels) > 0 {
@@ -148,9 +166,7 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 										if strings.TrimSpace(optchannel.New_Channel) != "" {
 											if v.Product.Clm_Project_Label != "" {
 												new_opt_channel_label := fmt.Sprintf("%s-%s-%s",
-													v.Product.Clm_Project_Label,
-													parts[1],
-													strings.TrimSpace(optchannel.New_Channel))
+													v.Product.Clm_Project_Label, env_label, strings.TrimSpace(optchannel.New_Channel))
 
 												opt_channel.Channel_Label = new_opt_channel_label
 												result := db.FirstOrCreate(&opt_channel)
@@ -182,9 +198,9 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 						}
 					}
 
-					if len(parts) > 2 {
-						db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", parts[1])
-						//logger.Infof("Minion %s is at content lifecycle management stage: %s\n", minion.Minion_Name, parts[1])
+					if env_label != "" {
+						db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Clm_Stage", env_label)
+						logger.Infof("Minion %s is at content lifecycle management stage: %s-%s\n", minion.Minion_Name, proj_label, env_label)
 
 					} else {
 						logger.Infof("%s: Channel %s could not be parsed.\n", minion.Minion_Name, channel.Label)
@@ -197,13 +213,14 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 						old_base_channel_label = channel.Parent_channel_label
 						if strings.TrimSpace(group.Assigne_Channel.New_base_prefix) != "" {
 							update_channel_prefix = &group.Assigne_Channel.New_base_prefix
-							temp_base_channel_label = fmt.Sprintf("%s%s", *update_channel_prefix,
-								Discart_lable(channel.Parent_channel_label))
-							temp_Child_label = fmt.Sprintf("%s%s", *update_channel_prefix, Discart_lable(channel.Label))
+							temp_base_channel_label = fmt.Sprintf("%s%s", *update_channel_prefix, original_base_channel_label)
+							_, _, original_child_channel_label := Match_Project_Environment_Label(*clm, strings.TrimSpace(channel.Label))
+							temp_Child_label = fmt.Sprintf("%s%s", *update_channel_prefix, original_child_channel_label)
 						} else {
 							*update_channel_prefix = ""
-							temp_base_channel_label = Discart_lable(channel.Parent_channel_label)
-							temp_Child_label = Discart_lable(channel.Label)
+							temp_base_channel_label = original_base_channel_label
+							_, _, original_child_channel_label := Match_Project_Environment_Label(*clm, strings.TrimSpace(channel.Label))
+							temp_Child_label = original_child_channel_label
 						}
 					}
 				}
@@ -319,12 +336,4 @@ func Assign_Channels(sessionkey *auth.SumaSessionKey, groupsdata *Update_Groups,
 		}
 	}
 
-}
-
-func Discart_lable(label string) string {
-	parts := strings.SplitN(label, "-", 3)
-	if len(parts) > 2 {
-		return parts[2]
-	}
-	return ""
 }

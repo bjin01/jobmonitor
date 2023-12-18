@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"reflect"
@@ -111,14 +112,17 @@ func main() {
 	r := gin.New()
 
 	r.LoadHTMLGlob(fmt.Sprintf("%s/*", *templates_dir))
-
+	//r.Static("/static", fmt.Sprintf("%s/static", *templates_dir))
+	//r.Static("/static", "/home/bjin/github/bjin01/jobmonitor/static")
+	r.Static("/static", "/srv/jobmonitor/static")
 	r.GET("/web", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "web.html", nil)
+		Myname := "Bo Jin"
+		c.HTML(http.StatusOK, "web.html", Myname)
 	})
 
 	r.POST("/viewdb", func(c *gin.Context) {
 		dbfile := c.PostForm("dbfile")
-
+		fmt.Println("POST Request for dbfile: ", dbfile)
 		// Store dbfile path in a cookie
 		c.SetCookie("dbfile", dbfile, 3600, "/", "", false, true)
 
@@ -137,7 +141,7 @@ func main() {
 		defer rows.Close()
 
 		//var tables []string
-		html := `<!DOCTYPE html>
+		/* html := `<!DOCTYPE html>
 		<html>
 		<head>
 		<meta charset="utf-8">
@@ -158,9 +162,18 @@ func main() {
 		html += `</div>
 		<a class="btn btn-primary" href="/web" role="button">Enter DB file</a>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-		</body></html>`
-
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+		</body></html>` */
+		return_values := []string{}
+		for rows.Next() {
+			var table string
+			if err := rows.Scan(&table); err != nil {
+				c.String(http.StatusInternalServerError, "Failed to scan row: %v", err)
+				return
+			}
+			return_values = append(return_values, table)
+		}
+		logger.Debugln("return_values: ", return_values)
+		c.JSONP(http.StatusOK, return_values)
 	})
 
 	r.GET("/viewdb", func(c *gin.Context) {
@@ -249,7 +262,47 @@ func main() {
 			return
 		}
 
-		var tableContent []map[string]interface{}
+		var result []map[string]interface{}
+		for rows.Next() {
+			values := make([]interface{}, len(columns))
+			valuePtrs := make([]interface{}, len(columns))
+			for i := 0; i < len(columns); i++ {
+				valuePtrs[i] = &values[i]
+			}
+
+			rows.Scan(valuePtrs...)
+
+			rowResult := make(map[string]interface{})
+			for i, colName := range columns {
+				var v interface{}
+				val := values[i]
+				b, ok := val.([]byte)
+				if ok {
+					v = string(b)
+				} else {
+					v = val
+				}
+				rowResult[colName] = v
+				//fmt.Println(colName, v)
+			}
+
+			result = append(result, rowResult)
+		}
+
+		jsonData, err := json.Marshal(result)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to marshal result: %v", err)
+			return
+		}
+
+		c.String(http.StatusOK, string(jsonData))
+		/* columns, err := rows.Columns()
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to get columns: %v", err)
+			return
+		} */
+
+		/* var tableContent []map[string]interface{}
 		values := make([]interface{}, len(columns))
 		valuePtrs := make([]interface{}, len(columns))
 		for rows.Next() {
@@ -314,7 +367,7 @@ func main() {
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 		</body></html>`
 
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html)) */
 	})
 
 	r.POST("/delete_system", func(c *gin.Context) {

@@ -17,7 +17,7 @@ func ListMigrationTarget(sessionkey *auth.SumaSessionKey, UserData *Update_Group
 	//allchannels := List_All_Channels(sessionkey)
 
 	for _, minion := range minion_list {
-		//get minion stage fromo DB
+		//get minion stage from DB
 		result := db.Where(&Minion_Data{Minion_Name: minion.Minion_Name}).First(&minion)
 		if result.Error != nil {
 			logger.Errorf("failed to get minion %s from database\n", minion.Minion_Name)

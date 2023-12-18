@@ -132,6 +132,9 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 		}
 	}
 
+	// Get CLM projects and environments into DB
+	pkg_updates.Get_Clm_Data(SessionKey, groupsdata, db)
+
 	/* wf, err := pkg_updates.Get_Workflow_From_DB(db)
 	if err != nil {
 		logger.Errorf("failed to get workflow from DB.")
