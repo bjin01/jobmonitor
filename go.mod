@@ -6,12 +6,15 @@ require gopkg.in/yaml.v2 v2.4.0
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gorilla/rpc v1.2.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.30.0 // indirect
 	github.com/rogpeppe/go-charset v0.0.0-20190617161244-0dc95cdf6f31 // indirect
 	golang.org/x/term v0.13.0 // indirect
 )

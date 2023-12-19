@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"log"
 	"net/http"
@@ -112,9 +113,16 @@ func main() {
 	r := gin.New()
 
 	r.LoadHTMLGlob(fmt.Sprintf("%s/*", *templates_dir))
-	//r.Static("/static", fmt.Sprintf("%s/static", *templates_dir))
-	//r.Static("/static", "/home/bjin/github/bjin01/jobmonitor/static")
-	r.Static("/static", "/srv/jobmonitor/static")
+
+	static_dir_split := strings.Split(fmt.Sprintf("%s", *templates_dir), "/")
+	// trim out the last / part
+	static_dir_list := static_dir_split[:len(static_dir_split)-1]
+	// join the string back
+	static_dir := strings.Join(static_dir_list, "/")
+	static_dir = fmt.Sprintf("%s/static", static_dir)
+	logger.Infoln("static_dir: ", static_dir)
+	r.Static("/static", static_dir)
+
 	r.GET("/web", func(c *gin.Context) {
 		Myname := "Bo Jin"
 		c.HTML(http.StatusOK, "web.html", Myname)
