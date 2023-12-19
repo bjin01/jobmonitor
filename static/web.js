@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(dbfile);
     
     let p1 = document.querySelector("#selected_db_file");
-    p1.style.color = "purple";  
+    p1.style.color = "blueviolet";  
     p1.innerText = "database file: " + dbfile;
     dbfilediv.appendChild(p1);
     // Clear the input field
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     // Create a FormData object
     if (dbfile == "") {
-      alert("Please select a database file");
+      alert("Please enter a database file path");
       return false;
     }
   
