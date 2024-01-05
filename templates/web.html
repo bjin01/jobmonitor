@@ -5,22 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Jobchecker</title>
     <link href="/static/web.css" rel="stylesheet">
+<link href="/static/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<link href="/static/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="/static/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+<script src="/static/jquery-3.7.0.min.js"></script>
+<script src="/static/jquery.dataTables.min.js"></script>
+<script src="/static/dataTables.bootstrap5.min.js"></script>
+
 </head>
 <body>
-<h2>Jobchecker - SQLite Database Viewer</h2>
-<form id="form1">
-  <div class="mb-3">
-  <label for="dbfile" class="form-label">Database File:</label><br>
-  <input type="text" id="dbfile" class="form-control" name="dbfile"><br>
+
+<nav class="navbar navbar-dark bg-secondary">
+  <div class="container-fluid">
+    <a class="navbar-brand">Suma Jobchecker</a>
+    <form id="form1" class="d-flex">
+      <input class="form-control me-2" value="/run/t74zb_test_f72_group.db" type="text" id="dbfile" name="dbfile" placeholder="DB-File Path" aria-label="Search">
+      <button class="btn btn-outline-light" id="myBtn" onclick="myFunction(event)" type="submit">open</button>
+    </form>
   </div>
-  <button type="submit" id="myBtn" onclick="myFunction(event)" class="btn btn-primary">Submit</button>
-  
-</form>
+</nav>
+
+<div class="container">
+<br>
 <div id="dbfilediv">
   <p id="selected_db_file"></p>
 </div>
-<div id="tableDiv">Select DB Table: </div>
-<div id="tableContent">Table: </div>
+<div id="tableDiv"></div>
+<br><br>
+<div id="tableContent" ></div>
+
+</div>
+
 <script src="/static/web.js"></script>
+
+<script>
+var intervalId = window.setInterval(function(){
+  // call your function here
+  new DataTable('#db_table')
+}, 100);
+</script>
+
+
 </body>
 </html>

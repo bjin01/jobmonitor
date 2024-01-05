@@ -19,7 +19,7 @@ func Logout(method string, args SumaSessionKey) error {
 	//logger.Info("Raw xml: %s\n", fmt.Sprintln(resp))
 	err = xml.DecodeClientResponse(resp.Body, LogoutResult)
 	if err != nil {
-		logger.Fatalf("Decode Logout response body failed: %s\n", err)
+		logger.Printf("Decode Logout response body failed: %s\n", err)
 	}
 
 	if LogoutResult.ReturnInt == 1 {

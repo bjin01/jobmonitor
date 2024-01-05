@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jobchecker</title>
+    <link href="/static/web.css" rel="stylesheet">
+</head>
+<body>
+<h2>Jobchecker - SQLite Database Viewer</h2>
+<form id="form1">
+  <div class="mb-3">
+  <label for="dbfile" class="form-label">Database File:</label><br>
+  <input type="text" id="dbfile" class="form-control" name="dbfile"><br>
+  </div>
+  <button type="submit" id="myBtn" onclick="myFunction(event)" class="btn btn-primary">Submit</button>
+  
+</form>
+<div id="dbfilediv">
+  <p id="selected_db_file"></p>
+</div>
+<div id="tableDiv">Select DB Table: </div>
+<div id="tableContent">Table: </div>
+<script src="/static/web.js"></script>
+</body>
+</html>

@@ -468,6 +468,7 @@ func main() {
 				return
 			}
 
+			Setup_Logger(pkg_update_request_obj.Logfile)
 			ctx, cancel := context.WithCancel(context.Background())
 
 			ctx_timestemp := fmt.Sprintf("%s_%d", pkg_update_request_obj.T7User, time.Now().Nanosecond())

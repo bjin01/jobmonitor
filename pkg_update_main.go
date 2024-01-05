@@ -9,7 +9,6 @@ import (
 	"github.com/bjin01/jobmonitor/email"
 	"github.com/bjin01/jobmonitor/pkg_updates"
 	"github.com/bjin01/jobmonitor/request"
-	"github.com/bjin01/jobmonitor/saltapi"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -53,14 +52,6 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 		}
 	}
 
-	//change pkg_updates logger log level to info
-	pkg_updates.Setup_Logger(groupsdata.Logfile)
-	pkg_updates.SetLoggerLevel(groupsdata.Log_Level)
-	saltapi.Setup_Logger(groupsdata.Logfile)
-	saltapi.SetLoggerLevel(groupsdata.Log_Level)
-	email.Setup_Logger(groupsdata.Logfile)
-	email.SetLoggerLevel(groupsdata.Log_Level)
-
 	//logger.Info("SP Migration input data %v\n", groupsdata)
 	var sumaconf Sumaconf
 	key := os.Getenv("SUMAKEY")
@@ -82,7 +73,8 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 	request.Sumahost = &sumaconf.Server
 	*SessionKey, err = auth.Login("auth.login", MysumaLogin)
 	if err != nil {
-		logger.Fatalln(err)
+		logger.Println(err)
+		return
 	}
 	//email_template_directory_string := fmt.Sprintf("%s", email_template_dir.Dir)
 
