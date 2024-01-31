@@ -2,6 +2,7 @@ package pkg_updates
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -39,7 +40,7 @@ type ListSystemInJobs_Request struct {
 	ActionId   int    `xmlrpc:"actionId"`
 }
 
-func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, minion Minion_Data) (string, error) {
+func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, minion Minion_Data, groupsdata *Update_Groups) (string, error) {
 	if jobid_pkg_update == 0 {
 		logger.Infof("No Job ID provided. Exit check.")
 		return "", fmt.Errorf("No Job ID provided. Exit check.")
@@ -56,6 +57,12 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 
 		for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
 			if minion.Minion_ID == inprogress.Server_id {
+				if strings.Contains(minion.Migration_Stage, "reboot") {
+					go func() {
+						//logger.Debugf("We do a reboot false-positive check here by using salt ping for %s.", minion.Minion_Name)
+						Reboot_Triage(sessionkey, jobid_pkg_update, minion.Minion_ID, minion.Minion_Name, groupsdata)
+					}()
+				}
 				return "pending", nil
 			}
 		}

@@ -100,6 +100,7 @@ type Update_Groups struct {
 	Salt_Prep_State                 string `json:"salt_prep_state"`
 	Salt_Post_State                 string `json:"salt_post_state"`
 	JobcheckerTimeout               int    `json:"jobchecker_timeout"`
+	Reboot_Triage_Timer             int    `json:"reboot_triage_timer"`
 	//Reboot_timeout                  int              `json:"reboot_timeout"`
 	JobcheckerEmails []string `json:"jobchecker_emails"`
 	Patch_Level      string   `json:"patch_level"`

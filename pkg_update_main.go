@@ -42,6 +42,12 @@ func GetAll_Minions_From_DB(db *gorm.DB) ([]pkg_updates.Minion_Data, error) {
 func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_Groups,
 	email_template_dir *email.Templates_Dir, health *bool) {
 
+	if groupsdata.Log_Level == "debug" {
+		logger.SetLevel(logrus.DebugLevel)
+	} else {
+		logger.SetLevel(logrus.InfoLevel)
+	}
+
 	if health != nil {
 		if *health == false {
 			logger.WithFields(logrus.Fields{
