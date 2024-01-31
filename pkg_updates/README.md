@@ -151,6 +151,7 @@ t7user: t7udp
 authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
 patch_level: 2023-Q4
+reboot_triage_timer: 20
 workflow:
 - assign_channels: 1
 - package_updates: 2
@@ -302,7 +303,12 @@ The tracking_file_directory parameter is a string value. This parameter is used 
 The purpose of this tracking file is to allow admins to follow the status of the systems while workflow is running. This file will be rewritten by jobchecker.
 
 ### patch_level
-This is a customer specific parameter. The value of this parameter will be used in a built-in salt execution module to set the patch level of the system. 
+This is a customer specific parameter. The value of this parameter will be used in a built-in salt execution module to set the patch level of the system.
+
+### reboot_triage_timer
+If scheduled reboot jobs remain in pending state this parameter defines how long after reboot_job_start the reboot triage will start. The reboot triage feature will check if the system is online or not. If the system is online then a salt event will be sent to salt-master which in turn will trigger the minion-start reactor.
+
+Additionally, the reboot triage will also consider salt-master server cpu 5 minutes load average. If the load average is higher than 10 then the reboot triage will be skipped until next triage check cycle. This is to avoid high load on salt-master server.
 
 ### workflow
 The workflow parameter is a list of workflow steps. The workflow steps will be executed in the given order.
