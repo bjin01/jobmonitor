@@ -28,6 +28,7 @@ t7user: t7udp
 authentication_token: R2bfp223Qsk-pX970Jw8tyJUChT4-e2J8anZ4G4n4IM=
 tracking_file_directory: "/var/log/sumapatch/"
 patch_level: 2023-Q4
+reboot_triage_timer: 15
 workflow:
 - assign_channels: 1
 - package_updates: 2

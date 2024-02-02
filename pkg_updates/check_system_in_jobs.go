@@ -40,6 +40,14 @@ type ListSystemInJobs_Request struct {
 	ActionId   int    `xmlrpc:"actionId"`
 }
 
+func (s *ListSystemInJobs_Response) Get_Systems_In_Jobs() (Systems []string) {
+
+	for _, result := range s.Result {
+		Systems = append(Systems, result.Server_name)
+	}
+	return Systems
+}
+
 func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, minion Minion_Data, groupsdata *Update_Groups) (string, error) {
 	if jobid_pkg_update == 0 {
 		logger.Infof("No Job ID provided. Exit check.")
@@ -53,7 +61,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 
 	if len(current_ListSystemInJobs_status.ListInProgressSystems.Result) > 0 {
 		logger.Debugf("Lookup job ID: %d: ListInProgressSystems: %v", jobid_pkg_update,
-			current_ListSystemInJobs_status.ListInProgressSystems)
+			current_ListSystemInJobs_status.ListInProgressSystems.Get_Systems_In_Jobs())
 
 		for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
 			if minion.Minion_ID == inprogress.Server_id {
@@ -70,7 +78,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 
 	if len(current_ListSystemInJobs_status.ListCompletedSystems.Result) > 0 {
 		logger.Debugf("Lookup job ID: %d: ListCompletedSystems: %v", jobid_pkg_update,
-			current_ListSystemInJobs_status.ListCompletedSystems)
+			current_ListSystemInJobs_status.ListCompletedSystems.Get_Systems_In_Jobs())
 		for _, completed := range current_ListSystemInJobs_status.ListCompletedSystems.Result {
 			if minion.Minion_ID == completed.Server_id {
 				return "completed", nil
@@ -80,7 +88,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 
 	if len(current_ListSystemInJobs_status.ListFailedSystems.Result) > 0 {
 		logger.Debugf("Lookup job ID: %d: ListFailedSystems: %v", jobid_pkg_update,
-			current_ListSystemInJobs_status.ListFailedSystems)
+			current_ListSystemInJobs_status.ListFailedSystems.Get_Systems_In_Jobs())
 
 		for _, failed := range current_ListSystemInJobs_status.ListFailedSystems.Result {
 			if minion.Minion_ID == failed.Server_id {

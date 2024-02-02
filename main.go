@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -40,6 +39,7 @@ func main() {
 	sumafile_path := flag.String("config", "/etc/salt/master.d/spacewalk.conf", "provide config file with SUMA login")
 	api_interval := flag.Int("interval", 60, "SUMA API polling interval, default 60 seconds, no need to write s.")
 	templates_dir := flag.String("templates", "/srv/jobmonitor", "provide directory name where the template files are stored.")
+	port := flag.Int("port", 12345, "provide port number for the web server.")
 	flag.Parse()
 
 	var my_contexts []my_context
@@ -52,6 +52,7 @@ func main() {
 	}
 	templates := &email.Templates_Dir{Dir: *templates_dir}
 	logger.Infof("templates_dir is: %s\n", templates.Dir)
+	logger.Infof("port is: %v\n", *port)
 
 	health := new(bool)
 	go func() {
@@ -702,8 +703,8 @@ func main() {
 		go Jobmonitor(SUMAConfig, alljobs, instance_jobs_patching, templates, health)
 		c.String(200, "Jobchecker task started.")
 	})
-	log.Default().Println("/jobckecker API is listening and serving HTTP on :12345")
-	// Listen and serve on 0.0.0.0:12345
-	r.Run(":12345")
+	logger.Infof("/jobckecker API is listening and serving HTTP on :%d", *port)
+	// Listen and serve on given port
+	r.Run(fmt.Sprintf(":%d", *port))
 
 }

@@ -21,8 +21,12 @@ This is a jobchecker with automated Updates and Service Pack Migration capabilit
 The jobchecker can trigger package updates including service pack migration for given groups in SUSE Manager/Uyuni.
 Read here for [more details](./pkg_updates/README.md)
 
+## Start the jobchecker manually
+```
+/usr/local/bin/jobmonitor -config /etc/salt/master.d/spacewalk.conf -port 45045 -interval 60 -templates /srv/jobmonitor/templates
+```
 
-## systemd service for jobchecker
+## Start the jobchecker - systemd service for jobchecker
 Jobchecker runs as a systemd service. [jobchecker.service](./etc/systemd/system/jobchecker.service)
 
 The suma-jobchecker runs non-stop. Upone received HTTP requests it will processes the requests in sub-routines concurrently.

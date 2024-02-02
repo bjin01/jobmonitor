@@ -7,7 +7,7 @@ Requires=taskomatic.service
 Environment="SUMAKEY=R2bfp223Qa="
 Type=simple
 Restart=always
-ExecStart=/usr/local/bin/jobmonitor -config /etc/salt/master.d/spacewalk.conf -interval 60 -templates /srv/jobmonitor
+ExecStart=/usr/local/bin/jobmonitor -config /etc/salt/master.d/spacewalk.conf -port 45045 -interval 60 -templates /srv/jobmonitor
 
 [Install]
 WantedBy=multi-user.target

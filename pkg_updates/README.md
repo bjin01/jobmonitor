@@ -16,7 +16,7 @@ Reason choosing Go over Python is the concurrency capabilities and stabilities I
 * The jobchecker binary can be placed in $PATH directory
 
 ## Concept:
-The one binary **jobchecker** program is listening at port ```12345``` for HTTP requests. The program calls xmlrpc api of SUSE Manager. On the other hand side jobchecker uses salt tornado rest api to execute salt states, runners and execution modules.
+The one binary **jobchecker** program is listening for HTTP requests. The program calls xmlrpc api of SUSE Manager. On the other hand side jobchecker uses salt tornado rest api to execute salt states, runners and execution modules.
 
 Jobchecker uses golang gorm to store system workflow stage information in SQLite database file. The SQLite database file will be created if it does not exist. The SQLite database file will not be deleted if the workflow is finished. The jobchecker can be restarted and the process will re-read the db file and continue the workflow.
 
