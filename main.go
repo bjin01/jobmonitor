@@ -382,6 +382,7 @@ func main() {
 	r.POST("/delete_system", func(c *gin.Context) {
 		/* minionName := c.PostForm("minion_name")
 		authToken := c.GetHeader("Authentication-Token") */
+		Setup_Logger("")
 		var deleteSystemRequestObj delete_systems.DeleteSystemRequest
 		if err := c.ShouldBindJSON(&deleteSystemRequestObj); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
