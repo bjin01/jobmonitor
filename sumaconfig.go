@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -62,5 +61,5 @@ func Decrypt(key string, cryptoText string) string {
 	msg := fernet.VerifyAndDecrypt([]byte(cryptoText), 0, k)
 	//logger.Infoln(string(msg))
 
-	return fmt.Sprintf("%s", msg)
+	return string(msg)
 }

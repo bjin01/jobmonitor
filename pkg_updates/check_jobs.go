@@ -73,6 +73,8 @@ func Check_Jobs(ctx context.Context, groupsdata *Update_Groups, sessionkey *auth
 
 			if minion.JobID != 0 {
 				status, err := Match_Job(sessionkey, minion, groupsdata)
+				//stage_time := time.Now().String()
+				//logger.Debugf(" %s: Minion %s JobID: %d, stage: %s at status: %s", stage_time, minion.Minion_Name, minion.JobID, minion.Migration_Stage, status)
 				if err != nil {
 					logger.Errorf("failed to get job status in Match_Job.")
 					return

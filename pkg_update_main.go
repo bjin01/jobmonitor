@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func ifGroupsExist(db *gorm.DB, group string) bool {
+/* func ifGroupsExist(db *gorm.DB, group string) bool {
 	g := new(pkg_updates.Group)
 	db.Where("Group_Name = ?", group).First(&g)
 	if g.Group_Name == group {
@@ -23,7 +23,7 @@ func ifGroupsExist(db *gorm.DB, group string) bool {
 		return true
 	}
 	return false
-}
+} */
 
 func GetAll_Groups(db *gorm.DB) ([]pkg_updates.Group, error) {
 	var grp []pkg_updates.Group
@@ -49,7 +49,7 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 	}
 
 	if health != nil {
-		if *health == false {
+		if !*health {
 			logger.WithFields(logrus.Fields{
 				"goroutine": ctx.Value("goroutine"),
 				"username":  groupsdata.T7User,
@@ -105,14 +105,14 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 	db.AutoMigrate(&pkg_updates.OptionalChannels{})
 	db.AutoMigrate(&pkg_updates.Minion_Data{})
 
-	var workflow_steps []pkg_updates.Workflow_Step
+	//var workflow_steps []pkg_updates.Workflow_Step
 	for _, g := range groupsdata.Workflow {
 		new_workflow := new(pkg_updates.Workflow_Step)
 		for name, step := range g {
 			new_workflow.Name = name
 			new_workflow.Order = step
 
-			workflow_steps = append(workflow_steps, *new_workflow)
+			//workflow_steps = append(workflow_steps, *new_workflow)
 			//fmt.Printf("-----------new_workflow: %+v\n", new_workflow)
 			result := db.FirstOrCreate(&new_workflow, new_workflow)
 			if result.RowsAffected > 0 {

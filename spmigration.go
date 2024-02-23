@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/bjin01/jobmonitor/auth"
@@ -12,7 +11,7 @@ import (
 
 func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Groups, email_template_dir *email.Templates_Dir, health *bool) {
 	if health != nil {
-		if *health == false {
+		if !*health {
 			logger.Infof("Health check failed. Skipping groups lookup.")
 			return
 		}
@@ -41,7 +40,7 @@ func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Gro
 	if err != nil {
 		logger.Fatalln(err)
 	}
-	email_template_directory_string := fmt.Sprintf("%s", email_template_dir.Dir)
+	email_template_directory_string := email_template_dir.Dir
 	spmigration.Orchestrate(SessionKey, groupsdata, string(*request.Sumahost), email_template_directory_string, health)
 	//logger.Info("target_minions: %v\n", target_minions)
 	//logger.Info("sessionkey: %s\n", SessionKey.Sessionkey)

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -32,6 +33,10 @@ type my_context struct {
 	cancells context.CancelFunc
 }
 
+type keyType struct {
+	name string
+}
+
 var time_counter_pkg_update_by_list int
 var time_counter_pkg_update int
 
@@ -40,6 +45,8 @@ func main() {
 	api_interval := flag.Int("interval", 60, "SUMA API polling interval, default 60 seconds, no need to write s.")
 	templates_dir := flag.String("templates", "/srv/jobmonitor", "provide directory name where the template files are stored.")
 	port := flag.Int("port", 12345, "provide port number for the web server.")
+	tls_cert := flag.String("tls_cert", "/etc/pki/tls/certs/spacewalk.crt", "provide tls certificate file path.")
+	tls_key := flag.String("tls_key", "/etc/pki/tls/private/spacewalk.key", "provide tls key file path.")
 	flag.Parse()
 
 	var my_contexts []my_context
@@ -115,7 +122,7 @@ func main() {
 
 	r.LoadHTMLGlob(fmt.Sprintf("%s/*", *templates_dir))
 
-	static_dir_split := strings.Split(fmt.Sprintf("%s", *templates_dir), "/")
+	static_dir_split := strings.Split(*templates_dir, "/")
 	// trim out the last / part
 	static_dir_list := static_dir_split[:len(static_dir_split)-1]
 	// join the string back
@@ -451,7 +458,7 @@ func main() {
 	r.POST("/pkg_update", func(c *gin.Context) {
 		var pkg_update_request_obj pkg_updates.Update_Groups
 
-		if *health == false {
+		if !*health {
 			c.String(200, "Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
 			logger.Infof("Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
@@ -475,10 +482,13 @@ func main() {
 
 			ctx_timestemp := fmt.Sprintf("%s_%d", pkg_update_request_obj.T7User, time.Now().Nanosecond())
 
-			ctx = context.WithValue(ctx, "ctx_timestemp", ctx_timestemp)
+			var key = keyType{"ctx_timestemp"}
+
+			ctx = context.WithValue(ctx, key, ctx_timestemp)
 			context_temp := my_context{ctx, cancel}
 			my_contexts = append(my_contexts, context_temp)
-			context_value := ctx.Value("ctx_timestemp")
+			//context_value := ctx.Value("ctx_timestemp")
+			context_value := ctx.Value(key)
 			pkg_update_request_obj.Ctx_ID = ctx_timestemp
 			logger.Infof("------------------context value: %v\n", context_value.(string))
 			logger.Infoln("Length of context: ", len(my_contexts))
@@ -486,7 +496,7 @@ func main() {
 			c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Groups))
 			//logger.Infof("request data %v for Package Update through SUSE Manager.\n", pkg_update_request_obj)
 		} else {
-			c.String(http.StatusOK, fmt.Sprintf("Package Updates & SP Migration POST request repeated too soon. Please wait for 20 seconds."))
+			c.String(http.StatusOK, "Package Updates & SP Migration POST request repeated too soon. Please wait for 20 seconds.")
 			logger.Infof("Package Updates & SP Migrationrequest repeated too soon. Please wait for 20 seconds.")
 		}
 
@@ -504,7 +514,7 @@ func main() {
 	r.POST("/pkg_update_by_list", func(c *gin.Context) {
 		var pkg_update_request_obj pkg_updates.Update_Groups
 
-		if *health == false {
+		if !*health {
 			c.String(200, "Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
 			logger.Infof("Pkg Update will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
@@ -528,10 +538,10 @@ func main() {
 
 		if time_counter_pkg_update_by_list == 0 {
 			go Pkg_update_by_list(SUMAConfig, &pkg_update_request_obj, templates, health)
-			c.String(http.StatusOK, fmt.Sprintf("Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Minions_to_add))
+			c.String(http.StatusOK, "Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Minions_to_add)
 			logger.Infof("request data for Package Update through SUSE Manager received.\n")
 		} else {
-			c.String(http.StatusOK, fmt.Sprintf("Pkg Update POST request repeated too soon. Please wait for 20 seconds."))
+			c.String(http.StatusOK, "Pkg Update POST request repeated too soon. Please wait for 20 seconds.")
 			logger.Infof("Pkg Update POST request repeated too soon. Please wait for 20 seconds.")
 		}
 
@@ -554,8 +564,10 @@ func main() {
 			return
 		}
 
+		var key = keyType{"ctx_timestemp"}
+
 		for i, ctx := range my_contexts {
-			context_value := ctx.ctx.Value("ctx_timestemp")
+			context_value := ctx.ctx.Value(key)
 			logger.Infof("------------------context value: %v\n", context_value.(string))
 			if context_value.(string) == ctx_id {
 				logger.Infof("context value found: %v\n", context_value.(string))
@@ -595,7 +607,7 @@ func main() {
 	r.POST("/spmigration", func(c *gin.Context) {
 		var spmigrationRequestObj spmigration.Migration_Groups
 
-		if *health == false {
+		if !*health {
 			c.String(200, "SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
 			logger.Infof("SPMigration will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
@@ -642,7 +654,7 @@ func main() {
 		var alljobs schedules.ScheduledJobs
 		var full_update_jobs schedules.Full_Update_Jobs
 
-		if *health == false {
+		if !*health {
 			c.String(200, "Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
 			logger.Infof("Jobchecker will not start due to SUSE Manager health check failed. Please check the logs.")
 			return
@@ -706,6 +718,13 @@ func main() {
 	})
 	logger.Infof("/jobckecker API is listening and serving HTTP on :%d", *port)
 	// Listen and serve on given port
-	r.Run(fmt.Sprintf(":%d", *port))
+	//r.Run(fmt.Sprintf(":%d", *port))
+
+	// Run the server with TLS.
+	// Replace 'cert.pem' and 'key.pem' with the paths to your actual certificate and key files.
+	err := r.RunTLS(fmt.Sprintf(":%d", *port), *tls_cert, *tls_key)
+	if err != nil {
+		log.Fatal("Failed to run server: ", err)
+	}
 
 }

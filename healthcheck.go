@@ -32,7 +32,7 @@ func performHealthCheck(sumaconfig *SUMAConfig) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Response code not OK, %d\n", resp.StatusCode)
+		return fmt.Errorf("response code not OK, %d", resp.StatusCode)
 	}
 	/* responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

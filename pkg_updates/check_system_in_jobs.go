@@ -66,6 +66,7 @@ func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int,
 		for _, inprogress := range current_ListSystemInJobs_status.ListInProgressSystems.Result {
 			if minion.Minion_ID == inprogress.Server_id {
 				if strings.Contains(minion.Migration_Stage, "reboot") {
+					logger.Debugf("We do a reboot false-positive check here by using salt ping for %s.", minion.Minion_Name)
 					go func() {
 						//logger.Debugf("We do a reboot false-positive check here by using salt ping for %s.", minion.Minion_Name)
 						Reboot_Triage(sessionkey, jobid_pkg_update, minion.Minion_ID, minion.Minion_Name, groupsdata)

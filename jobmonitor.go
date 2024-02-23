@@ -153,7 +153,7 @@ func Jobmonitor(SUMAConfig *SUMAConfig, alljobs schedules.ScheduledJobs,
 	begin:
 
 		for time.Now().Before(deadline) {
-			if *health == false {
+			if !*health {
 				logger.Infof("SUMA Health check failed. Skip jobcheck loop. We will continue if SUMA is online again.")
 				time.Sleep(20 * time.Second)
 				continue

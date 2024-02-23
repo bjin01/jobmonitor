@@ -15,7 +15,7 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 	email_template_dir *email.Templates_Dir, health *bool) {
 
 	if health != nil {
-		if *health == false {
+		if !*health {
 			logger.Infof("Health check failed. Skipping groups lookup.")
 			return
 		}
