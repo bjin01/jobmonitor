@@ -536,6 +536,7 @@ func main() {
 
 		/* go Pkg_update_by_list(SUMAConfig, &pkg_update_request_obj, templates, health) */
 
+		Setup_Logger(pkg_update_request_obj.Logfile)
 		if time_counter_pkg_update_by_list == 0 {
 			go Pkg_update_by_list(SUMAConfig, &pkg_update_request_obj, templates, health)
 			c.String(http.StatusOK, "Targeting %v for Package Updates & SP Migration through SUSE Manager.", pkg_update_request_obj.Minions_to_add)

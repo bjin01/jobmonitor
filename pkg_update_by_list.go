@@ -34,6 +34,8 @@ func Pkg_update_by_list(SUMAConfig *SUMAConfig, groupsdata *pkg_updates.Update_G
 		sumaconf.User = b.User
 		if len(b.Email_to) > 0 {
 			sumaconf.Email_to = b.Email_to
+		} else {
+			sumaconf.Email_to = nil // or a suitable default value
 		}
 	}
 	SessionKey := new(auth.SumaSessionKey)

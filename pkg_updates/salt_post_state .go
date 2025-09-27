@@ -24,7 +24,6 @@ func Salt_Run_Post_State(groupsdata *Update_Groups, post_minion_list []string) {
 
 	saltdata.Online_Minions = post_minion_list
 
-	url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	method := "POST"
 
 	if len(saltdata.Online_Minions) > 0 {
@@ -50,7 +49,7 @@ func Salt_Run_Post_State(groupsdata *Update_Groups, post_minion_list []string) {
 		logger.Infof("salt Argument list is empty\n")
 	}
 
-	url = fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
+	url := fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, saltdata.Token)
 	//logger.Infoln(string(response))
 

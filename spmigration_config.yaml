@@ -18,6 +18,8 @@ salt_diskspace_grains_key: btrfs:for_patching
 salt_diskspace_grains_value: ok
 salt_no_upgrade_exception_key: no_patch
 salt_no_upgrade_exception_value: 'true'
+salt_already_patched_exception_key: already_patched
+salt_already_patched_exception_value: 'True'
 salt_prep_state: orch.prepatch_states
 salt_post_state: orch.postpatch_states
 jobchecker_timeout: 90

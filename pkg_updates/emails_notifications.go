@@ -13,7 +13,7 @@ func Send_Email(ctx context.Context, groupsdata *Update_Groups, email_template_d
 	logger.Infof("Send_Email: Goroutine ID %d\n", gr)
 
 	for time.Now().Before(*deadline) {
-		if *health == false {
+		if !*health {
 			logger.Infof("Send_Email can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.\n")
 			time.Sleep(125 * time.Second)
 			continue

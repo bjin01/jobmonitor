@@ -23,6 +23,8 @@ func Salt_No_Upgrade_Exception_Check_New(sessionkey *auth.SumaSessionKey, groups
 	saltdata.Password = groupsdata.SaltPassword
 	saltdata.Salt_no_upgrade_exception_key = groupsdata.Salt_no_upgrade_exception_key
 	saltdata.Salt_no_upgrade_exception_value = groupsdata.Salt_no_upgrade_exception_value
+	saltdata.Salt_already_patched_exception_key = groupsdata.Salt_already_patched_exception_key
+	saltdata.Salt_already_patched_exception_value = groupsdata.Salt_already_patched_exception_value
 
 	all_minions, err := GetAll_Minions_From_DB(db)
 	if err != nil {
@@ -42,17 +44,41 @@ func Salt_No_Upgrade_Exception_Check_New(sessionkey *auth.SumaSessionKey, groups
 		disqualified_minions := saltdata.Run_No_Upgrade_Grains_Check()
 		logger.Infof("Salt_No_Upgrade_Exception_Check: %v\n", disqualified_minions)
 
-		for _, minion := range all_minions {
-			if string_array_contains(disqualified_minions, minion.Minion_Name) {
-				logger.Infof("Minion %s has no_upgrade exception and is disqualified\n", minion.Minion_Name)
-				subject := "No_upgrade exception"
-				body := fmt.Sprintf("No_upgrade exception for minion found: %s", minion.Minion_Name)
-				Add_Note(sessionkey, minion.Minion_ID, subject, body)
-				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "No_Upgrade_Exception is true")
-			} /* else {
-				logger.Infof("Minion %s passed no_upgrade exception check\n", minion.Minion_Name)
-				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
-			} */
+		exception_keys := []struct {
+			Key     string
+			Value   string
+			Subject string
+		}{
+			{
+				Key:     groupsdata.Salt_no_upgrade_exception_key,
+				Value:   groupsdata.Salt_no_upgrade_exception_value,
+				Subject: "No_upgrade exception",
+			},
+			{
+				Key:     groupsdata.Salt_already_patched_exception_key,
+				Value:   groupsdata.Salt_already_patched_exception_value,
+				Subject: "Already_patched exception",
+			},
+		}
+
+		for _, ex := range exception_keys {
+			if ex.Key == "" || ex.Value == "" {
+				continue
+			}
+			// Set the current exception key/value in saltdata
+			saltdata.Salt_no_upgrade_exception_key = ex.Key
+			saltdata.Salt_no_upgrade_exception_value = ex.Value
+
+			disqualified_minions := saltdata.Run_No_Upgrade_Grains_Check()
+			for _, minion := range all_minions {
+				if string_array_contains(disqualified_minions, minion.Minion_Name) {
+					logger.Infof("Minion %s has %s and is disqualified\n", minion.Minion_Name, ex.Subject)
+					subject := ex.Subject
+					body := fmt.Sprintf("%s for minion found: %s", ex.Subject, minion.Minion_Name)
+					Add_Note(sessionkey, minion.Minion_ID, subject, body)
+					db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", ex.Subject+" is true")
+				}
+			}
 		}
 
 	}

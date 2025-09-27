@@ -37,7 +37,7 @@ func Salt_Run_state_apply(groupsdata *Update_Groups, stage string, db *gorm.DB) 
 		}
 	}
 
-	url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
+	//url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	method := "POST"
 
 	if len(saltdata.Online_Minions) > 0 {
@@ -63,7 +63,7 @@ func Salt_Run_state_apply(groupsdata *Update_Groups, stage string, db *gorm.DB) 
 		logger.Infof("salt Argument list is empty\n")
 	}
 
-	url = fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
+	url := fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, saltdata.Token)
 	//logger.Infoln(string(response))
 
@@ -114,7 +114,7 @@ func Salt_Run_state_apply_by_List(groupsdata *Update_Groups, minion_list []Minio
 		}
 	}
 
-	url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
+	//url := fmt.Sprintf("http://%s:%d/", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	method := "POST"
 
 	if len(saltdata.Online_Minions) > 0 {
@@ -140,7 +140,7 @@ func Salt_Run_state_apply_by_List(groupsdata *Update_Groups, minion_list []Minio
 		logger.Infof("salt Argument list is empty\n")
 	}
 
-	url = fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
+	url := fmt.Sprintf("http://%s:%d/minions", saltdata.SaltMaster, saltdata.SaltApi_Port)
 	response := salt_request.Execute_Command_Async(url, method, saltdata.Token)
 	//logger.Infoln(string(response))
 

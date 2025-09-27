@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/bjin01/jobmonitor/auth"
-	"github.com/bjin01/jobmonitor/schedules"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +26,7 @@ func Check_Jobs(ctx context.Context, groupsdata *Update_Groups, sessionkey *auth
 	logger.Infof("Check_Jobs: Goroutine ID %d", gr)
 
 	for time.Now().Before(*deadline) {
-		if *health == false {
+		if !*health {
 			logger.Infof("Check_Jobs can't continue due to SUSE Manager health check failed. Please check the logs. continue after 125 seconds.")
 			time.Sleep(125 * time.Second)
 			continue
@@ -50,8 +49,8 @@ func Check_Jobs(ctx context.Context, groupsdata *Update_Groups, sessionkey *auth
 			return
 		}
 
-		var joblist schedules.ListJobs
-		joblist.Found_Pending_Jobs = false
+		//var joblist schedules.ListJobs
+		//joblist.Found_Pending_Jobs = false
 
 		/* if len(all_minions) > 0 {
 			joblist.GetPendingjobs(sessionkey)
@@ -103,7 +102,7 @@ func Check_Jobs(ctx context.Context, groupsdata *Update_Groups, sessionkey *auth
 		time.Sleep(60 * time.Second)
 	}
 	logger.Infof("Check_Jobs final deadline reached. Exiting.")
-	return
+
 }
 
 func Match_Job(sessionkey *auth.SumaSessionKey, minion Minion_Data, groupsdata *Update_Groups) (string, error) {

@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 type Minion struct {
@@ -38,7 +38,7 @@ type Configuration struct {
 }
 
 func readJSONFile(filename string) (*Configuration, error) {
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read JSON file: %s", err)
 	}

@@ -51,7 +51,7 @@ func (s *ListSystemInJobs_Response) Get_Systems_In_Jobs() (Systems []string) {
 func Check_System_In_Jobs(sessionkey *auth.SumaSessionKey, jobid_pkg_update int, minion Minion_Data, groupsdata *Update_Groups) (string, error) {
 	if jobid_pkg_update == 0 {
 		logger.Infof("No Job ID provided. Exit check.")
-		return "", fmt.Errorf("No Job ID provided. Exit check.")
+		return "", fmt.Errorf("no Job ID provided. Exit check")
 	}
 
 	current_ListSystemInJobs_status := new(ListSystemInJobs)

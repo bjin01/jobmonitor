@@ -12,24 +12,26 @@ type Login_Response struct {
 }
 
 type Salt_Data struct {
-	Username                        string   `json:"username"`
-	Password                        string   `json:"password"`
-	SaltMaster                      string   `json:"salt_master"`
-	SaltApi_Port                    int      `json:"salt_api_port"`
-	Token                           string   `json:"token,omitempty"`
-	Salt_Client_Type                string   `json:"salt_client_type,omitempty"`
-	SaltCmd                         string   `json:"salt_cmd,omitempty"`
-	Salt_diskspace_grains_key       string   `json:"salt_diskspace_grains_key,omitempty"`
-	Salt_diskspace_grains_value     string   `json:"salt_diskspace_grains_value,omitempty"`
-	Salt_no_upgrade_exception_key   string   `json:"salt_no_upgrade_exception_key"`
-	Salt_no_upgrade_exception_value string   `json:"salt_no_upgrade_exception_value"`
-	Patch_Level                     string   `json:"patch_level"`
-	Target_List                     []string `json:"target_list,omitempty"`
-	Arg                             []string `json:"arg,omitempty"`
-	Return                          []byte   `json:"return,omitempty"`
-	Online_Minions                  []string `json:"online_minions,omitempty"`
-	Offline_Minions                 []string `json:"offline_minions,omitempty"`
-	Jid                             string   `json:"jid,omitempty"`
+	Username                             string   `json:"username"`
+	Password                             string   `json:"password"`
+	SaltMaster                           string   `json:"salt_master"`
+	SaltApi_Port                         int      `json:"salt_api_port"`
+	Token                                string   `json:"token,omitempty"`
+	Salt_Client_Type                     string   `json:"salt_client_type,omitempty"`
+	SaltCmd                              string   `json:"salt_cmd,omitempty"`
+	Salt_diskspace_grains_key            string   `json:"salt_diskspace_grains_key,omitempty"`
+	Salt_diskspace_grains_value          string   `json:"salt_diskspace_grains_value,omitempty"`
+	Salt_no_upgrade_exception_key        string   `json:"salt_no_upgrade_exception_key"`
+	Salt_no_upgrade_exception_value      string   `json:"salt_no_upgrade_exception_value"`
+	Salt_already_patched_exception_key   string   `json:"salt_already_patched_exception_key"`
+	Salt_already_patched_exception_value string   `json:"salt_already_patched_exception_value"`
+	Patch_Level                          string   `json:"patch_level"`
+	Target_List                          []string `json:"target_list,omitempty"`
+	Arg                                  []string `json:"arg,omitempty"`
+	Return                               []byte   `json:"return,omitempty"`
+	Online_Minions                       []string `json:"online_minions,omitempty"`
+	Offline_Minions                      []string `json:"offline_minions,omitempty"`
+	Jid                                  string   `json:"jid,omitempty"`
 }
 
 type SaltJob_Data struct {
@@ -56,7 +58,7 @@ type Salt_Request_Async struct {
 	Arg      []string `json:"arg"`
 }
 
-//{"return": [{"up": ["pxesap01.bo2go.home", "pxesap02.bo2go.home"], "down": ["jupiter.bo2go.home"]}]}
+// {"return": [{"up": ["pxesap01.bo2go.home", "pxesap02.bo2go.home"], "down": ["jupiter.bo2go.home"]}]}
 type Runner_Manage_Status_Response struct {
 	Return []struct {
 		Down []string `json:"down"`

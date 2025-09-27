@@ -88,7 +88,7 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 			schedule_spmigration_request.RemoveProductsWithNoSuccessorAfterMigration = true
 			schedule_spmigration_request.EarliestOccurrence = time.Now()
 
-			if dryrun == true {
+			if dryrun {
 				schedule_spmigration_request.DryRun = true
 			} else {
 				logger.Debugf("Schedule Product Migration for %s now!\n", minion.Minion_Name)
@@ -112,14 +112,14 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", err.Error())
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "failed")
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage", stage)
-				if dryrun == true {
+				if dryrun {
 					logger.Infof("Decode scheduleProductMigration_DryRun Job response body failed: %s %s\n", err, minion.Minion_Name)
 				} else {
 					logger.Infof("Decode scheduleProductMigration Job response body failed: %s %s\n", err, minion.Minion_Name)
 				}
 			}
 
-			if dryrun == true && reply.JobID > 0 {
+			if dryrun && reply.JobID > 0 {
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")
@@ -127,7 +127,7 @@ func SPMigration(sessionkey *auth.SumaSessionKey, db *gorm.DB, wf []Workflow_Ste
 				logger.Infof("Minion %s has been scheduled for spmigration dryrun.\n", minion.Minion_Name)
 			}
 
-			if dryrun == false && reply.JobID > 0 {
+			if !dryrun && reply.JobID > 0 {
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobID", reply.JobID)
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("JobStatus", "pending")
 				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Migration_Stage_Status", "scheduled")

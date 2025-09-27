@@ -18,19 +18,17 @@ func groups_lookup(SUMAConfig *SUMAConfig, groupsdata *spmigration.Migration_Gro
 	}
 
 	//logger.Info("SP Migration input data %v\n", groupsdata)
-	var sumaconf Sumaconf
 	key := os.Getenv("SUMAKEY")
 	if len(key) == 0 {
 		logger.Infof("SUMAKEY is not set. This might cause error for password decryption.")
 	}
+	var sumaconf Sumaconf
 	for a, b := range SUMAConfig.SUMA {
+		sumaconf = Sumaconf{} // Ensure sumaconf is initialized for each iteration
 		sumaconf.Server = a
 		b.Password = Decrypt(key, b.Password)
 		sumaconf.Password = b.Password
 		sumaconf.User = b.User
-		if len(b.Email_to) > 0 {
-			sumaconf.Email_to = b.Email_to
-		}
 	}
 	SessionKey := new(auth.SumaSessionKey)
 	var err error

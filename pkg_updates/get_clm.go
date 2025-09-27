@@ -56,7 +56,6 @@ func Get_Clm_Data(sessionkey *auth.SumaSessionKey, UserData *Update_Groups, db *
 	err := db.AutoMigrate(&ContentLifecycleManagement{})
 	if err != nil {
 		logger.Errorf("failed to create ContentLifecycleManagement table in DB: %s\n", err)
-		return
 	}
 
 	method := "contentmanagement.listProjects"
@@ -135,8 +134,6 @@ func List_Project_Environments(sessionkey *auth.SumaSessionKey, db *gorm.DB, pro
 			}
 		}
 	}
-
-	return
 
 }
 

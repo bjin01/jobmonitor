@@ -1,7 +1,7 @@
 package pkg_updates
 
 import (
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -14,7 +14,7 @@ func writeMapToYAML(filename string, data map[string][]string) error {
 	}
 
 	// Write the YAML data to the file
-	err = ioutil.WriteFile(filename, yamlData, 0644)
+	err = os.WriteFile(filename, yamlData, 0644)
 	if err != nil {
 		return err
 	}

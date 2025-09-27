@@ -91,11 +91,11 @@ func Reboot_Triage(sessionkey *auth.SumaSessionKey, jobid int, minion_id int, mi
 					Reboot_triage_timer = groupsdata.Reboot_Triage_Timer
 				}
 				if time.Now().Before(event.Pickup_date.Add(time.Duration(Reboot_triage_timer) * time.Minute)) {
-					logger.Debugf("Reboot_Triage() %s event ID %d by User: %s, picked up: %s, less than %d minutes, so not continue here.", minion_name, jobid, event.Scheduler_user, fmt.Sprintf("%s", event.Pickup_date), Reboot_triage_timer)
+					logger.Debugf("Reboot_Triage() %s event ID %d by User: %s, picked up: %s, less than %d minutes, so not continue here.", minion_name, jobid, event.Scheduler_user, event.Pickup_date.String(), Reboot_triage_timer)
 					continue
 				}
 				if !event.Pickup_date.IsZero() && event.Completed_date.IsZero() {
-					logger.Infof("Reboot_Triage() %s event ID %d by User: %s, picked up: %s", minion_name, jobid, event.Scheduler_user, fmt.Sprintf("%s", event.Pickup_date))
+					logger.Infof("Reboot_Triage() %s event ID %d by User: %s, picked up: %s", minion_name, jobid, event.Scheduler_user, event.Pickup_date.String())
 					saltdata := new(saltapi.Salt_Data)
 					saltdata.SaltMaster = groupsdata.SaltMaster_Address
 					saltdata.SaltApi_Port = groupsdata.SaltApi_Port
@@ -118,12 +118,12 @@ func Reboot_Triage(sessionkey *auth.SumaSessionKey, jobid int, minion_id int, mi
 						saltdata.Execute_Command_Async()
 						continue
 					} else {
-						logger.Infof("Reboot_Triage() %s event ID %d by User: %s, picked up: %s, minion is still offline", minion_name, jobid, event.Scheduler_user, fmt.Sprintf("%s", event.Pickup_date))
+						logger.Infof("Reboot_Triage() %s event ID %d by User: %s, picked up: %s, minion is still offline", minion_name, jobid, event.Scheduler_user, event.Pickup_date.String())
 
 					}
 
 				} else {
-					logger.Infof("Reboot_Triage() %s event ID %d by User: %s:%s, completed: %s", minion_name, jobid, event.Scheduler_user, event.Result_msg, fmt.Sprintf("%s", event.Completed_date))
+					logger.Infof("Reboot_Triage() %s event ID %d by User: %s:%s, completed: %s", minion_name, jobid, event.Scheduler_user, event.Result_msg, event.Completed_date.String())
 				}
 			}
 		}

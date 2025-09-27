@@ -71,6 +71,8 @@ func Pkg_update_groups_lookup(ctx context.Context, SUMAConfig *SUMAConfig, group
 		sumaconf.User = b.User
 		if len(b.Email_to) > 0 {
 			sumaconf.Email_to = b.Email_to
+		} else {
+			sumaconf.Email_to = nil // or use []string{} if preferred
 		}
 	}
 	SessionKey := new(auth.SumaSessionKey)

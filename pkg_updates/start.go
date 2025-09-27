@@ -19,7 +19,7 @@ func Start_Workflow(ctx context.Context, sessionkey *auth.SumaSessionKey, groups
 
 	sleep_between_steps := 2 * time.Second
 	for time.Now().Before(*deadline) {
-		if *health == false {
+		if !*health {
 			logger.WithFields(logrus.Fields{
 				"goroutine": gr,
 				"username":  groupsdata.T7User,
@@ -181,5 +181,4 @@ func Start_Workflow(ctx context.Context, sessionkey *auth.SumaSessionKey, groups
 		"goroutine": gr,
 		"username":  groupsdata.T7User,
 	}).Infof("Workflow final deadline reached. Exiting.")
-	return
 }

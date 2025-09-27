@@ -35,7 +35,7 @@ type ListAllChannels_Response struct {
 	}
 }
 
-//DB columns: ID, Group_Name, T7User, Email
+// DB columns: ID, Group_Name, T7User, Email
 type Group struct {
 	gorm.Model
 	Group_Name string             `json:"group_name" gorm:"primaryKey"`
@@ -44,14 +44,14 @@ type Group struct {
 	Email      []Jobchecker_Email `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
-//DB columns: ID, Email, GroupID
+// DB columns: ID, Email, GroupID
 type Jobchecker_Email struct {
 	gorm.Model
 	Email   string `json:"email"`
 	GroupID uint   `json:"group_id"`
 }
 
-//DB columns: ID, Minion_ID, Minion_Name, Minion_Status, Workflow_Step, JobID, JobStatus, Migration_Stage, Migration_Stage_Status, Target_base_channel, Target_Ident, Target_Optional_Channels, Minion_Groups
+// DB columns: ID, Minion_ID, Minion_Name, Minion_Status, Workflow_Step, JobID, JobStatus, Migration_Stage, Migration_Stage_Status, Target_base_channel, Target_Ident, Target_Optional_Channels, Minion_Groups
 type Minion_Data struct {
 	gorm.Model
 	Minion_ID                int                `json:"Minion_ID"`
@@ -70,7 +70,7 @@ type Minion_Data struct {
 	Minion_Groups            []Group            `json:"Minion_Groups" gorm:"many2many:Minion_Data_Groups;"`
 }
 
-//DB columns: ID, Channel_Label
+// DB columns: ID, Channel_Label
 type OptionalChannels struct {
 	gorm.Model
 	Channel_Label    string `json:"channel_label" gorm:"primaryKey"`
@@ -84,23 +84,25 @@ type Update_Groups struct {
 	Sqlite_db       string   `json:"sqlite_db"`
 	Qualifying_only bool     `json:"qualifying_only"`
 	//Delay                           int              `json:"delay"`
-	Timeout                         int    `json:"timeout"`
-	GatherJobTimeout                int    `json:"gather_job_timeout"`
-	Email_Interval                  int    `json:"email_interval"`
-	Logfile                         string `json:"logfile"`
-	Log_Level                       string `json:"log_level"`
-	SaltMaster_Address              string `json:"salt_master_address"`
-	SaltApi_Port                    int    `json:"salt_api_port"`
-	SaltUser                        string `json:"salt_user"`
-	SaltPassword                    string `json:"salt_password"`
-	Salt_diskspace_grains_key       string `json:"salt_diskspace_grains_key"`
-	Salt_diskspace_grains_value     string `json:"salt_diskspace_grains_value"`
-	Salt_no_upgrade_exception_key   string `json:"salt_no_upgrade_exception_key"`
-	Salt_no_upgrade_exception_value string `json:"salt_no_upgrade_exception_value"`
-	Salt_Prep_State                 string `json:"salt_prep_state"`
-	Salt_Post_State                 string `json:"salt_post_state"`
-	JobcheckerTimeout               int    `json:"jobchecker_timeout"`
-	Reboot_Triage_Timer             int    `json:"reboot_triage_timer"`
+	Timeout                              int    `json:"timeout"`
+	GatherJobTimeout                     int    `json:"gather_job_timeout"`
+	Email_Interval                       int    `json:"email_interval"`
+	Logfile                              string `json:"logfile"`
+	Log_Level                            string `json:"log_level"`
+	SaltMaster_Address                   string `json:"salt_master_address"`
+	SaltApi_Port                         int    `json:"salt_api_port"`
+	SaltUser                             string `json:"salt_user"`
+	SaltPassword                         string `json:"salt_password"`
+	Salt_diskspace_grains_key            string `json:"salt_diskspace_grains_key"`
+	Salt_diskspace_grains_value          string `json:"salt_diskspace_grains_value"`
+	Salt_no_upgrade_exception_key        string `json:"salt_no_upgrade_exception_key"`
+	Salt_no_upgrade_exception_value      string `json:"salt_no_upgrade_exception_value"`
+	Salt_already_patched_exception_key   string `json:"salt_already_patched_exception_key"`
+	Salt_already_patched_exception_value string `json:"salt_already_patched_exception_value"`
+	Salt_Prep_State                      string `json:"salt_prep_state"`
+	Salt_Post_State                      string `json:"salt_post_state"`
+	JobcheckerTimeout                    int    `json:"jobchecker_timeout"`
+	Reboot_Triage_Timer                  int    `json:"reboot_triage_timer"`
 	//Reboot_timeout                  int              `json:"reboot_timeout"`
 	JobcheckerEmails []string `json:"jobchecker_emails"`
 	Patch_Level      string   `json:"patch_level"`

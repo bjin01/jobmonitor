@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -29,7 +28,7 @@ type SUMAConfig struct {
 
 func GetConfig(file string) *SUMAConfig {
 	// Read the file
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		logger.Infoln(err)
 	}

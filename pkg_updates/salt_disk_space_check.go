@@ -46,9 +46,9 @@ func Salt_Disk_Space_Check_New(sessionkey *auth.SumaSessionKey, groupsdata *Upda
 			if string_array_contains(disqualified_minions, minion.Minion_Name) {
 				logger.Infof("Minion %s is disk space check disqualified\n", minion.Minion_Name)
 				subject := "btrfs disqualified"
-				note := fmt.Sprintf("/ has less than 2GB free space. %s", minion.Minion_Name)
+				note := fmt.Sprintf("/ has less than predefined free space threshold. %s", minion.Minion_Name)
 				Add_Note(sessionkey, minion.Minion_ID, subject, note)
-				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "btrfs disk space check disqualified. less than 2GB")
+				db.Model(&minion).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "btrfs disk space check disqualified. less than predefined free space threshold")
 			} /* else {
 				logger.Infof("Minion %s passed disk space check\n", minion.Minion_Name)
 				db.Model(&Minion_Data{}).Where("Minion_Name = ?", minion.Minion_Name).Update("Minion_Remarks", "")
