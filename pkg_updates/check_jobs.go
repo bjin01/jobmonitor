@@ -99,7 +99,13 @@ func Check_Jobs(ctx context.Context, groupsdata *Update_Groups, sessionkey *auth
 				}
 			}
 		}
-		time.Sleep(60 * time.Second)
+		// Use configurable job check interval, default to 60 seconds if not set
+		interval := groupsdata.JobCheckInterval
+		if interval <= 0 {
+			interval = 60
+		}
+		logger.Debugf("Check_Jobs: sleeping for %d seconds", interval)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
 	logger.Infof("Check_Jobs final deadline reached. Exiting.")
 

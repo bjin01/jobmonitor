@@ -1,0 +1,70 @@
+# Example configuration showing the new workflow_loop_interval parameter
+# This controls how long the main workflow loop waits between iterations
+
+patch_level: 2025-Q4
+groups:
+- P-Basis_nachpatching_ha
+t7user: t730i
+email_interval: 3
+gather_job_timeout: 15
+jobchecker_timeout: 180
+reboot_triage_timer: 20
+timeout: 3
+log_level: debug
+logfile: /var/log/sumapatch/patching_pre_patch_t730i_2025-Q4_P-Basis_nachpatching_ha_V1.log
+sqlite_db: /data/config/db/patching_pre_patch_t730i_2025-Q4_P-Basis_nachpatching_ha_V1.db
+tracking_file_directory: /var/log/sumapatch
+qualifying_only: 'false'
+salt_post_state: spmigration.post_state
+salt_prep_state: spmigration.prep_state
+jobchecker_emails:
+- guido.hayoz@bit.admin.ch
+authentication_token: yDYDtLvKWovBotOjkSiplLs8SM5jGITF6ZVnx8Fv7Gs=
+salt_api_port: 8860
+salt_master_address: vmsuma804p02.svz.admin.ch
+salt_password: AHJki87M4
+salt_user: mysalt
+
+# NEW PARAMETERS: Controls timing intervals in seconds
+
+# Main workflow loop interval - how long to wait between workflow iterations
+# Default is 20 seconds if not specified or set to 0 or negative value
+workflow_loop_interval: 30  # Wait 30 seconds between workflow iterations instead of default 20
+
+# Job check interval - how long to wait between job status checks
+# Default is 60 seconds if not specified or set to 0 or negative value  
+job_check_interval: 45  # Wait 45 seconds between job checks instead of default 60
+
+salt_already_patched_exception_key: already_patched
+salt_already_patched_exception_value: 'true'
+salt_diskspace_grains_key: btrfs:for_patching
+salt_diskspace_grains_value: ok
+salt_no_upgrade_exception_key: no_patch
+salt_no_upgrade_exception_value: 'true'
+
+workflow:
+- assign_channels: 1
+- package_updates: 2
+- package_update_reboot: 3
+- package_refresh: 4
+- waiting: 5
+- spmigration_dryrun: 6
+- spmigration_run: 7
+- spmigration_reboot: 8
+- spmigration_package_refresh: 9
+- post_migration: 10
+
+assigne_channels:
+- assigne_channel:
+    current_base_channel: staged15sp6-produktion-sle-product-sles15-sp6-pool-x86_64
+    new_base_prefix: staged15sp6-produktion-
+
+products:
+- product:
+    base_channel_label: sle-product-sles15-sp7-pool-x86_64
+    clm_project_label: staged15sp7
+    ident: 1898,1934,1913,1909,1921,1938,1925,1929,1952,1996,1905,1222,1944,1948
+    name: SUSE Linux Enterprise Server 15 SP7 x86_64
+    optionalChildChannels:
+    - new_channel: bit-install-sles15sp7-x86
+      old_channel: bit-install-sles15sp6-x86

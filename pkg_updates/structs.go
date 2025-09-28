@@ -104,8 +104,10 @@ type Update_Groups struct {
 	JobcheckerTimeout                    int    `json:"jobchecker_timeout"`
 	Reboot_Triage_Timer                  int    `json:"reboot_triage_timer"`
 	//Reboot_timeout                  int              `json:"reboot_timeout"`
-	JobcheckerEmails []string `json:"jobchecker_emails"`
-	Patch_Level      string   `json:"patch_level"`
+	JobcheckerEmails     []string `json:"jobchecker_emails"`
+	WorkflowLoopInterval int      `json:"workflow_loop_interval"`
+	JobCheckInterval     int      `json:"job_check_interval"`
+	Patch_Level          string   `json:"patch_level"`
 	//Include_Spmigration             bool             `json:"include_spmigration"`
 	T7User                  string           `json:"t7user"`
 	Token                   string           `json:"authentication_token"`

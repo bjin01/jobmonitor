@@ -171,11 +171,16 @@ func Start_Workflow(ctx context.Context, sessionkey *auth.SumaSessionKey, groups
 				}
 			}
 		}
+		// Use configurable workflow loop interval, default to 20 seconds if not set
+		interval := groupsdata.WorkflowLoopInterval
+		if interval <= 0 {
+			interval = 20
+		}
 		logger.WithFields(logrus.Fields{
 			"goroutine": gr,
 			"username":  groupsdata.T7User,
-		}).Infof("Start_Workflow: continue after 20 seconds")
-		time.Sleep(20 * time.Second)
+		}).Infof("Start_Workflow: continue after %d seconds", interval)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
 	logger.WithFields(logrus.Fields{
 		"goroutine": gr,
